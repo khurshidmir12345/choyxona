@@ -29,8 +29,8 @@ class AuthenticatedSessionController extends Controller
 
         $user = User::find(1);
 //        dd($user->role);
-        if ($user->role && $user->role->name == 'admin') {
-            return redirect('/admin');
+        if ($user->role && $user->role->name == 'director') {
+            return redirect('/dashboard');
         }
 
         $request->session()->regenerate();
