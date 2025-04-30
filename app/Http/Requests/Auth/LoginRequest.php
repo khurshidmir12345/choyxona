@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'phone_number' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -39,18 +39,29 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        $phone_number = $this->input('phone_number');
+
+        $phone_number = preg_replace('/[^0-9+]/', '', $phone_number);
+
+        if (!str_starts_with($phone_number, '+')) {
+            $phone_number = '+998' . $phone_number;
+        }
+
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (!Auth::attempt(['phone_number' => $phone_number, 'password' => $this->input('password')], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'phone_number' => trans('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
     }
+
+
+
 
     /**
      * Ensure the login request is not rate limited.
@@ -80,6 +91,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('phone_number')).'|'.$this->ip());
     }
 }
