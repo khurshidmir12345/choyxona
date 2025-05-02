@@ -32,17 +32,13 @@ class AuthenticatedSessionController extends Controller
         $user = User::query()->with('role')->find(auth()->id());
         $role = $user->role ?? null;
 
-        if ($user->phone_verified_at === null) {
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'phone_number' => 'Telefon raqam tasdiqlanmagan !',
-            ]);
-        } elseif ($role === null || $role->name != 'director') {
+        if (  $user->phone_verified_at === null || !$user->role || $user->role->name !== 'director') {
             Auth::logout();
             throw ValidationException::withMessages([
                 'phone_number' => 'Sizda siystemaga kirish ruxsati mavjud emas !',
             ]);
         }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
