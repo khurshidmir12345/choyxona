@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -27,12 +29,20 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $user = User::find(1);
-//        dd($user->role);
-        if ($user->role && $user->role->name == 'director') {
-            return redirect('/dashboard');
-        }
+        $user = User::query()->with('role')->find(auth()->id());
+        $role = $user->role ?? null;
 
+        if ($user->phone_verified_at === null) {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'phone_number' => 'Telefon raqam tasdiqlanmagan !',
+            ]);
+        } elseif ($role === null || $role->name != 'director') {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'phone_number' => 'Sizda siystemaga kirish ruxsati mavjud emas !',
+            ]);
+        }
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
