@@ -7,6 +7,11 @@ Route::get('/', function () {
     return view('auth.login');
 })->middleware('guest');
 
+Route::get('/admin/local', function () {
+    return view('layout.admin.content');
+})->middleware('guest');
+
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
