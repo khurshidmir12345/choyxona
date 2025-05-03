@@ -36,11 +36,7 @@
                 <!-- partial -->
                 <div class="main-panel">
                     <div class="content-wrapper">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                @yield('content')
-                            </div>
-                        </div>
+                        @yield('content')
                     </div>
 
                     <footer class="footer">
@@ -63,6 +59,7 @@
     <script src="{{ asset('assets/vendors/chart.js/chart.umd.js') }}"></script>
     <script src="{{ asset('assets/vendors/progressbar.js/progressbar.min.js') }}"></script>
     @livewireScripts
+    @include('layout.admin.scripts')
     <!-- End plugin js for this page -->
     <!-- inject:js -->
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
