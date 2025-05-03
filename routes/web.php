@@ -7,9 +7,9 @@ Route::get('/', function () {
     return view('auth.login');
 })->middleware('guest');
 
-Route::get('/admin/local', function () {
-    return view('layout.admin.content');
-})->middleware('guest');
+Route::get('/home', function () {
+    return view('welcome');
+})->middleware('auth')->name('home');
 
 
 Route::get('/dashboard', function () {
