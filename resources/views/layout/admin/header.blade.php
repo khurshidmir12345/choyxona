@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<?php $company = \App\Models\Company::query()->where('user_id', auth()->user()->id)->first() ?>
 <html lang="en">
 <head>
     <!-- Required meta tags -->
@@ -21,7 +22,7 @@
     <!-- inject:css -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <!-- endinject -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}"/>
+    <link rel="shortcut icon" href="{{ $company?->logo ? asset("storage/{$company->logo}") : asset('assets/images/img.png') }}" />
     @livewireStyles
 </head>
 <body class="with-welcome-text">
@@ -59,19 +60,14 @@
     <script src="{{ asset('assets/vendors/chart.js/chart.umd.js') }}"></script>
     <script src="{{ asset('assets/vendors/progressbar.js/progressbar.min.js') }}"></script>
     @livewireScripts
+    @yield('scripts')
     @include('layout.admin.scripts')
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
     <script src="{{ asset('assets/js/template.js') }}"></script>
     <script src="{{ asset('assets/js/settings.js') }}"></script>
     <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
     <script src="{{ asset('assets/js/todolist.js') }}"></script>
-    <!-- endinject -->
-    <!-- Custom js for this page-->
     <script src="{{ asset('assets/js/jquery.cookie.js') }}" type="text/javascript"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
-    <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
-    <!-- End custom js for this page-->
 </body>
 </html>

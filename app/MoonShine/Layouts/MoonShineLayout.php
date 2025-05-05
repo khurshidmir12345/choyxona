@@ -33,6 +33,7 @@ use MoonShine\UI\Components\{Breadcrumbs,
 use App\MoonShine\Resources\UserResource;
 use MoonShine\MenuManager\MenuItem;
 use App\MoonShine\Resources\RoleResource;
+use App\MoonShine\Resources\CompanyResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -49,6 +50,7 @@ final class MoonShineLayout extends AppLayout
             ...parent::menu(),
             MenuItem::make('Users', UserResource::class),
             MenuItem::make('Roles', RoleResource::class),
+            MenuItem::make('Companies', CompanyResource::class),
         ];
     }
 

@@ -14,12 +14,13 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'price',
-        'sell_price',
-        'extra_price',
+        'price', // bu asl narxi
+        'sell_price', // shuni ishlatamiz hamma joyda Zuxriddin
+        'extra_price', // bu faqat foydani hisoblash uchun keyinchalik ishlatamiz
         'image',
         'discount',
         'current_stock',
+        'code',
         'company_id',
         'category_id',
     ];

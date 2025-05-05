@@ -55,7 +55,12 @@ class User extends Authenticatable
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function getCompany()
+    {
+        return Company::query()->where('user_id', $this->id)->first();
     }
 
     public function role(): BelongsTo

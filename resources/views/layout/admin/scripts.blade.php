@@ -12,3 +12,13 @@
         y.value = !a[2] ? a[1] : '(' + a[1] + ') ' + a[2] + (a[3] ? '-' + a[3] + (a[4] ? '-' + a[4] : '') : '');
     }
 </script>
+
+<script>
+    function price_format(input) {
+        // Faqat raqamlarni olamiz (0-9)
+        let value = input.value.replace(/\D/g, '');
+
+        // Formatlab inputga yozamiz
+        input.value = Number(value).toLocaleString('uz-UZ');
+    }
+</script>
