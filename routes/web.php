@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('product')->group(function () {
         Route::get('/', function () {return view('admin.products.index');})->name('products.index');
         Route::get('/categories', function () {return view('admin.categories.index');})->name('categories.index');
+        Route::get('/rooms', function () {return view('admin.places.index');})->name('places.index');
     });
 });
 

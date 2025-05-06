@@ -1,17 +1,10 @@
 <div>
     <!-- Button to Open Create Modal -->
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <button class="btn btn-success btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#categoryModal" wire:click="$set('category_id', null)">
+        <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Kategoriya nomi bo‘yicha qidirish...">
+        <button class="btn btn-success btn-rounded mb-2" data-bs-toggle="modal" data-bs-target="#categoryModal" wire:click="$set('category_id', null)">
             <i class="fa fa-plus">  Kategoriya qo‘shish </i>
         </button>
-
-        <div class="input-group" style="max-width: 250px;">
-            <input style="font-size: 16px; font-weight: 500;" wire:model.live="search"
-                   type="text" class="form-control" placeholder="Nomi ...">
-            <button class="btn btn-outline-secondary" type="button">
-                <i class="fa fa-search"></i>
-            </button>
-        </div>
     </div>
 
     <!-- Category Table -->

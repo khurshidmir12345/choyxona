@@ -1,18 +1,9 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <!-- Yangi mahsulot tugmasi -->
-        <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-sm">
+        <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Mahsulot nomi yoki kodi bo‘yicha qidirish...">
+        <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-rounded">
             <i class="fa fa-plus">  Yangi mahsulot</i>
         </a>
-
-        <!-- Filter input maydoni -->
-        <div class="input-group" style="max-width: 250px;">
-            <input style="font-size: 16px; font-weight: 500;" wire:model.live="search"
-                   type="text" class="form-control" placeholder="nomi yoki kodi">
-            <button class="btn btn-outline-secondary" type="button">
-                <i class="fa fa-search"></i>
-            </button>
-        </div>
     </div>
 
     <table class="table table-bordered">

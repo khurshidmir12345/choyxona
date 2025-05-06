@@ -9,7 +9,7 @@
         <li class="nav-item nav-category">Boshqaruv</li>
         <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <i class="menu-icon mdi mdi-floor-plan"></i>
+                <i class="menu-icon mdi mdi-food"></i>
                 <span class="menu-title">Maxsulotlar</span>
                 <i class="menu-arrow"></i>
             </a>
@@ -17,19 +17,18 @@
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('products.index')}}">Maxsulotlar</a></li>
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('categories.index')}}">Maxsulot turi</a></li>
-                    <li class="nav-item"> <a class="nav-link fw-bold" href="pages/ui-features/typography.html">Typography</a></li>
                 </ul>
             </div>
         </li>
         <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
-                <i class="menu-icon mdi mdi-card-text-outline"></i>
-                <span class="menu-title">Form elements</span>
+                <i class="menu-icon mdi mdi-sofa-outline"></i>
+                <span class="menu-title">Joylar</span>
                 <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="form-elements">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"><a class="nav-link" href="pages/forms/basic_elements.html">Basic Elements</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" href="{{route('places.index')}}">Cafe o'rindiqlari</a></li>
                 </ul>
             </div>
         </li>
