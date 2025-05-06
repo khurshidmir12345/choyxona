@@ -2,7 +2,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <!-- Yangi mahsulot tugmasi -->
         <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-sm">
-            <i class="fa fa-plus"></i> Yangi mahsulot
+            <i class="fa fa-plus">  Yangi mahsulot</i>
         </a>
 
         <!-- Filter input maydoni -->

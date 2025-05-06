@@ -21,8 +21,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::prefix('products')->group(function () {
+    Route::prefix('product')->group(function () {
         Route::get('/', function () {return view('admin.products.index');})->name('products.index');
+        Route::get('/categories', function () {return view('admin.categories.index');})->name('categories.index');
     });
 });
 
