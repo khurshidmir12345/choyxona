@@ -49,4 +49,9 @@ class Order extends Model
     {
         return $this->belongsTo(Place::class, 'place_id');
     }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }

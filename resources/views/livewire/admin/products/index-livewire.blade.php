@@ -24,7 +24,7 @@
                 <td>{{str_pad($product->code, 5, '0', STR_PAD_LEFT)}}</td>
                 <td>
                     @if ($product->image && file_exists(public_path($product->image)))
-                        <img src="{{ asset("storage/$product->company->image") }}" alt="{{ $product->name }}" width="50" class="object-cover rounded">
+                        <img src="{{ asset('storage/' . $product->company->image) }}" alt="{{ $product->name }}" width="50" class="object-cover rounded">
                     @else
                         <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>

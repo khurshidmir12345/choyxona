@@ -7,6 +7,7 @@ enum OrderStatusEnum: string
     case opened = 'opened';
     case Closed = 'closed';
     case Cancelled = 'cancelled';
+
     case Done = 'done';
 
     public static function values(): array
