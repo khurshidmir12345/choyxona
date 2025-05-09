@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\OrderStatusEnum;
 use App\Casts\OrderTypeEnum;
+use Carbon\Carbon;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class Order extends Model
         'company_id',
         'place_id',
         'user_id',
+        'amount',
         'total_amount',
         'discount',
         'type',
@@ -33,6 +35,10 @@ class Order extends Model
             'type' => OrderTypeEnum::class,
             'status' => OrderStatusEnum::class,
         ];
+    }
+    public function getCreatedAtAttribute()
+    {
+        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y - H:i');
     }
 
     public function user(): BelongsTo

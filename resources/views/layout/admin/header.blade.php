@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <!-- endinject -->
     <link rel="shortcut icon" href="{{ $company?->logo ? asset("storage/{$company->logo}") : asset('assets/images/img.png') }}" />
+    @yield('styles')
     @livewireStyles
 </head>
 <body class="with-welcome-text">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\OrderDetailFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,13 @@ class OrderDetail extends Model
         'discount',
         'quantity',
         'price',
+        'total_amount',
     ];
+
+    public function getCreatedAtAttribute()
+    {
+        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y H:i');
+    }
 
     public function order(): BelongsTo
     {

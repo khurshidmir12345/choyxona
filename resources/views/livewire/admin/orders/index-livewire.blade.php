@@ -1,4 +1,42 @@
 <div>
+    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+        <button class="btn btn-success btn-rounded mb-2"
+                data-bs-toggle="collapse"
+                role="button" aria-expanded="false"
+                onclick="document.getElementById('export_filter_div').classList.toggle('d-none')"
+                aria-controls="collapseExample">
+            <i class="fa fa-filter"></i>
+            Filter
+        </button>
+    </div>
+    <div class="d-none mb-3" id="export_filter_div" wire:ignore>
+        <div class="card card-body border-0  filter-box-shadow">
+            <form class="d-block">
+                <div class="row gx-2 gy-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="date" wire:model.live="from_date" class="form-control" placeholder="Sanadan">
+                            <button type="button" class="btn btn-outline-warning" wire:click="clear_from_date()" onclick="this.previousElementSibling.value=''">X</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="date" wire:model.live="to_date" class="form-control" placeholder="Sanagacha">
+                            <button type="button" class="btn btn-outline-warning" wire:click="clear_to_date()" onclick="this.previousElementSibling.value='' ">X</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select wire:model.live="type" class="form-control">
+                            <option value="">Barchasi</option>
+                            <option value="delivery">Yetkazib berish</option>
+                            <option value="takeaway">Olib ketish</option>
+                            <option value="cafe">Choyxonada</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <table class="table table-bordered">
         <thead>
         <tr>
@@ -8,6 +46,7 @@
             <th>Summa</th>
             <th>Turi</th>
             <th>Xolati</th>
+            <th>Sana</th>
             <th>Amallar</th>
         </tr>
         </thead>
@@ -16,8 +55,16 @@
             <tr>
                 <td>{{ $order->id }}</td>
                 <td>{{ $order->user->name ?? '-' }}</td>
+
                 <td>{{ $order->place->name ?? '-' }}</td>
-                <td>{{ number_format($order->total_amount) }}</td>
+                <td><b style="font-size: 16px">{{ number_format($order->total_amount, 0, ',', ' ') }}</b>
+                    <span class="text-green"> uzs</span>
+                    @if ($order->discount)
+                        <small class="text-danger d-block">
+                            -{{ $order->discount }}% chegirma
+                        </small>
+                    @endif
+                </td>
                 <td>
                     @switch($order->type)
                         @case(\App\Casts\OrderTypeEnum::Delivery)
@@ -58,7 +105,7 @@
                             @break
                     @endswitch
                 </td>
-
+                <td>{{ $order->getCreatedAtAttribute() ?? '-' }}</td>
                 <td>
                     <button wire:click="toggleDetails({{ $order->id }})" class="btn btn-sm btn-primary">
                         {{ $expandedOrderId === $order->id ? 'Yopish' : 'Ko‘rish' }}
@@ -68,17 +115,18 @@
 
             @if($expandedOrderId === $order->id)
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         <strong>Tafsilotlar:</strong>
                         <table class="table table-sm table-striped mt-2">
                             <thead>
                             <tr>
-                                <th>Mahsulot</th>
+                                <th>Mahsulot nomi</th>
                                 <th>Miqdori</th>
                                 <th>Narxi</th>
                                 <th>Chegirma</th>
                                 <th>Xodim</th>
                                 <th>Umumiy narxi</th>
+                                <th>Sana</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -91,8 +139,8 @@
                                 <tr>
                                     <td>{{ $detail->product->name ?? '-' }}</td>
                                     <td>{{ $detail->quantity }}</td>
-                                    <td>{{ number_format($detail->price, 0, ',', ' ') }}</td>
-                                    <td>{{ $detail->discount }}</td>
+                                    <td><b>{{ number_format($detail->price, 0, ',', ' ') }}</b> uzs</td>
+                                    <td>{{ $detail->discount }} %</td>
                                     <td>{{ $detail->worker->name ?? '-' }}</td>
                                     <td>
                                         {{ number_format($finalTotal, 0, ',', ' ') }}
@@ -102,6 +150,7 @@
                                             </small>
                                         @endif
                                     </td>
+                                    <td>{{ $detail->getCreatedAtAttribute() ?? '-' }}</td>
                                 </tr>
                             @endforeach
                             </tbody>

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Livewire\Admin\Orders\CreateOrderLivewire;
+use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,10 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::prefix('product')->group(function () {
-        Route::get('/', function () {return view('admin.products.index');})->name('products.index');
+        Route::get('/index', function () {return view('admin.products.index');})->name('products.index');
         Route::get('/categories', function () {return view('admin.categories.index');})->name('categories.index');
         Route::get('/rooms', function () {return view('admin.places.index');})->name('places.index');
         Route::get('/orders', function () {return view('admin.orders.index');})->name('orders.index');
+        Route::get('/delivery', function () {return view('admin.orders.delivery');})->name('delivery.create');
+        Route::get('/takeaway', function () {return view('admin.orders.takeaway');})->name('takeaway.create');
+        Route::get('/cafe', function () {return view('admin.orders.cafe');})->name('cafe.create');
     });
 });
 

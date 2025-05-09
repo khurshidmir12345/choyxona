@@ -23,6 +23,15 @@ class Place extends Model
         ];
     }
 
+    public function isStatusEmpty(): bool
+    {
+        return $this->status->value === 'empty';
+    }
+    public function getStatusColor(): string
+    {
+        return $this->status->value === 'empty' ? '#52be80' : '#FF6347';
+    }
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);

@@ -60,7 +60,7 @@ class User extends Authenticatable
 
     public function getCompany()
     {
-        return Company::query()->where('user_id', $this->id)->first();
+        return Company::query()->where('user_id', $this->id)->first() ?? $this->company->id;
     }
 
     public function role(): BelongsTo

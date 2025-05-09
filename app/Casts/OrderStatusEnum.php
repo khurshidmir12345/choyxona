@@ -4,7 +4,7 @@ namespace App\Casts;
 
 enum OrderStatusEnum: string
 {
-    case opened = 'opened';
+    case Opened = 'opened';
     case Closed = 'closed';
     case Cancelled = 'cancelled';
 

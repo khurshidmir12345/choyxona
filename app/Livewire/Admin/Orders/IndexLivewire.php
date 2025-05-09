@@ -10,6 +10,19 @@ class IndexLivewire extends Component
 {
     use WithPagination;
 
+    public $from_date, $to_date, $type;
+
+    public function clear_to_date()
+    {
+        $this->to_date = '';
+        $this->render();
+    }
+    public function clear_from_date()
+    {
+        $this->from_date = '';
+        $this->render();
+    }
+
     protected $paginationTheme = 'bootstrap';
 
     public $expandedOrderId = null;
@@ -23,6 +36,15 @@ class IndexLivewire extends Component
     {
         $orders = Order::with(['user', 'place', 'company'])
             ->where('company_id', auth()->user()->getCompany()->id)
+            ->when($this->from_date, function ($query) {
+                return $query->whereDate('created_at', '>=', $this->from_date);
+            })
+            ->when($this->to_date, function ($query) {
+                return $query->whereDate('created_at', '<=', $this->to_date);
+            })
+            ->when($this->type, function ($query) {
+                return $query->where('type', $this->type);
+            })
             ->orderByDesc('id')
             ->paginate(10);
 
