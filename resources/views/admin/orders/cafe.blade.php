@@ -61,28 +61,9 @@
         <div class="col-12">
             @livewire('admin.orders.order-in-cafe-livewire')
         </div>
-        <div class="modal fade" id="crete_order" tabindex="-1" aria-labelledby="show_product"
-             aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                @livewire('admin.orders.create-order-livewire')
-            </div>
-        </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script>
-        window.addEventListener('livewire:initialized', () => {
-            Livewire.on('openCreateOrderModal', (event) => {
-                // Open the modal
-                const modal = new bootstrap.Modal(document.getElementById('crete_order'));
-                modal.show();
-
-                // Emit the place data to the show-livewire component
-                Livewire.dispatchTo('admin.products.show-livewire', 'setPlace', {
-                    place: event.place
-                });
-            });
-        });
-    </script>
+   //
 @endsection

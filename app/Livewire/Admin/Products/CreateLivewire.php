@@ -64,6 +64,7 @@ protected $messages = [
         $this->validate();
         if ($this->image) {
             $imagePath = $this->image->store('products', 'public');
+            $imageUrl = asset('storage/' . $imagePath);
         }
 
         Product::create([
@@ -71,11 +72,11 @@ protected $messages = [
             'price' => $price,
             'sell_price' => $sell_price,
             'extra_price' => $sell_price - $price,
-            'discount' => $this->discount,
+            'discount' => $this->discount ?? 0,
             'code' => (int) $this->code,
             'category_id' => $this->category_id,
             'company_id' => $this->company_id,
-            'image' => $imagePath ?? null,
+            'image' => $imageUrl,
         ]);
 
         session()->flash('success', 'Mahsulot muvaffaqiyatli yaratildi.');

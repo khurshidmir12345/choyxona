@@ -41,8 +41,6 @@
             <div class="collapse" id="charts">
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('orders.index')}}">Buyurtmalar tarixi</a></li>
-                    <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('delivery.create')}}">Dostavka yaratish</a></li>
-                    <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('takeaway.create')}}">Sotuv yaratish</a></li>
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('cafe.create')}}">Choyxona ichida</a></li>
                 </ul>
             </div>

@@ -11,27 +11,21 @@ class IndexLivewire extends Component
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
 
-    public $name, $company_id;
+    public $name;
 
     public $search = '';
 
     public $category_id;
 
-    public function mount()
-    {
-        $this->company_id = auth()->user()->getCompany()->id;
-    }
-
     public function create()
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'company_id' => 'required|integer|exists:companies,id',
         ]);
 
         ProductCategory::query()->create([
             'name' => $this->name,
-            'company_id' => $this->company_id,
+            'company_id' => auth()->user()->getCompany()->id,
         ]);
 
         $this->dispatch('closeModal');
@@ -41,7 +35,6 @@ class IndexLivewire extends Component
     private function resetInputFields()
     {
         $this->name = '';
-        $this->company_id = '';
         $this->category_id = null;
     }
 
@@ -56,7 +49,6 @@ class IndexLivewire extends Component
     {
         $this->validate([
             'name' => 'required|string|max:255',
-            'company_id' => 'required|integer|exists:companies,id',
         ]);
 
         $category = ProductCategory::findOrFail($this->category_id);

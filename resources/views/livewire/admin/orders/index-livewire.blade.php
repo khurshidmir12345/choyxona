@@ -8,6 +8,9 @@
             <i class="fa fa-filter"></i>
             Filter
         </button>
+        <button class="btn btn-success btn-rounded mb-2" data-bs-toggle="modal" data-bs-target="#createOrder">
+            <i class="fa fa-plus">  Buyurtma ochish </i>
+        </button>
     </div>
     <div class="d-none mb-3" id="export_filter_div" wire:ignore>
         <div class="card card-body border-0  filter-box-shadow">
@@ -88,7 +91,7 @@
                 </td>
                 <td>
                     @switch($order->status)
-                        @case(\App\Casts\OrderStatusEnum::opened)
+                        @case(\App\Casts\OrderStatusEnum::Opened)
                             <span class="badge bg-primary text-white">Davom etmoqda</span>
                             @break
 
@@ -131,11 +134,6 @@
                             </thead>
                             <tbody>
                             @foreach($order->orderDetails as $detail)
-                                @php
-                                    $total = $detail->price * $detail->quantity;
-                                    $discountAmount = $detail->discount ? ($total * $detail->discount / 100) : 0;
-                                    $finalTotal = $total - $discountAmount;
-                                @endphp
                                 <tr>
                                     <td>{{ $detail->product->name ?? '-' }}</td>
                                     <td>{{ $detail->quantity }}</td>
@@ -143,7 +141,7 @@
                                     <td>{{ $detail->discount }} %</td>
                                     <td>{{ $detail->worker->name ?? '-' }}</td>
                                     <td>
-                                        {{ number_format($finalTotal, 0, ',', ' ') }}
+                                       <b> {{ number_format($detail->total_amount, 0, ',', ' ') }}</b> uzs
                                         @if ($detail->discount)
                                             <small class="text-danger d-block">
                                                 -{{ $detail->discount }}% chegirma

@@ -6,7 +6,6 @@
             <i class="fa fa-plus">  Kategoriya qo‘shish </i>
         </button>
     </div>
-
     <!-- Category Table -->
     <table class="table table-bordered">
         <thead>
@@ -47,6 +46,15 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
                     </div>
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Kategoriya nomi</label>
