@@ -6,13 +6,12 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
-    function delte($id)
-    {
+    public $categories;
+    public $search;
 
-    }
     public function render()
     {
-
+        $this->categories = \App\Models\ProductCategory::all();
         return view('livewire.admin.dashboard');
     }
 }
