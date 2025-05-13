@@ -1,5 +1,6 @@
 <div>
     <!-- Search and Add Button -->
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Joy nomi bo‘yicha qidirish...">
         <button class="btn btn-success btn-rounded ms-2" data-bs-toggle="modal" data-bs-target="#placeModal" wire:click="$set('place_id', null)">
