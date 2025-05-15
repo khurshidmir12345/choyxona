@@ -18,19 +18,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-//        User::factory()->create([
-//            'name' => 'Test User',
-//            'phone_number' => '+998901234567',
-//            'password' => bcrypt('password'),// password
-//        ]);
-//
-//        Company::factory()->create([
-//           'name' => 'Test Company',
-//           'phone_number' => '+998901234567',
-//            'logo' => asset('images/company/img.png'),
-//            'user_id' => 1,
-//
-//        ]);
+        User::factory()->create([
+            'name' => 'Test User',
+            'phone_number' => '+998901234567',
+            'password' => bcrypt('password'),// password
+        ]);
+
+        Company::factory()->create([
+           'name' => 'Test Company',
+           'phone_number' => '+998901234567',
+            'logo' => asset('images/company/img.png'),
+            'user_id' => 1,
+
+        ]);
 
 
         ProductCategory::factory()

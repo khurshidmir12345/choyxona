@@ -30,6 +30,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', function () {return view('admin.orders.index');})->name('orders.index');
         Route::get('/cafe', function () {return view('admin.orders.cafe');})->name('cafe.create');
     });
+    Route::prefix('product-stock')->group(function () {
+        Route::get('/index', function () {return view('admin.product-stock.index');})->name('product-stock.index');
+    });
 });
 
 require __DIR__.'/auth.php';

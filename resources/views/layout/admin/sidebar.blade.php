@@ -17,6 +17,7 @@
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('products.index')}}">Maxsulotlar</a></li>
                     <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('categories.index')}}">Maxsulot turi</a></li>
+                    <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('product-stock.index')}}">Kirim</a></li>
                 </ul>
             </div>
         </li>

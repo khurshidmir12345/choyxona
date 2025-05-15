@@ -12,4 +12,22 @@ enum ProductStockType : string
     {
         return array_column(self::cases(), 'value');
     }
+
+    public function label(): string
+    {
+        return match($this) {
+            self::Add => 'Kirim',
+            self::Sell => 'Chiqim (sotildi)',
+            self::Waste => 'Chiqim (yo‘qotildi)',
+        };
+    }
+
+    public function color(): string
+    {
+        return match($this) {
+            self::Add => 'success',
+            self::Sell => 'warning',
+            self::Waste => 'danger',
+        };
+    }
 }
