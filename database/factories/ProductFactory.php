@@ -18,17 +18,20 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $company = Company::inRandomOrder()->first();
+        $category = ProductCategory::inRandomOrder()->first();
+
         return [
             'name' => $this->faker->words(3, true),
-            'price' => $this->faker->randomFloat(2, 8000, 80000),
-            'sell_price' => $this->faker->randomFloat(2, 10000, 100000),
-            'extra_price' => $this->faker->randomFloat(2, 2000, 10000),
-            'image' => asset('storage/products/dx90uwvSLhsZi6jC5jR1v6wAHoiVb6mAPUns1tAT.jpg'),
-            'discount' => $this->faker->numberBetween(0, 30),
-            'current_stock' => $this->faker->numberBetween(0, 100),
-            'company_id' => 2,
-            'category_id' => $this->faker->numberBetween(159, 161),
-            'code' => $this->faker->unique()->numberBetween(11111, 99999),
+            'price' => $this->faker->randomFloat(2, 1000, 100000),
+            'sell_price' => $this->faker->randomFloat(2, 1000, 100000),
+            'extra_price' => $this->faker->randomFloat(2, 500, 10000),
+            'image' => $this->faker->imageUrl(),
+            'discount' => 5,
+            'current_stock' => rand(10, 100),
+            'company_id' => $company->id,
+            'category_id' => $category->id,
+            'code' => $this->faker->unique()->randomNumber(5),
         ];
     }
 }
