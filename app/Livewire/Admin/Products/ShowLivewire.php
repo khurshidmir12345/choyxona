@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Admin\Products;
 
+use App\Models\Product;
 use Livewire\Component;
 
 class ShowLivewire extends Component
 {
     public function render()
     {
-        return view('livewire.admin.products.show-livewire');
+        $product = Product::query()->orderByDesc('id')->first();
+        return view('livewire.admin.products.show-livewire' , compact('product'));
     }
 }
