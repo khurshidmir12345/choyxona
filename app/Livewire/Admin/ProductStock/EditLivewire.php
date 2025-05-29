@@ -2,48 +2,51 @@
 
 namespace App\Livewire\Admin\ProductStock;
 
+use App\Casts\ProductStockType;
 use App\Models\Product;
 use App\Models\ProductStock;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class EditLivewire extends Component
 {
-    use WithFileUploads;
-
     public $stock_id;
-    public $product_name;
+    public $product_id;
+    public $type;
     public $quantity;
+
+    public $products = [];
 
     protected $listeners = [
         'openEditProductModal' => 'listenFromIndex',
     ];
+
     protected $rules = [
-        'product_name' => 'required|string|max:255',
-        'quantity' => 'required|min:0',
-    ];
-    protected $messages = [
-        'product_name.required' => 'Nomni kiritish majburiy.',
-        'product_name.string' => 'Nom matn bo\'lishi kerak.',
-        'product_name.max' => 'Nom 255 ta belgidan oshmasligi kerak.',
-        'quantity.numeric' => 'Miqdor raqam bo‘lishi kerak.',
-        'quantity.min' => 'Miqdor kamida 1 bo‘lishi kerak.',
-        'quantity.required' => 'Miqdor maydoni to‘ldirilishi shart.',
+        'product_id' => 'required|exists:products,id',
+        'type' => 'required',
+        'quantity' => 'required|numeric|min:0',
     ];
 
-    public function listenFromIndex($product_id)
+    protected $messages = [
+        'product_id.required' => 'Mahsulot tanlash majburiy.',
+        'type.required' => 'Holat tanlash majburiy.',
+        'quantity.required' => 'Miqdor maydoni to‘ldirilishi shart.',
+        'quantity.numeric' => 'Miqdor raqam bo‘lishi kerak.',
+        'quantity.min' => 'Miqdor kamida 0 bo‘lishi kerak.',
+    ];
+
+    public function mount($product_id)
     {
         $this->stock_id = $product_id;
+        $this->products = Product::all();
         $this->loadProduct();
-        $this->dispatch('openEditProductModal');
     }
 
     protected function loadProduct()
     {
-        $productStock = ProductStock::query()->findOrFail($this->stock_id);
+        $productStock = ProductStock::with('product')->findOrFail($this->stock_id);
 
-        $this->name = $productStock->name;
+        $this->product_id = $productStock->product_id;
+        $this->type = $productStock->type->value;
         $this->quantity = $productStock->quantity;
     }
 
@@ -51,21 +54,27 @@ class EditLivewire extends Component
     {
         $this->validate();
 
-        $product = ProductStock::findOrFail($this->stock_id);
+        $productStock = ProductStock::findOrFail($this->stock_id);
 
-
-        $product->update([
-            'name' => $this->product_name,
-            'quantity' => $this->quantity
+        $productStock->update([
+            'product_id' => $this->product_id,
+            'type' => $this->type,
+            'quantity' => $this->quantity,
         ]);
 
         session()->flash('success', 'Mahsulot muvaffaqiyatli yangilandi.');
-        $this->dispatch('productStockUpdated');
+        $this->closeModal();
     }
 
+    public function closeModal()
+    {
+        $this->dispatch('closeEditModal');
+    }
 
     public function render()
     {
-        return view('livewire.admin.product-stock.edit-livewire');
+        return view('livewire.admin.product-stock.edit-livewire', [
+            'stockTypes' => ProductStockType::cases(),
+        ]);
     }
 }

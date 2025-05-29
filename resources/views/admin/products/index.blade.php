@@ -1,25 +1,16 @@
 @extends('layout.admin.header')
-
+@section('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+@endsection
 @section('content')
     <div class="row">
         <div class="col-12">
             @livewire('admin.products.index-livewire')
         </div>
-        <div class="modal fade" id="edit_product" tabindex="-1" aria-labelledby="edit_group" aria-hidden="true">
-            <div class="modal-dialog modal-md modal-dialog-scrollable">
-                @livewire('admin.products.edit-livewire')
-            </div>
-        </div>
         <div class="modal fade" id="add_product" tabindex="-1" aria-labelledby="add_product"
              aria-hidden="true">
             <div class="modal-dialog modal-md modal-dialog-scrollable">
                 @livewire('admin.products.create-livewire')
-            </div>
-        </div>
-        <div class="modal fade" id="show_product" tabindex="-1" aria-labelledby="show_product"
-             aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                @livewire('admin.products.show-livewire')
             </div>
         </div>
     </div>

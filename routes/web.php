@@ -33,6 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('product-stock')->group(function () {
         Route::get('/index', function () {return view('admin.product-stock.index');})->name('product-stock.index');
     });
+
+    Route::get('/admin/orders/place/{place_id}', App\Livewire\Admin\Orders\OrderInCafeLivewire::class)->name('admin.orders.place');
 });
 
 require __DIR__.'/auth.php';

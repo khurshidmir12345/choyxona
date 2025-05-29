@@ -10,11 +10,15 @@ class IndexLivewire extends Component
 {
     use WithPagination;
 
+    public $editProductId = null;
+    public  $showProductId = null;
+
+
     protected $paginationTheme = 'bootstrap';
 
     public $search = '';
 
-    protected $listeners = ['productCreated'];
+    protected $listeners = ['productCreated', 'productUpdated', 'closeEditModal', 'closeShowModal'];
 
     public function productCreated()
     {
@@ -22,9 +26,20 @@ class IndexLivewire extends Component
         $this->dispatch('closeModal');
     }
 
+    public function productUpdated()
+    {
+        $this->render();
+        $this->editProductId = null;
+    }
+
     public function edit($product_id)
     {
-        $this->dispatch('openEditProductModal', product_id: $product_id);
+        $this->editProductId = $product_id;
+    }
+
+    public function show($product_id)
+    {
+        $this->showProductId = $product_id;
     }
 
     public function delete($id)
@@ -36,6 +51,16 @@ class IndexLivewire extends Component
     public function openCreateModal()
     {
         $this->dispatch('openAddProductModal');
+    }
+
+    public function closeEditModal()
+    {
+        $this->editProductId = null;
+    }
+
+    public function closeShowModal()
+    {
+        $this->showProductId = null;
     }
 
 

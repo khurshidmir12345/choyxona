@@ -5,7 +5,15 @@
             <i class="fa fa-plus">  Yangi mahsulot</i>
         </a>
     </div>
-
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <table class="table table-bordered">
         <thead>
         <tr>
@@ -32,7 +40,6 @@
                 </td>
                 <td>{{ $stock->created_at }}</td>
                 <td>
-{{--                    <a href="{{ route('product-stock.show', $stock->id) }}" class="btn btn-info btn-sm">Ko‘rish</a>--}}
                     <a href="#" class="btn btn-warning btn-sm" wire:click="edit({{ $stock->id }})">Tahrirlash</a>
                     <button wire:click="delete({{ $stock->id }})" class="btn btn-danger btn-sm">O‘chirish</button>
                 </td>
@@ -41,6 +48,14 @@
         </tbody>
     </table>
     <div class="mt-2">
-{{--        {{ $products->links() }}--}}
+        {{ $productStock->links() }}
     </div>
+
+    @if ($editProductId)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-md modal-dialog-scrollable">
+                @livewire('admin.product-stock.edit-livewire', ['product_id' => $editProductId])
+            </div>
+        </div>
+    @endif
 </div>

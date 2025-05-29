@@ -40,8 +40,11 @@
                     </p>
                 </td>
                 <td>
-                    <a href="{{--{{ route('products.show', $product->id) }}--}}" class="btn btn-info btn-sm">Ko‘rish</a>
-                    <a href="#" class="btn btn-warning btn-sm" wire:click="edit({{ $product->id }})">Tahrirlash</a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#show_product"
+                       wire:click="show({{ $product->id }})" class="btn btn-info btn-sm">Ko‘rish</a>
+                    <a href="#" class="btn btn-warning btn-sm" wire:click="edit({{ $product->id }})"
+                       data-bs-toggle="modal" data-bs-target="#edit_product"
+                    >Tahrirlash</a>
                     <button wire:click="delete({{ $product->id }})" class="btn btn-danger btn-sm">O‘chirish</button>
                 </td>
             </tr>
@@ -51,4 +54,19 @@
     <div class="mt-2">
         {{ $products->links() }}
     </div>
+
+    @if ($showProductId)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-md modal-dialog-scrollable">
+                @livewire('admin.products.show-livewire', ['product_id' => $showProductId])
+            </div>
+        </div>
+    @endif
+    @if ($editProductId)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-md modal-dialog-scrollable">
+                @livewire('admin.products.edit-livewire', ['product_id' => $editProductId])
+            </div>
+        </div>
+    @endif
 </div>

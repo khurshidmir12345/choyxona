@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Products;
 use App\Models\Product;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
 
 class CreateLivewire extends Component
 {
@@ -76,7 +77,7 @@ protected $messages = [
             'code' => (int) $this->code,
             'category_id' => $this->category_id,
             'company_id' => $this->company_id,
-            'image' => $imageUrl,
+            'image' => $imageUrl ?? null,
         ]);
 
         session()->flash('success', 'Mahsulot muvaffaqiyatli yaratildi.');

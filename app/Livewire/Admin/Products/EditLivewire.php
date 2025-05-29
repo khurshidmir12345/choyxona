@@ -11,6 +11,8 @@ class EditLivewire extends Component
 {
     use WithFileUploads;
 
+    public $product;
+
     public $product_id;
     public $name, $price, $sell_price, $extra_price, $discount, $code, $category_id;
     public $image;
@@ -49,12 +51,11 @@ class EditLivewire extends Component
         'image.max' => 'Rasm hajmi 4096 KB dan oshmasligi kerak.',
     ];
 
-    public function listenFromIndex($product_id)
+    public function mount($product_id)
     {
         $this->product_id = $product_id;
         $this->company_id = auth()->user()->getCompany()->id;
         $this->loadProduct();
-        $this->dispatch('openEditProductModal');
     }
 
     protected function loadProduct()
@@ -70,7 +71,7 @@ class EditLivewire extends Component
         $this->current_image = $product->image;
     }
 
-    public function update()
+    public function updateProduct()
     {
         $price = (int)preg_replace('/\D/', '', $this->price);
         $sell_price = (int)preg_replace('/\D/', '', $this->sell_price);
@@ -79,15 +80,14 @@ class EditLivewire extends Component
 
         $product = Product::findOrFail($this->product_id);
 
-        $imagePath = $this->current_image;
 
         if ($this->image) {
-            // Delete old image if exists
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+            if ($product->image && Storage::disk('public')->exists(str_replace('storage/', '', parse_url($product->image, PHP_URL_PATH)))) {
+                Storage::disk('public')->delete(str_replace('storage/', '', parse_url($product->image, PHP_URL_PATH)));
             }
 
             $imagePath = $this->image->store('products', 'public');
+            $imageUrl = asset('storage/' . $imagePath);
         }
 
         $product->update([
@@ -95,14 +95,19 @@ class EditLivewire extends Component
             'price' => $price,
             'sell_price' => $sell_price,
             'extra_price' => $sell_price - $price,
-            'discount' => $this->discount,
+            'discount' => $this->discount ?? null,
             'code' => (int)$this->code,
             'category_id' => $this->category_id,
-            'image' => $imagePath,
+            'image' => $imageUrl ?? $product->image,
         ]);
 
         session()->flash('success', 'Mahsulot muvaffaqiyatli yangilandi.');
         $this->dispatch('productUpdated');
+    }
+
+    public function closeModal()
+    {
+        $this->dispatch('closeEditModal');
     }
 
 
