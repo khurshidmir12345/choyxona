@@ -27,4 +27,13 @@
             modal.show();
         });
     </script>
+    <script>
+        setTimeout(function () {
+            const successAlert = document.getElementById('success-alert');
+            if (successAlert) successAlert.style.display = 'none';
+
+            const errorAlert = document.getElementById('error-alert');
+            if (errorAlert) errorAlert.style.display = 'none';
+        }, 4000); // 4 sekunddan keyin yo‘qoladi
+    </script>
 @endsection

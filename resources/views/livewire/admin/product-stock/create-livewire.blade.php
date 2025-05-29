@@ -16,6 +16,18 @@
                     </div>
                 @endif
 
+                @if (session()->has('success'))
+                    <div id="success-alert" class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session()->has('error'))
+                    <div id="error-alert" class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <div class="mb-3">
                     <label>Mahsulotni tanlang</label>
                     <select wire:model="product_id" class="form-control">

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\ProductStock;
 
+use App\Casts\ProductStockType;
 use App\Models\Product;
 use App\Models\ProductStock;
 use Livewire\Component;
@@ -27,7 +28,19 @@ class CreateLivewire extends Component
         $companyId = auth()->user()->getCompany()->id;
         $this->validate();
 
-//        dd($this->status);
+        $product = Product::query()->find($this->product_id);
+
+        if ($this->status == ProductStockType::Add->value) {
+            $product->current_stock += $this->quantity;
+        } else {
+            if ($product->current_stock < $this->quantity) {
+                session()->flash('error', "Ushbu mahsulotdan {$product->current_stock} ta mavjud.");
+                return;
+            }
+            $product->current_stock -= $this->quantity;
+        }
+
+        $product->save();
 
         ProductStock::create([
             'company_id' => $companyId,
@@ -35,6 +48,7 @@ class CreateLivewire extends Component
             'quantity' => $this->quantity,
             'type' => $this->status,
         ]);
+
 
         session()->flash('success', 'Mahsulot qo‘shildi.');
         $this->reset();

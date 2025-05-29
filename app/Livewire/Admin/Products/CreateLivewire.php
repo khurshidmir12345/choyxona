@@ -75,6 +75,7 @@ protected $messages = [
             'extra_price' => $sell_price - $price,
             'discount' => $this->discount ?? 0,
             'code' => (int) $this->code,
+            'current_stock' => 0,
             'category_id' => $this->category_id,
             'company_id' => $this->company_id,
             'image' => $imageUrl ?? null,
