@@ -23,11 +23,6 @@ class OrderDetail extends Model
         'total_amount',
     ];
 
-    public function getCreatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y H:i');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
@@ -41,5 +36,10 @@ class OrderDetail extends Model
     public function worker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'worker_id');
+    }
+
+    public function getCreatedAtAttribute()
+    {
+        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y H:i');
     }
 }

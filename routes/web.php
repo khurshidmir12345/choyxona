@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\Orders\CreateOrderLivewire;
+use App\Livewire\Admin\Orders\OrderCompleted;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/admin/orders/place/{place_id}', App\Livewire\Admin\Orders\OrderInCafeLivewire::class)->name('admin.orders.place');
+    
+    // Print route for completed orders
+    Route::get('/order/{id}/print', OrderCompleted::class)->name('admin.orders.print');
 });
 
 require __DIR__.'/auth.php';

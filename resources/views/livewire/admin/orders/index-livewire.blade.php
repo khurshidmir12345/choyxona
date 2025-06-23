@@ -111,8 +111,17 @@
                 <td>{{ $order->getCreatedAtAttribute() ?? '-' }}</td>
                 <td>
                     <button wire:click="toggleDetails({{ $order->id }})" class="btn btn-sm btn-primary">
-                        {{ $expandedOrderId === $order->id ? 'Yopish' : 'Ko‘rish' }}
+                        {{ $expandedOrderId === $order->id ? 'Yopish' : 'Ko\'rish' }}
                     </button>
+                    
+                    {{-- Print button for completed orders --}}
+                    @if($order->status === \App\Casts\OrderStatusEnum::Done)
+                        <a href="{{ route('admin.orders.print', $order->id) }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-success">
+                            🖨️ Chek
+                        </a>
+                    @endif
                 </td>
             </tr>
 

@@ -36,6 +36,7 @@ class Order extends Model
             'status' => OrderStatusEnum::class,
         ];
     }
+
     public function getCreatedAtAttribute()
     {
         return Carbon::parse($this->attributes['created_at'])->format('d.m.Y - H:i');
