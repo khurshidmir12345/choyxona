@@ -5,3 +5,7 @@
        @livewire('admin.dashboard')
     </div>
 @endsection
+
+@section('script')
+
+@endsection
