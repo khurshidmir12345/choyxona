@@ -46,18 +46,19 @@
                 </ul>
             </div>
         </li>
-{{--        <li class="nav-item">--}}
-{{--            <a class="nav-link" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="tables">--}}
-{{--                <i class="menu-icon mdi mdi-table"></i>--}}
-{{--                <span class="menu-title">Tables</span>--}}
-{{--                <i class="menu-arrow"></i>--}}
-{{--            </a>--}}
-{{--            <div class="collapse" id="tables">--}}
-{{--                <ul class="nav flex-column sub-menu">--}}
-{{--                    <li class="nav-item"> <a class="nav-link" href="pages/tables/basic-table.html">Basic table</a></li>--}}
-{{--                </ul>--}}
-{{--            </div>--}}
-{{--        </li>--}}
+       <li class="nav-item">
+           <a class="nav-link" data-bs-toggle="collapse" href="#tables" aria-expanded="false" aria-controls="tables">
+               <i class="menu-icon mdi mdi-table"></i>
+               <span class="menu-title">Xarajatlar</span>
+               <i class="menu-arrow"></i>
+           </a>
+           <div class="collapse" id="tables">
+               <ul class="nav flex-column sub-menu">
+                    <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('expense-categories.index')}}">Xarajat kategoriyasi</a></li>
+                    <li class="nav-item"> <a class="nav-link fw-bold" href="{{route('expenses.index')}}">Xarajatlar</a></li>
+               </ul>
+           </div>
+       </li>
 {{--        <li class="nav-item">--}}
 {{--            <a class="nav-link" data-bs-toggle="collapse" href="#icons" aria-expanded="false" aria-controls="icons">--}}
 {{--                <i class="menu-icon mdi mdi-layers-outline"></i>--}}

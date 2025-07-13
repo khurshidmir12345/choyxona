@@ -95,7 +95,7 @@ class OrderInCafeLivewire extends Component
             $this->selectedProducts[$productId] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'price' => $product->sell_price,
+                'price' => $product->sell_price, // Single item price
                 'image' => $product->image,
                 'quantity' => 1
             ];
@@ -135,7 +135,7 @@ class OrderInCafeLivewire extends Component
     {
         $total = 0;
         foreach ($this->selectedProducts as $product) {
-            $total += $product['price'] * $product['quantity'];
+            $total += $product['price'] * $product['quantity']; // price is single item price
         }
 
         if ($this->currentOrder) {
@@ -165,8 +165,8 @@ class OrderInCafeLivewire extends Component
                 'product_id' => $product['id'],
                 'worker_id' => auth()->user()->id,
                 'quantity' => $product['quantity'],
-                'price' => $product['price'],
-                'total_amount' => $product['price'] * $product['quantity'],
+                'price' => $product['price'], // Single item price
+                'total_amount' => $product['price'] * $product['quantity'], // price * quantity
                 'discount' => 0,
             ]);
         }
@@ -195,8 +195,8 @@ class OrderInCafeLivewire extends Component
                     'product_id' => $product['id'],
                     'worker_id' => auth()->user()->id,
                     'quantity' => $product['quantity'],
-                    'price' => $product['price'],
-                    'total_amount' => $product['price'] * $product['quantity'],
+                    'price' => $product['price'], // Single item price
+                    'total_amount' => $product['price'] * $product['quantity'], // price * quantity
                     'discount' => 0,
                 ]);
             }

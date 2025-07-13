@@ -76,8 +76,8 @@ class CreateLivewire extends Component
             $this->selectedProducts = collect($this->selectedProducts)->map(function ($item) use ($product) {
                 if ($item['id'] === $product->id) {
                     $item['quantity'] += 1;
-                    $item['sell_price'] = $product->sell_price * $item['quantity'];
-                    $total_price = $item['sell_price'];
+                    $item['price'] = $product->sell_price; // Single item price
+                    $total_price = $item['price'] * $item['quantity'];
                     $discount_amount = $total_price * ((int)$item['discount'] / 100);
                     $item['total_amount'] = $total_price - (int)$discount_amount;
                 }
@@ -89,7 +89,7 @@ class CreateLivewire extends Component
             $this->selectedProducts[] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'sell_price' => $product->sell_price,
+                'price' => $product->sell_price, // Single item price
                 'discount' => $product->discount ?? 0,
                 'quantity' => 1,
                 'total_amount' => $product->sell_price * (1 - ((int)$product->discount ?? 0) / 100),
@@ -114,8 +114,8 @@ class CreateLivewire extends Component
 
         $product = $this->selectedProducts[$index];
         $product['quantity'] = $quantity;
-        $product['sell_price'] = $product['quantity'] * ($this->products->firstWhere('id', $product['id'])->sell_price ?? 0);
-        $total_price = $product['sell_price'];
+        $product['price'] = $this->products->firstWhere('id', $product['id'])->sell_price ?? 0; // Single item price
+        $total_price = $product['price'] * $product['quantity'];
         $discount_amount = $total_price * ($product['discount'] / 100);
         $product['total_amount'] = (int)$total_price - (int)$discount_amount;
 
@@ -164,8 +164,8 @@ class CreateLivewire extends Component
                 'worker_id' => auth()->id(),
                 'discount' => $product['discount'],
                 'quantity' => $product['quantity'],
-                'price' => $product['sell_price'],
-                'total_amount' => $product['total_amount'],
+                'price' => $product['price'], // Single item price
+                'total_amount' => $product['total_amount'], // Already calculated with discount
             ]);
         }
 

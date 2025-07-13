@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
 
         ]);
 
-
         ProductCategory::factory()
             ->count(5)
             ->create();
@@ -41,5 +40,11 @@ class DatabaseSeeder extends Seeder
         Product::factory()
             ->count(100)
             ->create();
+
+        // Seed expense categories and expenses for existing company_id = 2
+        $this->call([
+            ExpenseCategorySeeder::class,
+            ExpenseSeeder::class,
+        ]);
     }
 }

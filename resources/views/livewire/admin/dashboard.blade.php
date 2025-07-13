@@ -105,17 +105,17 @@
             <div class="card">
                 <div class="card-body">
                     <div class="dash-widget-header">
-                        <span class="dash-widget-icon text-info">
-                            <i class="fas fa-calculator"></i>
+                        <span class="dash-widget-icon text-danger">
+                            <i class="fas fa-money-bill-alt"></i>
                         </span>
                         <div class="dash-count">
-                            <h3>{{ number_format($averageOrderValue) }} so'm</h3>
+                            <h3>{{ number_format($totalApprovedExpenses) }} so'm</h3>
                         </div>
                     </div>
                     <div class="dash-widget-info">
-                        <h6 class="text-muted">O'rtacha buyurtma</h6>
+                        <h6 class="text-muted">Tasdiqlangan xarajatlar</h6>
                         <div class="progress progress-sm">
-                            <div class="progress-bar bg-info" style="width: 100%"></div>
+                            <div class="progress-bar bg-danger" style="width: 100%"></div>
                         </div>
                     </div>
                 </div>
@@ -210,8 +210,8 @@
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
-                                <h4 class="text-success">{{ number_format($averageOrderValue) }} so'm</h4>
-                                <p class="text-muted">O'rtacha buyurtma</p>
+                                <h4 class="text-danger">{{ number_format($totalApprovedExpenses) }} so'm</h4>
+                                <p class="text-muted">Tasdiqlangan xarajatlar</p>
                             </div>
                         </div>
                         <div class="col-md-3">

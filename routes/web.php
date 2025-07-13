@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Orders\CreateOrderLivewire;
 use App\Livewire\Admin\Orders\OrderCompleted;
+use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
+use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
 use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +39,15 @@ Route::middleware('auth')->group(function () {
     });
     Route::prefix('product-stock')->group(function () {
         Route::get('/index', function () {return view('admin.product-stock.index');})->name('product-stock.index');
+    });
+
+    // Expense routes
+    Route::prefix('expense-categories')->group(function () {
+        Route::get('/index', function () {return view('admin.expense-categories.index');})->name('expense-categories.index');
+    });
+    
+    Route::prefix('expenses')->group(function () {
+        Route::get('/index', function () {return view('admin.expenses.index');})->name('expenses.index');
     });
 
     Route::get('/admin/orders/place/{place_id}', App\Livewire\Admin\Orders\OrderInCafeLivewire::class)->name('admin.orders.place');

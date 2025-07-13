@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -18,7 +19,7 @@ class Dashboard extends Component
     public $totalRevenue = 0;
     public $totalProfit = 0;
     public $totalOrders = 0;
-    public $averageOrderValue = 0;
+    public $totalApprovedExpenses = 0;
     public $topProducts = [];
     public $topCategories = [];
     public $profitMargin = 0;
@@ -83,11 +84,19 @@ class Dashboard extends Component
     {
         $startDate = Carbon::parse($this->startDate)->startOfDay();
         $endDate = Carbon::parse($this->endDate)->endOfDay();
+        $companyId = auth()->user()->getCompany()->id;
 
         // Get orders for the selected period
-        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+        $orders = Order::where('company_id', $companyId)
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'done')
             ->with('orderDetails.product')
+            ->get();
+
+        // Get approved expenses for the selected period
+        $approvedExpenses = Expense::where('company_id', $companyId)
+            ->whereBetween('expense_date', [$startDate, $endDate])
+            ->where('status', 'approved')
             ->get();
 
         // Calculate total revenue
@@ -96,8 +105,8 @@ class Dashboard extends Component
         // Calculate total orders
         $this->totalOrders = $orders->count();
         
-        // Calculate average order value
-        $this->averageOrderValue = $this->totalOrders > 0 ? round($this->totalRevenue / $this->totalOrders) : 0;
+        // Calculate total approved expenses
+        $this->totalApprovedExpenses = $approvedExpenses->sum('amount');
 
         // Calculate profit
         $this->calculateProfit($orders);
@@ -106,7 +115,7 @@ class Dashboard extends Component
         $this->calculateAdditionalMetrics($orders);
 
         // Generate chart data (monthly view)
-        $this->generateMonthlyChartData($startDate, $endDate);
+        $this->generateMonthlyChartData($startDate, $endDate, $companyId);
 
         // Get top products
         $this->getTopProducts($orders);
@@ -147,7 +156,7 @@ class Dashboard extends Component
         $this->dailyAverage = $daysDiff > 0 ? round($this->totalRevenue / $daysDiff) : 0;
     }
 
-    private function generateMonthlyChartData($startDate, $endDate)
+    private function generateMonthlyChartData($startDate, $endDate, $companyId)
     {
         $chartData = [];
         $daysDiff = $startDate->diffInDays($endDate) + 1;
@@ -156,7 +165,8 @@ class Dashboard extends Component
             // Kunlik chart
             $currentDate = $startDate->copy();
             while ($currentDate <= $endDate) {
-                $dayOrders = Order::whereDate('created_at', $currentDate)
+                $dayOrders = Order::where('company_id', $companyId)
+                    ->whereDate('created_at', $currentDate)
                     ->where('status', 'done')
                     ->sum('total_amount');
                 $chartData[] = [
@@ -178,7 +188,8 @@ class Dashboard extends Component
                 if ($monthEnd > $endDate) {
                     $monthEnd = $endDate->copy();
                 }
-                $monthOrders = Order::whereBetween('created_at', [$monthStart, $monthEnd])
+                $monthOrders = Order::where('company_id', $companyId)
+                    ->whereBetween('created_at', [$monthStart, $monthEnd])
                     ->where('status', 'done')
                     ->sum('total_amount');
                 $chartData[] = [
