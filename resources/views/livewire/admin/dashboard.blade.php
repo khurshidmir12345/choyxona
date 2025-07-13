@@ -86,7 +86,7 @@
                 <div class="card-body">
                     <div class="dash-widget-header">
                         <span class="dash-widget-icon text-warning">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i class="fas fa-chart-line"></i>
                         </span>
                         <div class="dash-count">
                             <h3>{{ number_format($totalOrders) }}</h3>
