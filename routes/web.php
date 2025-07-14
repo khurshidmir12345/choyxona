@@ -26,9 +26,11 @@ Route::middleware('auth')->group(function () {
     // Dashboard route
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/admin/profile', function () {return view('admin.profile');})->name('admin.profile');
 
     Route::prefix('product')->group(function () {
         Route::get('/index', function () {return view('admin.products.index');})->name('products.index');

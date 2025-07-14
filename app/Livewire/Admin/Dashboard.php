@@ -14,7 +14,7 @@ class Dashboard extends Component
 {
     public $startDate;
     public $endDate;
-    public $selectedPeriod = 'today';
+    public $selectedPeriod = 'month';
     public $chartData = [];
     public $totalRevenue = 0;
     public $totalProfit = 0;
@@ -28,8 +28,7 @@ class Dashboard extends Component
 
     public function mount()
     {
-        $this->startDate = Carbon::today()->format('Y-m-d');
-        $this->endDate = Carbon::today()->format('Y-m-d');
+        $this->setDateRange();
         $this->loadDashboardData();
     }
 
@@ -162,21 +161,29 @@ class Dashboard extends Component
         $daysDiff = $startDate->diffInDays($endDate) + 1;
 
         if ($daysDiff <= 31) {
-            // Kunlik chart
+            // Kunlik chart - har kun uchun ma'lumot
             $currentDate = $startDate->copy();
             while ($currentDate <= $endDate) {
                 $dayOrders = Order::where('company_id', $companyId)
                     ->whereDate('created_at', $currentDate)
                     ->where('status', 'done')
                     ->sum('total_amount');
+                
+                $dayExpenses = Expense::where('company_id', $companyId)
+                    ->whereDate('expense_date', $currentDate)
+                    ->where('status', 'approved')
+                    ->sum('amount');
+                
                 $chartData[] = [
                     'date' => $currentDate->format('d.m.Y'),
-                    'amount' => $dayOrders
+                    'sales' => (float)$dayOrders,
+                    'expenses' => (float)$dayExpenses,
+                    'profit' => (float)($dayOrders - $dayExpenses)
                 ];
                 $currentDate->addDay();
             }
         } else {
-            // Oylik chart
+            // Oylik chart - har oy uchun ma'lumot
             $currentDate = $startDate->copy()->startOfMonth();
             $endOfPeriod = $endDate->copy()->endOfMonth();
             while ($currentDate <= $endOfPeriod) {
@@ -188,24 +195,35 @@ class Dashboard extends Component
                 if ($monthEnd > $endDate) {
                     $monthEnd = $endDate->copy();
                 }
+                
                 $monthOrders = Order::where('company_id', $companyId)
                     ->whereBetween('created_at', [$monthStart, $monthEnd])
                     ->where('status', 'done')
                     ->sum('total_amount');
+                
+                $monthExpenses = Expense::where('company_id', $companyId)
+                    ->whereBetween('expense_date', [$monthStart, $monthEnd])
+                    ->where('status', 'approved')
+                    ->sum('amount');
+                
                 $chartData[] = [
                     'date' => $currentDate->format('M Y'),
-                    'amount' => $monthOrders
+                    'sales' => (float)$monthOrders,
+                    'expenses' => (float)$monthExpenses,
+                    'profit' => (float)($monthOrders - $monthExpenses)
                 ];
                 $currentDate->addMonth();
             }
         }
 
-        // Agar butun davrda hech qanday buyurtma bo'lmasa, bitta 0 nuqta chiqsin
-        if (empty($chartData) || array_sum(array_column($chartData, 'amount')) === 0) {
+        // Agar butun davrda hech qanday ma'lumot bo'lmasa, bitta 0 nuqta chiqsin
+        if (empty($chartData) || (array_sum(array_column($chartData, 'sales')) === 0 && array_sum(array_column($chartData, 'expenses')) === 0)) {
             $chartData = [
                 [
                     'date' => $startDate->format($daysDiff <= 31 ? 'd.m.Y' : 'M Y'),
-                    'amount' => 0
+                    'sales' => 0,
+                    'expenses' => 0,
+                    'profit' => 0
                 ]
             ];
         }
