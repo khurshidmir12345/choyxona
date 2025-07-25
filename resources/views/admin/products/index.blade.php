@@ -22,6 +22,11 @@
         window.addEventListener('closeModal', event => {
             $('#add_product').modal('hide');
         });
+        
+        // Modal ochilganda xabarlarni tozalash
+        Livewire.on('clearCreateMessages', () => {
+            // Xabarlarni tozalash uchun event
+        });
     </script>
     <script>
         Livewire.on('openEditProductModal', () => {

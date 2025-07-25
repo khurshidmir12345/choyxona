@@ -1,7 +1,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Mahsulot nomi yoki kodi bo‘yicha qidirish...">
-        <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-rounded">
+        <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-rounded" wire:click="openCreateModal">
             <i class="fa fa-plus">  Yangi mahsulot</i>
         </a>
     </div>

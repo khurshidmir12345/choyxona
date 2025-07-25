@@ -11,6 +11,8 @@ class CreateLivewire extends Component
 {
     use WithFileUploads;
 
+    protected $listeners = ['clearCreateMessages' => 'clearAllMessages'];
+
     public $name, $price, $sell_price, $extra_price, $discount, $code, $category_id;
     public $image;
     public $company_id; // mount orqali ulanadi
@@ -19,6 +21,8 @@ class CreateLivewire extends Component
     {
         $this->reset();
         $this->company_id = auth()->user()->getCompany()->id;
+        // Eski xabarlarni tozalaymiz
+        session()->forget(['success', 'error']);
     }
 
     protected $rules = [
@@ -33,7 +37,7 @@ class CreateLivewire extends Component
     public function generateCode()
     {
         $lastProduct = Product::where('company_id', $this->company_id)->orderBy('code', 'desc')->first();
-        $code = $lastProduct ? $lastProduct->code + 1 : 1001;
+        $code = $lastProduct ? $lastProduct->code + 1 : 10001;
         $this->code = str_pad($code, 5, '0', STR_PAD_LEFT);
     }
 
@@ -59,6 +63,9 @@ protected $messages = [
 
     public function save()
     {
+        // Eski xabarlarni tozalaymiz
+        $this->clearAllMessages();
+        
         try {
             $price = (int) preg_replace('/\D/', '', $this->price);
             $sell_price = (int) preg_replace('/\D/', '', $this->sell_price);
@@ -86,11 +93,23 @@ protected $messages = [
             session()->flash('success', 'Mahsulot muvaffaqiyatli yaratildi.');
             $this->dispatch('productCreated');
             $this->reset();
+            $this->clearMessages();
             
         } catch (\Exception $e) {
             session()->flash('error', 'Mahsulot yaratishda xatolik yuz berdi: ' . $e->getMessage());
             // Modal yopilmasin, error ko'rsatilsin
         }
+    }
+
+    public function clearMessages()
+    {
+        session()->forget(['success', 'error']);
+    }
+
+    public function clearAllMessages()
+    {
+        session()->forget(['success', 'error']);
+        $this->resetValidation();
     }
 
     public function render()

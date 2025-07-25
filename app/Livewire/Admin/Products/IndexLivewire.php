@@ -51,6 +51,7 @@ class IndexLivewire extends Component
     public function openCreateModal()
     {
         $this->dispatch('openAddProductModal');
+        $this->dispatch('clearCreateMessages');
     }
 
     public function closeEditModal()
