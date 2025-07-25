@@ -40,16 +40,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/cafe', function () {return view('admin.orders.cafe');})->name('cafe.create');
     });
     Route::prefix('product-stock')->group(function () {
-        Route::get('/index', function () {return view('admin.product-stock.index');})->name('product-stock.index');
+        Route::get('/product-stock', function () {return view('admin.product-stock.index');})->name('product-stock.index');
     });
 
     // Expense routes
-    Route::prefix('expense-categories')->group(function () {
-        Route::get('/index', function () {return view('admin.expense-categories.index');})->name('expense-categories.index');
+    Route::prefix('expense-cat')->group(function () {
+        Route::get('/expense-cat', function () {return view('admin.expense-categories.index');})->name('expense-categories.index');
     });
     
     Route::prefix('expenses')->group(function () {
-        Route::get('/index', function () {return view('admin.expenses.index');})->name('expenses.index');
+        Route::get('/expenses', function () {return view('admin.expenses.index');})->name('expenses.index');
     });
 
     Route::get('/admin/orders/place/{place_id}', App\Livewire\Admin\Orders\OrderInCafeLivewire::class)->name('admin.orders.place');
