@@ -22,6 +22,14 @@ class IndexLivewire extends Component
         $this->company_id = auth()->user()->getCompany()->id;
     }
 
+    public function hydrate()
+    {
+        // Har safar component yuklanganda company_id ni o'rnatamiz
+        if (!$this->company_id) {
+            $this->company_id = auth()->user()->getCompany()->id;
+        }
+    }
+
     public function create()
     {
         $this->validate([
@@ -29,10 +37,15 @@ class IndexLivewire extends Component
             'capacity' => 'nullable|integer',
         ]);
 
+        // Company_id ni tekshiramiz va o'rnatamiz
+        if (!$this->company_id) {
+            $this->company_id = auth()->user()->getCompany()->id;
+        }
+
         Place::query()->create([
             'name' => $this->name,
             'capacity' => $this->capacity,
-            'company_id' => $this->company_id ?? auth()->user()->getCompany()->id,
+            'company_id' => $this->company_id,
         ]);
 
         $this->dispatch('closeModal');
@@ -43,7 +56,7 @@ class IndexLivewire extends Component
     {
         $this->name = '';
         $this->capacity = '';
-        $this->company_id = '';
+        $this->company_id = auth()->user()->getCompany()->id;
         $this->place_id = null;
     }
 
