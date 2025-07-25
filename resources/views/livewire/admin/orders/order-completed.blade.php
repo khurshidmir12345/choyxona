@@ -31,7 +31,8 @@
         <thead>
             <tr>
                 <th class="item-name">Mahsulot</th>
-                <th class="item-price-qty">Narxi × Soni</th>
+                <th class="item-price-qty" style="padding-left: 15px;">Narxi</th>
+                <th class="item-price-qty">Soni</th>
                 <th class="item-total">Jami</th>
             </tr>
         </thead>
@@ -44,8 +45,11 @@
                             <div class="discount">-{{ $detail->discount }}% chegirma</div>
                         @endif
                     </td>
+                    <td class="item-price-qty" style="padding-left: 15px;">
+                        {{ number_format($detail->price, 0, ',', ' ') }}
+                    </td>
                     <td class="item-price-qty">
-                        {{ number_format($detail->price, 0, ',', ' ') }} × {{ $detail->quantity }}
+                        {{ $detail->quantity }}
                     </td>
                     <td class="item-total">
                         {{ number_format($detail->total_amount, 0, ',', ' ') }}
@@ -80,10 +84,10 @@
 
     {{-- Receipt Footer --}}
     <div class="receipt-footer">
-        <div>Rahmat!</div>
+        <div>❤️❤️❤️ Rahmat! ❤️❤️❤️</div>
         <div>Tashrifingizdan xursandmiz!</div>
         <div style="margin-top: 3px;">
-            {{ \Carbon\Carbon::parse($order->getRawOriginal('created_at'))->format('d.m.Y H:i:s') }}
+            ⏰ {{ \Carbon\Carbon::parse($order->getRawOriginal('created_at'))->format('d.m.Y H:i:s') }} ⏰
         </div>
         @if($order->user)
             <div style="margin-top: 2px;">
