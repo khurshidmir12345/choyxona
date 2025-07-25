@@ -25,6 +25,14 @@ class CreateLivewire extends Component
         session()->forget(['success', 'error']);
     }
 
+    public function hydrate()
+    {
+        // Har safar component yuklanganda company_id ni o'rnatamiz
+        if (!$this->company_id) {
+            $this->company_id = auth()->user()->getCompany()->id;
+        }
+    }
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'price' => 'required|min:0',
@@ -110,10 +118,17 @@ protected $messages = [
     {
         session()->forget(['success', 'error']);
         $this->resetValidation();
+        // Company_id ni qayta o'rnatamiz
+        $this->company_id = auth()->user()->getCompany()->id;
     }
 
     public function render()
     {
+        // Company_id ni tekshiramiz va o'rnatamiz
+        if (!$this->company_id) {
+            $this->company_id = auth()->user()->getCompany()->id;
+        }
+        
         return view('livewire.admin.products.create-livewire',[
             'categories' => \App\Models\ProductCategory::where('company_id', $this->company_id)->get(),
         ]);
