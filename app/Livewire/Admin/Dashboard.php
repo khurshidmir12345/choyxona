@@ -100,10 +100,10 @@ class Dashboard extends Component
 
         // Calculate total revenue
         $this->totalRevenue = $orders->sum('total_amount');
-        
+
         // Calculate total orders
         $this->totalOrders = $orders->count();
-        
+
         // Calculate total approved expenses
         $this->totalApprovedExpenses = $approvedExpenses->sum('amount');
 
@@ -129,7 +129,7 @@ class Dashboard extends Component
     private function calculateProfit($orders)
     {
         $totalProfit = 0;
-        
+
         foreach ($orders as $order) {
             foreach ($order->orderDetails as $detail) {
                 if ($detail->product) {
@@ -138,7 +138,7 @@ class Dashboard extends Component
                 }
             }
         }
-        
+
         $this->totalProfit = $totalProfit;
     }
 
@@ -146,10 +146,10 @@ class Dashboard extends Component
     {
         // Calculate profit margin
         $this->profitMargin = $this->totalRevenue > 0 ? round(($this->totalProfit / $this->totalRevenue) * 100, 1) : 0;
-        
+
         // Calculate average profit per order
         $this->averageProfit = $this->totalOrders > 0 ? round($this->totalProfit / $this->totalOrders) : 0;
-        
+
         // Calculate daily average
         $daysDiff = Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) + 1;
         $this->dailyAverage = $daysDiff > 0 ? round($this->totalRevenue / $daysDiff) : 0;
@@ -168,12 +168,12 @@ class Dashboard extends Component
                     ->whereDate('created_at', $currentDate)
                     ->where('status', 'done')
                     ->sum('total_amount');
-                
+
                 $dayExpenses = Expense::where('company_id', $companyId)
                     ->whereDate('expense_date', $currentDate)
                     ->where('status', 'approved')
                     ->sum('amount');
-                
+
                 $chartData[] = [
                     'date' => $currentDate->format('d.m.Y'),
                     'sales' => (float)$dayOrders,
@@ -195,17 +195,17 @@ class Dashboard extends Component
                 if ($monthEnd > $endDate) {
                     $monthEnd = $endDate->copy();
                 }
-                
+
                 $monthOrders = Order::where('company_id', $companyId)
                     ->whereBetween('created_at', [$monthStart, $monthEnd])
                     ->where('status', 'done')
                     ->sum('total_amount');
-                
+
                 $monthExpenses = Expense::where('company_id', $companyId)
                     ->whereBetween('expense_date', [$monthStart, $monthEnd])
                     ->where('status', 'approved')
                     ->sum('amount');
-                
+
                 $chartData[] = [
                     'date' => $currentDate->format('M Y'),
                     'sales' => (float)$monthOrders,
@@ -240,7 +240,7 @@ class Dashboard extends Component
                 if ($detail->product) {
                     $productId = $detail->product->id;
                     $productName = $detail->product->name;
-                    
+
                     if (!isset($productStats[$productId])) {
                         $productStats[$productId] = [
                             'name' => $productName,
@@ -248,7 +248,7 @@ class Dashboard extends Component
                             'revenue' => 0
                         ];
                     }
-                    
+
                     $productStats[$productId]['quantity'] += $detail->quantity;
                     $productStats[$productId]['revenue'] += $detail->quantity * $detail->product->sell_price;
                 }
@@ -272,7 +272,7 @@ class Dashboard extends Component
                 if ($detail->product && $detail->product->category) {
                     $categoryId = $detail->product->category->id;
                     $categoryName = $detail->product->category->name;
-                    
+
                     if (!isset($categoryStats[$categoryId])) {
                         $categoryStats[$categoryId] = [
                             'name' => $categoryName,
@@ -280,7 +280,7 @@ class Dashboard extends Component
                             'revenue' => 0
                         ];
                     }
-                    
+
                     $categoryStats[$categoryId]['quantity'] += $detail->quantity;
                     $categoryStats[$categoryId]['revenue'] += $detail->quantity * $detail->product->sell_price;
                 }

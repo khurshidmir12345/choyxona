@@ -59,37 +59,44 @@ protected $messages = [
 
     public function save()
     {
-        $price = (int) preg_replace('/\D/', '', $this->price);
-        $sell_price = (int) preg_replace('/\D/', '', $this->sell_price);
-        $this->generateCode();
-        $this->validate();
-        if ($this->image) {
-            $imagePath = $this->image->store('products', 'public');
-            $imageUrl = asset('storage/' . $imagePath);
+        try {
+            $price = (int) preg_replace('/\D/', '', $this->price);
+            $sell_price = (int) preg_replace('/\D/', '', $this->sell_price);
+            $this->generateCode();
+            $this->validate();
+            
+            if ($this->image) {
+                $imagePath = $this->image->store('products', 'public');
+                $imageUrl = asset('storage/' . $imagePath);
+            }
+
+            Product::create([
+                'name' => $this->name,
+                'price' => $price,
+                'sell_price' => $sell_price,
+                'extra_price' => $sell_price - $price,
+                'discount' => $this->discount ?? 0,
+                'code' => (int) $this->code,
+                'current_stock' => 0,
+                'category_id' => $this->category_id,
+                'company_id' => $this->company_id,
+                'image' => $imageUrl ?? null,
+            ]);
+
+            session()->flash('success', 'Mahsulot muvaffaqiyatli yaratildi.');
+            $this->dispatch('productCreated');
+            $this->reset();
+            
+        } catch (\Exception $e) {
+            session()->flash('error', 'Mahsulot yaratishda xatolik yuz berdi: ' . $e->getMessage());
+            // Modal yopilmasin, error ko'rsatilsin
         }
-
-        Product::create([
-            'name' => $this->name,
-            'price' => $price,
-            'sell_price' => $sell_price,
-            'extra_price' => $sell_price - $price,
-            'discount' => $this->discount ?? 0,
-            'code' => (int) $this->code,
-            'current_stock' => 0,
-            'category_id' => $this->category_id,
-            'company_id' => $this->company_id,
-            'image' => $imageUrl ?? null,
-        ]);
-
-        session()->flash('success', 'Mahsulot muvaffaqiyatli yaratildi.');
-        $this->reset();
-        $this->dispatch('productCreated');
     }
 
     public function render()
     {
         return view('livewire.admin.products.create-livewire',[
-            'categories' => \App\Models\ProductCategory::all(),
+            'categories' => \App\Models\ProductCategory::where('company_id', $this->company_id)->get(),
         ]);
     }
 }
