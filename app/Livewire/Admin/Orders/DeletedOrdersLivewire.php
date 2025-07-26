@@ -30,6 +30,19 @@ class DeletedOrdersLivewire extends Component
     public function toggleDetails($orderId)
     {
         $this->expandedOrderId = $this->expandedOrderId === $orderId ? null : $orderId;
+        
+        // Debug: Check if order details are loaded
+        if ($this->expandedOrderId === $orderId) {
+            $order = Order::withTrashed()->with(['orderDetails' => function($query) {
+                $query->withTrashed()->with(['product', 'worker' => function($workerQuery) {
+                    $workerQuery->withTrashed();
+                }]);
+            }])->find($orderId);
+            
+            if ($order && $order->orderDetails->count() === 0) {
+                session()->flash('message', 'Buyurtma tafsilotlari topilmadi yoki o\'chirilgan.');
+            }
+        }
     }
 
     public function restore($orderId)
@@ -61,7 +74,11 @@ class DeletedOrdersLivewire extends Component
     public function render()
     {
         $orders = Order::withTrashed()
-            ->with(['user', 'place', 'company'])
+            ->with(['user', 'place', 'company', 'orderDetails' => function($query) {
+                $query->withTrashed()->with(['product', 'worker' => function($workerQuery) {
+                    $workerQuery->withTrashed();
+                }]);
+            }])
             ->where('company_id', auth()->user()->getCompany()->id)
             ->whereNotNull('deleted_at')
             ->when($this->from_date, function ($query) {
