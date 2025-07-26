@@ -5,7 +5,7 @@
             {{ $order->company->name ?? 'Choyxona' }}
         </div>
         <div class="receipt-title">CHEK</div>
-        <div class="order-info">
+        <div class="order-info" style="font-weight: bolder">
             Buyurtma #{{ $order->id }}<br>
             {{ \Carbon\Carbon::parse($order->getRawOriginal('created_at'))->format('d.m.Y H:i') }}
             @if($order->place)
@@ -39,19 +39,19 @@
         <tbody>
             @foreach($order->orderDetails as $detail)
                 <tr>
-                    <td class="item-name">
+                    <td class="item-name" style="font-weight: bolder">
                         {{ Str::limit($detail->product->name ?? 'Noma\'lum mahsulot', 20) }}
                         @if($detail->discount > 0)
                             <div class="discount">-{{ $detail->discount }}% chegirma</div>
                         @endif
                     </td>
-                    <td class="item-price-qty" style="padding-left: 15px;">
+                    <td class="item-price-qty" style="padding-left: 15px; font-weight: bolder">
                         {{ number_format($detail->price, 0, ',', ' ') }}
                     </td>
-                    <td class="item-price-qty">
+                    <td class="item-price-qty" style="font-weight: bolder">
                         {{ $detail->quantity }}
                     </td>
-                    <td class="item-total">
+                    <td class="item-total" style="font-weight: bolder">
                         {{ number_format($detail->total_amount, 0, ',', ' ') }}
                     </td>
                 </tr>
@@ -62,7 +62,7 @@
     {{-- Total Section --}}
     <div class="total-section">
         {{-- Subtotal --}}
-        <div class="total-row">
+        <div class="total-row" style="font-weight: bolder">
             <span>Jami:</span>
             <span>{{ number_format($order->amount, 0, ',', ' ') }} uzs</span>
         </div>
@@ -83,11 +83,11 @@
     </div>
 
     {{-- Receipt Footer --}}
-    <div class="receipt-footer">
-        <div>❤️❤️❤️ Rahmat! ❤️❤️❤️</div>
+    <div class="receipt-footer" style="margin-bottom: 150px; font-weight: bolder">
+        <div>Rahmat!</div>
         <div>Tashrifingizdan xursandmiz!</div>
         <div style="margin-top: 3px;">
-            ⏰ {{ \Carbon\Carbon::parse($order->getRawOriginal('created_at'))->format('d.m.Y H:i:s') }} ⏰
+            {{ \Carbon\Carbon::parse($order->getRawOriginal('created_at'))->format('d.m.Y H:i:s') }}
         </div>
         @if($order->user)
             <div style="margin-top: 2px;">
@@ -95,4 +95,4 @@
             </div>
         @endif
     </div>
-</div> 
+</div>
