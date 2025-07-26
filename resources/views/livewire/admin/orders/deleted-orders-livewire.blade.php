@@ -1,12 +1,6 @@
 <div>
-    @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('message') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+        <h4 class="text-danger">🗑️ O'chirilgan buyurtmalar</h4>
         <button class="btn btn-success btn-rounded mb-2"
                 data-bs-toggle="collapse"
                 role="button" aria-expanded="false"
@@ -15,10 +9,8 @@
             <i class="fa fa-filter"></i>
             Filter
         </button>
-        <button class="btn btn-success btn-rounded mb-2" data-bs-toggle="modal" data-bs-target="#createOrder">
-            <i class="fa fa-plus">  Buyurtma ochish </i>
-        </button>
     </div>
+    
     <div class="d-none mb-3" id="export_filter_div" wire:ignore>
         <div class="card card-body border-0  filter-box-shadow">
             <form class="d-block">
@@ -47,6 +39,14 @@
             </form>
         </div>
     </div>
+
+    @if (session()->has('message'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('message') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <table class="table table-bordered">
         <thead>
         <tr>
@@ -56,16 +56,15 @@
             <th>Summa</th>
             <th>Turi</th>
             <th>Xolati</th>
-            <th>Sana</th>
+            <th>O'chirilgan sana</th>
             <th>Amallar</th>
         </tr>
         </thead>
         <tbody>
-        @foreach($orders as $order)
-            <tr>
+        @forelse($orders as $order)
+            <tr class="table-danger">
                 <td>{{ $order->id }}</td>
                 <td>{{ $order->user->name ?? '-' }}</td>
-
                 <td>{{ $order->place->name ?? '-' }}</td>
                 <td><b style="font-size: 16px">{{ number_format($order->total_amount, 0, ',', ' ') }}</b>
                     <span class="text-green"> uzs</span>
@@ -115,26 +114,22 @@
                             @break
                     @endswitch
                 </td>
-                <td>{{ $order->getCreatedAtAttribute() ?? '-' }}</td>
+                <td>{{ $order->deleted_at ? $order->deleted_at->format('d.m.Y H:i') : '-' }}</td>
                 <td>
                     <button wire:click="toggleDetails({{ $order->id }})" class="btn btn-sm btn-primary">
                         {{ $expandedOrderId === $order->id ? 'Yopish' : 'Ko\'rish' }}
                     </button>
                     
-                    {{-- Print button for completed orders --}}
-                    @if($order->status === \App\Casts\OrderStatusEnum::Done)
-                        <a href="{{ route('admin.orders.print', $order->id) }}" 
-                           target="_blank" 
-                           class="btn btn-sm btn-success">
-                            🖨️ Chek
-                        </a>
-                    @endif
+                    <button wire:click="restore({{ $order->id }})" 
+                            class="btn btn-sm btn-success"
+                            onclick="return confirm('Buyurtmani tiklashni xohlaysizmi?')">
+                        🔄 Tiklash
+                    </button>
                     
-                    {{-- Delete button --}}
-                    <button wire:click="delete({{ $order->id }})" 
+                    <button wire:click="forceDelete({{ $order->id }})" 
                             class="btn btn-sm btn-danger"
-                            onclick="return confirm('Buyurtmani o\'chirishni xohlaysizmi?')">
-                        🗑️ O'chirish
+                            onclick="return confirm('Buyurtmani to\'liq o\'chirishni xohlaysizmi? Bu amalni qaytarib bo\'lmaydi!')">
+                        🗑️ To'liq o'chirish
                     </button>
                 </td>
             </tr>
@@ -179,11 +174,17 @@
                     </td>
                 </tr>
             @endif
-        @endforeach
+        @empty
+            <tr>
+                <td colspan="8" class="text-center text-muted">
+                    <h5>O'chirilgan buyurtmalar mavjud emas</h5>
+                </td>
+            </tr>
+        @endforelse
         </tbody>
     </table>
 
     <div class="mt-2">
         {{ $orders->links() }}
     </div>
-</div>
+</div> 

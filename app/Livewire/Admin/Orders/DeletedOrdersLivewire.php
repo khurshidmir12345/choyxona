@@ -6,49 +6,64 @@ use App\Models\Order;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class IndexLivewire extends Component
+class DeletedOrdersLivewire extends Component
 {
     use WithPagination;
 
     public $from_date, $to_date, $type;
+    public $expandedOrderId = null;
+
+    protected $paginationTheme = 'bootstrap';
 
     public function clear_to_date()
     {
         $this->to_date = '';
         $this->render();
     }
+
     public function clear_from_date()
     {
         $this->from_date = '';
         $this->render();
     }
 
-    protected $paginationTheme = 'bootstrap';
-
-    public $expandedOrderId = null;
-
     public function toggleDetails($orderId)
     {
         $this->expandedOrderId = $this->expandedOrderId === $orderId ? null : $orderId;
     }
 
-    public function delete($orderId)
+    public function restore($orderId)
     {
-        $order = Order::findOrFail($orderId);
+        $order = Order::withTrashed()->findOrFail($orderId);
         
-        // Order details ni o'chiramiz
-        $order->orderDetails()->delete();
+        // Order details ni restore qilamiz
+        $order->orderDetails()->withTrashed()->restore();
         
-        // Order ni o'chiramiz
-        $order->delete();
+        // Order ni restore qilamiz
+        $order->restore();
         
-        session()->flash('message', 'Buyurtma muvaffaqiyatli o\'chirildi.');
+        session()->flash('message', 'Buyurtma muvaffaqiyatli tiklandi.');
+    }
+
+    public function forceDelete($orderId)
+    {
+        $order = Order::withTrashed()->findOrFail($orderId);
+        
+        // Order details ni to'liq o'chiramiz
+        $order->orderDetails()->withTrashed()->forceDelete();
+        
+        // Order ni to'liq o'chiramiz
+        $order->forceDelete();
+        
+        session()->flash('message', 'Buyurtma to\'liq o\'chirildi.');
     }
 
     public function render()
     {
-        $orders = Order::with(['user', 'place', 'company'])
+        $orders = Order::withTrashed()
+            ->with(['user', 'place', 'company'])
             ->where('company_id', auth()->user()->getCompany()->id)
+            ->whereNotNull('deleted_at')
             ->when($this->from_date, function ($query) {
                 return $query->whereDate('created_at', '>=', $this->from_date);
             })
@@ -58,9 +73,9 @@ class IndexLivewire extends Component
             ->when($this->type, function ($query) {
                 return $query->where('type', $this->type);
             })
-            ->orderByDesc('id')
+            ->orderByDesc('deleted_at')
             ->paginate(10);
 
-        return view('livewire.admin.orders.index-livewire', compact('orders'));
+        return view('livewire.admin.orders.deleted-orders-livewire', compact('orders'));
     }
-}
+} 

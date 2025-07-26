@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories', function () {return view('admin.categories.index');})->name('categories.index');
         Route::get('/rooms', function () {return view('admin.places.index');})->name('places.index');
         Route::get('/orders', function () {return view('admin.orders.index');})->name('orders.index');
+        Route::get('/orders/deleted', function () {return view('admin.orders.deleted');})->name('orders.deleted');
         Route::get('/cafe', function () {return view('admin.orders.cafe');})->name('cafe.create');
     });
     Route::prefix('product-stock')->group(function () {
