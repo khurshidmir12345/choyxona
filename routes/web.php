@@ -10,8 +10,19 @@ use App\Models\Place;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('home');
+    }
     return view('auth.login');
-})->middleware('guest');
+});
+
+// Redirect authenticated users from login to home
+Route::get('/login', function () {
+    if (auth()->check()) {
+        return redirect()->route('home');
+    }
+    return redirect()->route('login');
+});
 
 Route::get('/home', function () {
     return view('welcome');

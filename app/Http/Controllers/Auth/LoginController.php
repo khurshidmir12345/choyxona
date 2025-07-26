@@ -21,7 +21,7 @@ class LoginController extends Controller
         $request->authenticate();
 
 
-        return redirect()->intended('/dashboard');
+        return redirect()->intended('/home');
     }
 
     /**
