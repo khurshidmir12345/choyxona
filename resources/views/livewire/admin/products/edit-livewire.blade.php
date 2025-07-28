@@ -37,6 +37,12 @@
             </div>
 
             <div class="mb-3">
+                <label>Maxsulot soni</label>
+                <input type="text" class="form-control" wire:model.debounce.500ms="current_stock">
+                @error('current_stock') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="mb-3">
                 <label>Chegirma % (ixtiyoriy)</label>
                 <input type="number" step="1" wire:model="discount" class="form-control">
                 @error('discount') <span class="text-danger">{{ $message }}</span> @enderror

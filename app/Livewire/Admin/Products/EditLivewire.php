@@ -14,7 +14,7 @@ class EditLivewire extends Component
     public $product;
 
     public $product_id;
-    public $name, $price, $sell_price, $extra_price, $discount, $code, $category_id;
+    public $name, $price, $sell_price, $extra_price, $discount, $code, $category_id, $current_stock;
     public $image;
     public $current_image;
     public $company_id;
@@ -68,6 +68,7 @@ class EditLivewire extends Component
         $this->discount = $product->discount;
         $this->code = $product->code;
         $this->category_id = $product->category_id;
+        $this->current_stock = $product->current_stock;
         $this->current_image = $product->image;
     }
 
@@ -98,6 +99,7 @@ class EditLivewire extends Component
             'discount' => $this->discount ?? null,
             'code' => (int)$this->code,
             'category_id' => $this->category_id,
+            'current_stock' => $this->current_stock,
             'image' => $imageUrl ?? $product->image,
         ]);
 
@@ -114,7 +116,7 @@ class EditLivewire extends Component
     public function render()
     {
         return view('livewire.admin.products.edit-livewire', [
-            'categories' => \App\Models\ProductCategory::all(),
+            'categories' => \App\Models\ProductCategory::query()->where('company_id', auth()->user()->getCompany()->id)->get(),
         ]);
     }
 }
