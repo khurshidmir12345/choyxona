@@ -41,12 +41,40 @@ class IndexLivewire extends Component
     public function render()
     {
         $companyId = auth()->user()->getCompany()->id;
-        
+
         // Get overall statistics (unfiltered) - separate queries for each statistic
-        $totalAmount = Expense::where('company_id', $companyId)->sum('amount');
-        $pendingAmount = Expense::where('company_id', $companyId)->where('status', 'pending')->sum('amount');
-        $approvedAmount = Expense::where('company_id', $companyId)->where('status', 'approved')->sum('amount');
-        
+        $totalAmount = Expense::where('company_id', $companyId)
+            ->when($this->dateFrom, function ($query) {
+                $query->where('expense_date', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($query) {
+                $query->where('expense_date', '<=', $this->dateTo);
+            })
+            ->when($this->selectedStatus, function ($query) {
+                $query->where('status', $this->selectedStatus);
+            })
+            ->sum('amount');
+
+        $pendingAmount = Expense::where('company_id', $companyId)
+            ->when($this->dateFrom, function ($query) {
+                $query->where('expense_date', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($query) {
+                $query->where('expense_date', '<=', $this->dateTo);
+            })
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        $approvedAmount = Expense::where('company_id', $companyId)
+            ->when($this->dateFrom, function ($query) {
+                $query->where('expense_date', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($query) {
+                $query->where('expense_date', '<=', $this->dateTo);
+            })
+            ->where('status', 'approved')
+            ->sum('amount');
+
         // Get filtered expenses for the table
         $expenses = Expense::with(['category', 'user'])
             ->where('company_id', $companyId)
@@ -66,12 +94,12 @@ class IndexLivewire extends Component
             ->when($this->dateTo, function ($query) {
                 $query->where('expense_date', '<=', $this->dateTo);
             })
-            ->orderBy('expense_date', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(15);
 
         $categories = ExpenseCategory::where('company_id', $companyId)
             ->where('is_active', true)
-            ->orderBy('name')
+            ->orderBy('id', 'desc')
             ->get();
 
         return view('livewire.admin.expenses.index-livewire', compact('expenses', 'categories', 'totalAmount', 'pendingAmount', 'approvedAmount'));
@@ -140,23 +168,23 @@ class IndexLivewire extends Component
     {
         try {
             $expense = Expense::find($id);
-            
+
             if (!$expense) {
                 session()->flash('error', 'Xarajat topilmadi!');
                 return;
             }
-            
+
             if ($expense->company_id !== auth()->user()->getCompany()->id) {
                 session()->flash('error', 'Bu xarajatni o\'chirish huquqingiz yo\'q!');
                 return;
             }
-            
+
             $expenseTitle = $expense->title;
             $expense->delete();
-            
+
             session()->flash('message', "Xarajat '{$expenseTitle}' muvaffaqiyatli o'chirildi!");
             $this->dispatch('$refresh');
-            
+
         } catch (\Exception $e) {
             session()->flash('error', 'Xatolik yuz berdi: ' . $e->getMessage());
         }
