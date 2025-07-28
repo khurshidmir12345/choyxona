@@ -167,6 +167,10 @@ class CreateLivewire extends Component
                 'price' => $product['price'], // Single item price
                 'total_amount' => $product['total_amount'], // Already calculated with discount
             ]);
+
+            $old_product = Product::query()->find($product['id']);
+            $old_product->decrement('current_stock', $product['quantity']);
+            $this->dispatch('refresh_index');
         }
 
         // Redirect to order view or list

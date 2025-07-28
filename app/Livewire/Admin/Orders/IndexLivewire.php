@@ -12,6 +12,10 @@ class IndexLivewire extends Component
 
     public $from_date, $to_date, $type;
 
+    protected $listeners = [
+        'refresh_index' => 'render',
+    ];
+
     public function clear_to_date()
     {
         $this->to_date = '';
@@ -35,13 +39,13 @@ class IndexLivewire extends Component
     public function delete($orderId)
     {
         $order = Order::findOrFail($orderId);
-        
+
         // Order details ni o'chiramiz
         $order->orderDetails()->delete();
-        
+
         // Order ni o'chiramiz
         $order->delete();
-        
+
         session()->flash('message', 'Buyurtma muvaffaqiyatli o\'chirildi.');
     }
 
