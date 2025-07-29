@@ -20,6 +20,8 @@ class OrderInCafeLivewire extends Component
     public $quantities = [];
     public $discount = 0;
     public $selectedCategory = null;
+    public $givenAmount = 0;
+    public $changeAmount = 0;
 
     public function startOrder($place_id)
     {
@@ -131,6 +133,11 @@ class OrderInCafeLivewire extends Component
         $this->updateOrderTotal();
     }
 
+    public function updatedGivenAmount()
+    {
+        $this->calculateChange();
+    }
+
     private function updateOrderTotal()
     {
         $total = 0;
@@ -147,6 +154,25 @@ class OrderInCafeLivewire extends Component
                 'total_amount' => $finalTotal,
                 'discount' => $this->discount
             ]);
+        }
+
+        // Calculate change amount
+        $this->calculateChange();
+    }
+
+    public function calculateChange()
+    {
+        $total = 0;
+        foreach ($this->selectedProducts as $product) {
+            $total += $product['price'] * $product['quantity'];
+        }
+        
+        $discountAmount = ($total * $this->discount) / 100;
+        $finalTotal = $total - $discountAmount;
+        
+        $this->changeAmount = (int)$this->givenAmount - (int)$finalTotal;
+        if ($this->changeAmount < 0) {
+            $this->changeAmount = 0;
         }
     }
 
@@ -222,6 +248,9 @@ class OrderInCafeLivewire extends Component
         $this->selectedProducts = [];
         $this->selectedPlace = null;
         $this->place_id = null;
+        $this->givenAmount = 0;
+        $this->changeAmount = 0;
+        $this->discount = 0;
     }
 
     public function cancelOrder()

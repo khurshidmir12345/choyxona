@@ -246,17 +246,27 @@
                                                 <span class="fw-bold text-success">{{ number_format($currentOrder->amount ?? 0, 0, ',', ' ') }} uzs</span>
                                             </div>
 
-                                            <!-- Discount Input -->
-                                            <div class="mt-2">
-                                                <label class="form-label small">Chegirma (%)</label>
-                                                <input type="number" 
-                                                       wire:model.live="discount" 
-                                                       class="form-control form-control-sm discount-input" 
-                                                       min="0" 
-                                                       max="100" 
-                                                       placeholder="0"
-                                                       onfocus="this.select()"
-                                                       oninput="handleDiscountInput(this)">
+                                            <!-- Discount and Payment Inputs -->
+                                            <div class="row mt-2">
+                                                <div class="col-6">
+                                                    <label class="form-label small">Chegirma (%)</label>
+                                                    <input type="number" 
+                                                           wire:model.live="discount" 
+                                                           class="form-control form-control-sm discount-input" 
+                                                           min="0" 
+                                                           max="100" 
+                                                           placeholder="0"
+                                                           onfocus="this.select()"
+                                                           oninput="handleDiscountInput(this)">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small">Berilgan summa</label>
+                                                    <input type="number" 
+                                                           wire:model.live="givenAmount" 
+                                                           class="form-control form-control-sm" 
+                                                           placeholder="0"
+                                                           onfocus="this.select()">
+                                                </div>
                                             </div>
 
                                             @if($discount > 0)
@@ -270,6 +280,16 @@
                                                 <span class="fw-bold">TO'LOV:</span>
                                                 <span class="fw-bold text-primary">{{ number_format($currentOrder->total_amount ?? 0, 0, ',', ' ') }} uzs</span>
                                             </div>
+                                            @if($givenAmount > 0)
+                                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                                    <span class="text-muted small">Berilgan:</span>
+                                                    <span class="fw-medium small">{{ number_format($givenAmount, 0, ',', ' ') }} uzs</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                                    <span class="fw-bold text-success small">Qaytarish:</span>
+                                                    <span class="fw-bold text-success small">{{ number_format($changeAmount, 0, ',', ' ') }} uzs</span>
+                                                </div>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
