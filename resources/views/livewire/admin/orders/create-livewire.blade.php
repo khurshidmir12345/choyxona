@@ -26,7 +26,7 @@
                             <h5 class="card-title fw-bold mb-0">Maxsulotlar</h5>
                             <div class="input-group" style="max-width: 300px;">
                                 <input type="text" class="form-control" placeholder="Search products..."
-                                       wire:model.debounce.300ms="searchQuery">
+                                       wire:model.live="searchQuery">
                                 <button class="btn btn-outline-secondary" type="button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor">

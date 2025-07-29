@@ -52,7 +52,10 @@ class CreateLivewire extends Component
         ->when($this->selectedCategory, function ($query) {
             return $query->where('category_id', $this->selectedCategory);
         })->when($this->searchQuery, function ($query) {
-            return $query->where('name', 'like', '%' . $this->searchQuery . '%');
+            return $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->searchQuery . '%')
+                  ->orWhere('code', 'like', '%' . $this->searchQuery . '%');
+            });
         })->orderByDesc('id')->get();
     }
 
