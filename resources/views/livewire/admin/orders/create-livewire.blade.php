@@ -207,10 +207,21 @@
                         </div>
 
                         <div class="p-4 border-top">
-                            <div class="mb-3">
-                                <label for="orderDiscount" class="form-label fw-medium">Chegirma miqdori %</label>
-                                <input type="number" class="form-control" id="orderDiscount"
-                                       wire:model.live="orderDiscount">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="orderDiscount" class="form-label fw-medium">Chegirma miqdori %</label>
+                                        <input type="number" class="form-control" id="orderDiscount"
+                                               wire:model.live="orderDiscount">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="givenAmount" class="form-label fw-medium">Berilgan summa</label>
+                                        <input type="number" class="form-control" id="givenAmount"
+                                               wire:model.live="givenAmount" placeholder="0">
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-between mb-2">
@@ -225,6 +236,16 @@
                                 <span>Umumiy summa:</span>
                                 <span>{{ number_format($orderTotalAmount) }}</span>
                             </div>
+                            @if($givenAmount > 0)
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Berilgan:</span>
+                                    <span class="fw-medium">{{ number_format($givenAmount) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold text-success">
+                                    <span>Qaytim:</span>
+                                    <span>{{ number_format($changeAmount) }}</span>
+                                </div>
+                            @endif
 
                             <div class="mt-4">
                                 <button class="btn btn-primary w-100 py-2" wire:click="saveOrder"

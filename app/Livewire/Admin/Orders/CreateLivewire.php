@@ -23,6 +23,8 @@ class CreateLivewire extends Component
     public $orderDiscount;
     public $orderAmount = 0;
     public $orderTotalAmount = 0;
+    public $givenAmount = 0;
+    public $changeAmount = 0;
     public $searchQuery = '';
     public $selectedCategory = null;
 
@@ -67,6 +69,11 @@ class CreateLivewire extends Component
     public function updatedOrderDiscount()
     {
         $this->calculateTotals();
+    }
+
+    public function updatedGivenAmount()
+    {
+        $this->calculateChange();
     }
 
     public function addProduct(Product $product)
@@ -134,9 +141,19 @@ class CreateLivewire extends Component
         // Calculate order total amount (order amount - order discount)
         $this->orderTotalAmount = (int)$this->orderAmount - ((int)$this->orderAmount * ((int)$this->orderDiscount) / 100);
 
-
         if ($this->orderTotalAmount < 0) {
             $this->orderTotalAmount = 0;
+        }
+
+        // Calculate change amount
+        $this->calculateChange();
+    }
+
+    public function calculateChange()
+    {
+        $this->changeAmount = (int)$this->givenAmount - (int)$this->orderTotalAmount;
+        if ($this->changeAmount < 0) {
+            $this->changeAmount = 0;
         }
     }
 
@@ -181,6 +198,8 @@ class CreateLivewire extends Component
         $this->orderDiscount = 0;
         $this->orderAmount = 0;
         $this->orderTotalAmount = 0;
+        $this->givenAmount = 0;
+        $this->changeAmount = 0;
         $this->searchQuery = '';
         $this->selectedCategory = null;
         $this->orderType = 'takeaway';
