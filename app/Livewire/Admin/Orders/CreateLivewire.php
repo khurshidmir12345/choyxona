@@ -173,6 +173,15 @@ class CreateLivewire extends Component
             $this->dispatch('refresh_index');
         }
 
+        // Clear all variables after successful order creation
+        $this->selectedProducts = [];
+        $this->orderDiscount = 0;
+        $this->orderAmount = 0;
+        $this->orderTotalAmount = 0;
+        $this->searchQuery = '';
+        $this->selectedCategory = null;
+        $this->orderType = 'takeaway';
+        
         // Redirect to order view or list
         session()->flash('success', 'Order created successfully!');
         $this->dispatch('closeModal');
