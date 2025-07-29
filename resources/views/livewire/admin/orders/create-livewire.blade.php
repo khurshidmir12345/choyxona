@@ -65,11 +65,11 @@
                                             <div class="product-img mb-2">
                                                 @if($product->image)
                                                     <img src="{{ asset($product->image) }}" alt="{{ $product->name }}"
-                                                         class="img-fluid rounded">
+                                                         class="img-fluid rounded" style="width: 100%; height: 100px; object-fit: cover;">
                                                 @else
                                                     <div
                                                         class="placeholder-img rounded bg-light d-flex align-items-center justify-content-center"
-                                                        style="height: 80px;">
+                                                        style="width: 100px; height: 80px;">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                                              fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                              class="text-muted">
@@ -80,7 +80,7 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            <h6 class="product-name mb-1 text-info">{{ $product->name }}</h6>
+                                            <h6 class="product-name mb-1 text-warning">{{ $product->name }}</h6>
                                             <div class="product-price">
                                                 <span
                                                     class="fw-bold">{{ number_format($product->sell_price, 0, ',', ' ') }}</span>
