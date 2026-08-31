@@ -1,60 +1,60 @@
 @php
-    // Kompaniya nomi har sahifada kerak — faqat kerakli ustunlar,
-    // so'rov davomida bir marta.
     $company = once(fn () => \App\Models\Company::query()
         ->select(['id', 'name', 'logo'])
         ->find(auth()->user()?->companyId()));
 @endphp
 
-<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
-    <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-        <div class="me-3">
-            <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize">
-                <span class="icon-menu"></span>
-            </button>
-        </div>
-        <div>
-            <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
-                <div class="text-primary fw-bold fs-5">Choyxona</div>
-            </a>
-            <a class="navbar-brand brand-logo-mini" href="{{ route('dashboard') }}">
-                <i class="mdi mdi-store text-primary" style="font-size: 1.6rem;"></i>
-            </a>
-        </div>
+{{--
+    Yagona yuqori panel. Ilgari bu yerda 28px li "welcome" sarlavha turardi
+    va sahifa sarlavhasi bilan birga ikkita ustma-ust panel taassurotini
+    berardi. Endi bu panel faqat xizmat elementlarini saqlaydi, sahifadagi
+    sarlavha esa yagona yirik matn bo'lib qoladi.
+--}}
+<nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-stretch flex-row">
+    <div class="navbar-brand-wrapper d-flex align-items-center">
+        <a class="navbar-brand brand-logo d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
+            <span class="brand-mark"><i class="mdi mdi-storefront-outline"></i></span>
+            <span class="brand-text">Choyxona</span>
+        </a>
+        <a class="navbar-brand brand-logo-mini" href="{{ route('dashboard') }}">
+            <span class="brand-mark"><i class="mdi mdi-storefront-outline"></i></span>
+        </a>
     </div>
 
-    <div class="navbar-menu-wrapper d-flex align-items-top">
-        <ul class="navbar-nav">
-            <li class="nav-item fw-semibold d-none d-lg-block ms-0">
-                <h1 class="welcome-text">
-                    <span class="text-black fw-bold">{{ $company?->name ?? 'Choyxona' }}</span>
-                </h1>
-                <h3 class="welcome-sub-text">{{ now()->format('d.m.Y') }} — xush kelibsiz!</h3>
-            </li>
-        </ul>
+    <div class="navbar-menu-wrapper d-flex align-items-center">
+        <button class="navbar-toggler align-self-center d-none d-lg-inline-flex" type="button"
+                data-bs-toggle="minimize" aria-label="Menyuni yig'ish">
+            <i class="mdi mdi-menu"></i>
+        </button>
 
-        <ul class="navbar-nav ms-auto align-items-center">
-            {{-- Kassada eng ko'p ishlatiladigan ikkita amal doim ko'rinib tursin --}}
-            <li class="nav-item d-none d-md-block me-2">
-                <a href="{{ route('cafe.create') }}" class="btn btn-primary btn-rounded btn-sm px-3">
-                    <i class="mdi mdi-sofa-outline me-1"></i> Zal
-                </a>
-            </li>
-            <li class="nav-item d-none d-md-block me-3">
-                <a href="{{ route('orders.create') }}" class="btn btn-inverse-primary btn-rounded btn-sm px-3">
-                    <i class="mdi mdi-cart-outline me-1"></i> Tez sotuv
-                </a>
-            </li>
+        <div class="company-chip d-none d-md-flex">
+            @if($company?->logoUrl())
+                <img src="{{ $company->logoUrl() }}" alt="" onerror="this.remove()">
+            @else
+                <span class="company-chip-mark">
+                    {{ mb_strtoupper(mb_substr($company?->name ?? 'C', 0, 1)) }}
+                </span>
+            @endif
+            <span class="company-chip-name">{{ $company?->name ?? 'Choyxona' }}</span>
+        </div>
 
-            <li class="nav-item dropdown user-dropdown">
-                <a class="nav-link d-flex align-items-center" id="UserDropdown" href="#"
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <a href="{{ route('cafe.create') }}" class="btn btn-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
+                <i class="mdi mdi-sofa-outline me-1"></i> Zal
+            </a>
+            <a href="{{ route('orders.create') }}"
+               class="btn btn-inverse-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
+                <i class="mdi mdi-cart-outline me-1"></i> Tez sotuv
+            </a>
+
+            <div class="nav-item dropdown user-dropdown list-unstyled mb-0">
+                <a class="nav-link d-flex align-items-center gap-2 p-0" id="UserDropdown" href="#"
                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold"
-                          style="width: 34px; height: 34px;">
+                    <span class="user-avatar">
                         {{ mb_strtoupper(mb_substr(auth()->user()->name ?? 'X', 0, 1)) }}
                     </span>
-                    <span class="ms-2 d-none d-lg-inline text-dark fw-semibold">{{ auth()->user()->name }}</span>
-                    <i class="mdi mdi-chevron-down ms-1 text-muted"></i>
+                    <span class="d-none d-lg-inline text-dark fw-semibold">{{ auth()->user()->name }}</span>
+                    <i class="mdi mdi-chevron-down text-muted"></i>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="UserDropdown">
                     <div class="dropdown-header text-center">
@@ -72,12 +72,12 @@
                         <i class="dropdown-item-icon mdi mdi-power text-danger me-2"></i> Chiqish
                     </a>
                 </div>
-            </li>
-        </ul>
+            </div>
 
-        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
-                data-bs-toggle="offcanvas">
-            <span class="mdi mdi-menu"></span>
-        </button>
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button"
+                    data-bs-toggle="offcanvas" aria-label="Menyu">
+                <i class="mdi mdi-menu"></i>
+            </button>
+        </div>
     </div>
 </nav>

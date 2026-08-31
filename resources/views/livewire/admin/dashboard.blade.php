@@ -95,7 +95,7 @@
             @php
                 $typeValue = $row->type?->value ?? $row->type;
                 [$typeLabel, $typeIcon] = match($typeValue) {
-                    'delivery' => ['Yetkazib berish', 'mdi-truck-delivery-outline'],
+                    'delivery' => ['Yetkazish', 'mdi-truck-delivery-outline'],
                     'takeaway' => ['Olib ketish', 'mdi-shopping-outline'],
                     'cafe' => ['Zalda', 'mdi-sofa-outline'],
                     default => ['Boshqa', 'mdi-help-circle-outline'],

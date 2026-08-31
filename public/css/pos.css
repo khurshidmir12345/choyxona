@@ -632,3 +632,350 @@ select.form-select option { color: #1e283d; }
 }
 
 .table .btn-sm i { font-size: 1rem; }
+
+/* ============================================================================
+   Yuqori panel va yon menyu — shablon ustidan qayta ishlangan qism.
+
+   Sababi: shablonning o'z navbari 97px balandlikda, ichida 28px li sarlavha
+   bor edi. Sahifaning o'z sarlavhasi bilan birga ikkita ustma-ust panel
+   ko'rinishi hosil bo'lardi. Endi yuqorida faqat xizmat paneli, sahifada esa
+   yagona sarlavha.
+   ========================================================================= */
+
+:root {
+    --pos-topbar-h: 66px;
+    --pos-sidebar-w: 244px;
+    --pos-sidebar-bg: #ffffff;
+    --pos-line: #e8ebf2;
+}
+
+/* ------------------------------------------------------------ yuqori panel */
+
+.navbar.default-layout {
+    height: var(--pos-topbar-h);
+    background: #fff;
+    border-bottom: 1px solid var(--pos-line);
+}
+
+.navbar .navbar-brand-wrapper,
+.navbar .navbar-menu-wrapper {
+    height: var(--pos-topbar-h);
+    background: transparent;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.navbar .navbar-brand-wrapper {
+    width: var(--pos-sidebar-w);
+    padding-left: 22px;
+    padding-right: 12px;
+    border-right: 1px solid var(--pos-line);
+}
+
+.navbar .navbar-menu-wrapper {
+    width: calc(100% - var(--pos-sidebar-w));
+    padding-left: 20px;
+    padding-right: 24px;
+}
+
+/* Shablonning eski sarlavhalari endi ishlatilmaydi */
+.welcome-text,
+.welcome-sub-text {
+    display: none !important;
+}
+
+.navbar .navbar-brand.brand-logo {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--pos-primary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.brand-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e283d;
+    letter-spacing: -.01em;
+}
+
+.navbar .navbar-toggler {
+    border: 0;
+    background: transparent;
+    color: #8e94a9;
+    font-size: 1.35rem;
+    padding: 0 .5rem 0 0;
+    line-height: 1;
+}
+
+.navbar .navbar-toggler:hover { color: var(--pos-primary); }
+
+.company-chip {
+    align-items: center;
+    gap: 9px;
+    padding: 5px 14px 5px 5px;
+    border: 1px solid var(--pos-line);
+    border-radius: 50px;
+    background: #fafbff;
+}
+
+.company-chip img,
+.company-chip-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.company-chip-mark {
+    background: var(--pos-tale);
+    color: #fff;
+    font-weight: 700;
+    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.company-chip-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #4a5265;
+    white-space: nowrap;
+}
+
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--pos-primary);
+    color: #fff;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Panel balandligi o'zgargani uchun ostidagi bloklar ham moslanadi */
+.sidebar,
+.main-panel {
+    min-height: calc(100vh - var(--pos-topbar-h));
+}
+
+.page-body-wrapper { padding-top: var(--pos-topbar-h); }
+
+.content-wrapper {
+    background: #f6f7fb;
+    padding: 1.75rem 1.75rem 2rem;
+}
+
+/* ---------------------------------------------------------------- yon menyu */
+
+.sidebar {
+    width: var(--pos-sidebar-w);
+    background: var(--pos-sidebar-bg);
+    border-right: 1px solid var(--pos-line);
+    padding: 10px 0 24px;
+}
+
+.main-panel { width: calc(100% - var(--pos-sidebar-w)); }
+
+.sidebar .nav { margin-bottom: 0; }
+
+/* Bo'lim ajratuvchisi: ikki tarafi chiziq, o'rtasida xira yozuv */
+.sidebar .nav .nav-item.nav-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 18px 8px;
+    padding: 0;
+    color: #b4bacb;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    border-bottom: 0;
+}
+
+.sidebar .nav .nav-item.nav-section::before,
+.sidebar .nav .nav-item.nav-section::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--pos-line);
+}
+
+.sidebar .nav .nav-item.nav-section span { flex: 0 0 auto; }
+
+/* Asosiy bandlar */
+.sidebar .nav .nav-item { margin: 1px 12px; }
+
+.sidebar .nav .nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    color: #5c6478;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+}
+
+.sidebar .nav .nav-item .nav-link:hover {
+    background: #f2f4f9;
+    color: #1e283d;
+}
+
+.sidebar .nav .nav-item .nav-link i.menu-icon {
+    font-size: 19px;
+    margin: 0;
+    color: #99a0b3;
+    width: 20px;
+    text-align: center;
+    transition: color .15s ease;
+}
+
+.sidebar .nav .nav-item .nav-link:hover i.menu-icon { color: #5c6478; }
+
+.sidebar .nav .nav-item .nav-link .menu-title {
+    font-size: .875rem;
+    line-height: 1.2;
+}
+
+.sidebar .nav .nav-item .nav-link i.menu-arrow {
+    margin-left: auto;
+    color: #c2c8d6;
+    font-size: 1rem;
+}
+
+/* Tanlangan band: chap chekkada ingichka belgi, yumshoq fon */
+.sidebar .nav .nav-item.active > .nav-link,
+.sidebar .nav .nav-item.active > .nav-link[aria-expanded="true"],
+.sidebar .nav .nav-item.active > .nav-link[aria-expanded="false"],
+.sidebar .nav .nav-item.active > .nav-link.collapsed {
+    background: rgba(31, 59, 179, .07) !important;
+    border-radius: 10px !important;
+    color: var(--pos-primary);
+    font-weight: 600;
+    font-size: .875rem;
+    position: relative;
+}
+
+.sidebar .nav .nav-item.active > .nav-link i.menu-icon,
+.sidebar .nav .nav-item.active > .nav-link .menu-title,
+.sidebar .nav .nav-item.active > .nav-link i.menu-arrow {
+    color: var(--pos-primary);
+}
+
+.sidebar .nav .nav-item.active > .nav-link .menu-title { font-size: .875rem; }
+
+/* Ichki menyu: nuqtalar o'rniga ikonkalar */
+.sidebar .nav.sub-menu {
+    background: transparent;
+    border-radius: 0;
+    padding: 2px 0 4px 16px;
+    margin: 0;
+    position: relative;
+}
+
+.sidebar .nav.sub-menu::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 4px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--pos-line);
+}
+
+.sidebar .nav.sub-menu .nav-item {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar .nav.sub-menu .nav-item::before { display: none; }
+
+.sidebar .nav.sub-menu .nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px 7px 14px;
+    margin-left: 12px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 500;
+    color: #6f7789;
+}
+
+.sidebar .nav.sub-menu .nav-item .nav-link i {
+    font-size: 15px;
+    color: #a9b0c0;
+    width: 17px;
+    text-align: center;
+}
+
+.sidebar .nav.sub-menu .nav-item .nav-link:hover {
+    background: #f2f4f9;
+    color: #1e283d;
+}
+
+.sidebar .nav.sub-menu .nav-item .nav-link:hover i { color: #5c6478; }
+
+.sidebar .nav.sub-menu .nav-item .nav-link.active {
+    background: transparent;
+    color: var(--pos-primary);
+    font-weight: 600;
+}
+
+.sidebar .nav.sub-menu .nav-item .nav-link.active i { color: var(--pos-primary); }
+
+/* ------------------------------------------------- sahifa sarlavhasi (yagona) */
+
+.pos-page-head {
+    margin-bottom: 20px;
+}
+
+.pos-page-head h3 {
+    font-size: 1.35rem;
+    letter-spacing: -.015em;
+}
+
+.pos-page-head p {
+    font-size: .825rem;
+}
+
+/* -------------------------------------------------------------- kichik ekran */
+
+@media (max-width: 991.98px) {
+    .navbar .navbar-brand-wrapper {
+        width: auto;
+        border-right: 0;
+    }
+
+    .navbar .navbar-menu-wrapper {
+        width: auto;
+        flex: 1 1 auto;
+        padding-left: 8px;
+        padding-right: 14px;
+    }
+
+    .sidebar { border-right: 0; }
+
+    .main-panel { width: 100%; }
+
+    .content-wrapper { padding: 1.25rem 1rem 1.75rem; }
+}
