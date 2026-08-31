@@ -1,171 +1,120 @@
 <div>
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <!-- Flash Messages -->
-                    @if (session()->has('message'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('message') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
+    <x-ui.page-header title="Xarajat kategoriyalari" subtitle="Chiqimlarni guruhlash">
+        <a href="{{ route('expenses.index') }}" class="btn btn-secondary" wire:navigate>
+            <x-icon name="wallet"/>
+            Xarajatlar
+        </a>
+        <button type="button" class="btn btn-primary" wire:click="createCategory">
+            <x-icon name="plus"/>
+            Kategoriya qo'shish
+        </button>
+    </x-ui.page-header>
 
-                    @if (session()->has('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title mb-0">Xarajat Kategoriyalari</h4>
-                        <button class="btn btn-primary" wire:click="createCategory">
-                            <i class="mdi mdi-plus"></i> Yangi Kategoriya
-                        </button>
-                    </div>
-
-                    <!-- Search -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Kategoriya nomi yoki tavsifini qidiring..." 
-                                       wire:model.live="search">
-                                <span class="input-group-text">
-                                    <i class="mdi mdi-magnify"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Categories Table -->
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nomi</th>
-                                    <th>Tavsif</th>
-                                    <th>Holat</th>
-                                    <th>Xarajatlar soni</th>
-                                    <th>Yaratilgan</th>
-                                    <th>Amallar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($categories as $category)
-                                    <tr>
-                                        <td>{{ $category->id }}</td>
-                                        <td>
-                                            <strong>{{ $category->name }}</strong>
-                                        </td>
-                                        <td>{{ $category->description ?? '-' }}</td>
-                                        <td>
-                                            @if($category->is_active)
-                                                <span class="badge bg-success">Faol</span>
-                                            @else
-                                                <span class="badge bg-secondary">Nofaol</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $category->expenses()->count() }}</span>
-                                        </td>
-                                        <td>{{ $category->created_at }}</td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-sm btn-outline-primary" 
-                                                        wire:click="editCategory({{ $category->id }})"
-                                                        title="Tahrirlash">
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-{{ $category->is_active ? 'warning' : 'success' }}" 
-                                                        wire:click="toggleStatus({{ $category->id }})"
-                                                        title="{{ $category->is_active ? 'Nofaol qilish' : 'Faol qilish' }}">
-                                                    <i class="mdi mdi-{{ $category->is_active ? 'eye-off' : 'eye' }}"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger" 
-                                                        wire:click="deleteCategory({{ $category->id }})"
-                                                        wire:confirm="Kategoriyani o'chirishni xohlaysizmi?"
-                                                        title="O'chirish">
-                                                    <i class="mdi mdi-delete"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="mdi mdi-folder-open" style="font-size: 3rem;"></i>
-                                                <p class="mt-2">Hech qanday kategoriya topilmadi</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-center">
-                        {{ $categories->links() }}
-                    </div>
-                </div>
-            </div>
+    <div class="card mb-4">
+        <div class="p-4">
+            <label class="relative block max-w-md">
+                <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"/>
+                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
+                       placeholder="Nomi yoki izohi bo'yicha qidirish…">
+            </label>
         </div>
     </div>
 
-    <!-- Modal -->
-    @if($showModal)
-    <div class="modal fade show" style="display: block;" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        {{ $editingCategory ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya' }}
-                    </h5>
-                    <button type="button" class="btn-close" wire:click="closeModal"></button>
-                </div>
-                <div class="modal-body">
-                    <form wire:submit.prevent="saveCategory">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nomi *</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" wire:model="name" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+    <div class="card">
+        @if($categories->isEmpty())
+            <x-ui.empty icon="folder" title="Kategoriya yo'q"
+                        description="Xarajatlarni turlarga ajratish uchun kategoriya qo'shing."/>
+        @else
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="w-12"></th>
+                        <th>Nomi</th>
+                        <th>Izoh</th>
+                        <th class="text-center">Xarajatlar</th>
+                        <th>Holati</th>
+                        <th class="text-right">Amallar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($categories as $category)
+                        <tr wire:key="exp-cat-{{ $category->id }}">
+                            <td>
+                                <span class="block h-6 w-6 rounded-md"
+                                      style="background-color: {{ $category->color ?: '#3b82f6' }}"></span>
+                            </td>
+                            <td class="font-semibold text-ink-900">{{ $category->name }}</td>
+                            <td class="max-w-xs truncate text-ink-500">{{ $category->description ?: '—' }}</td>
+                            <td class="text-center">
+                                <span class="badge badge-gray tabular">{{ $category->expenses_count }}</span>
+                            </td>
+                            <td>
+                                <button type="button" wire:click="toggleStatus({{ $category->id }})"
+                                        class="badge {{ $category->is_active ? 'badge-green' : 'badge-gray' }}">
+                                    {{ $category->is_active ? 'Faol' : 'Nofaol' }}
+                                </button>
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button" class="btn btn-sm btn-ghost"
+                                            wire:click="edit({{ $category->id }})" title="Tahrirlash">
+                                        <x-icon name="edit"/>
+                                    </button>
+                                    <x-ui.confirm :action="'delete('.$category->id.')'"/>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Tavsif</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                      id="description" wire:model="description" rows="3"></textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </form>
+            <div class="border-t border-ink-200/80 px-4 py-3">
+                {{ $categories->links() }}
+            </div>
+        @endif
+    </div>
+
+    @if($showForm)
+        <x-ui.modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" close="closeForm">
+            <form wire:submit="save" class="space-y-4 p-5">
+                <label class="block">
+                    <span class="label">Nomi</span>
+                    <input type="text" wire:model="name" class="input @error('name') input-error @enderror"
+                           placeholder="Masalan: Kommunal to'lovlar" autofocus>
+                    @error('name') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <label class="block">
+                    <span class="label">Izoh</span>
+                    <textarea wire:model="description" rows="3" class="textarea" placeholder="Ixtiyoriy"></textarea>
+                    @error('description') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <div>
+                    <span class="label">Rang</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        @foreach(['#3b82f6', '#12866f', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#64748b'] as $swatch)
+                            <button type="button" wire:click="$set('color', '{{ $swatch }}')"
+                                    class="h-8 w-8 rounded-lg ring-offset-2 transition
+                                           {{ $color === $swatch ? 'ring-2 ring-ink-900' : '' }}"
+                                    style="background-color: {{ $swatch }}"
+                                    aria-label="{{ $swatch }}"></button>
+                        @endforeach
+                        <input type="color" wire:model="color" class="h-8 w-12 cursor-pointer rounded border-ink-200">
+                    </div>
+                    @error('color') <span class="field-error">{{ $message }}</span> @enderror
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="closeModal">Bekor</button>
-                    <button type="button" class="btn btn-primary" wire:click="saveCategory">
-                        {{ $editingCategory ? 'Yangilash' : 'Yaratish' }}
+
+                <div class="flex justify-end gap-2 border-t border-ink-200/80 pt-4">
+                    <button type="button" class="btn btn-secondary" wire:click="closeForm">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">
+                        <x-icon name="check"/>
+                        Saqlash
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal-backdrop fade show"></div>
+            </form>
+        </x-ui.modal>
     @endif
-
-    <style>
-        .modal-backdrop {
-            z-index: 1040;
-        }
-        
-        .modal {
-            z-index: 1050;
-        }
-    </style>
 </div>

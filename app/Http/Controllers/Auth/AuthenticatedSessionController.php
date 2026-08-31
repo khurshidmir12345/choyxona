@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\User;
-use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,19 +27,26 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $user = User::query()->with('role')->find(auth()->id());
-        $role = $user->role ?? null;
+        /*
+         * Ilgari bu yerda "role->name === 'director'" sharti bor edi.
+         * roles jadvali bo'sh bo'lgani uchun shart hech qachon bajarilmasdi
+         * va hech kim tizimga kira olmasdi. Endi mezon oddiy va aniq:
+         * hisob biror kompaniyaga bog'langan bo'lishi kerak.
+         */
+        $user = $request->user();
 
-        if (  $user->phone_verified_at === null || !$user->role || $user->role->name !== 'director') {
-            Auth::logout();
+        if (! $user->companyId()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+
             throw ValidationException::withMessages([
-                'phone_number' => 'Sizda siystemaga kirish ruxsati mavjud emas !',
+                'phone_number' => 'Hisobingiz hech qaysi choyxonaga bog\'lanmagan. Administratorga murojaat qiling.',
             ]);
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
@@ -55,6 +60,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }

@@ -1,43 +1,53 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900">Xush kelibsiz</h1>
+    <p class="mt-1.5 text-sm text-ink-500">Davom etish uchun tizimga kiring.</p>
 
-    <form method="POST" action="{{ route('login') }}">
+    @if (session('status'))
+        <div class="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" class="mt-7 space-y-4">
         @csrf
 
-        <!-- Phone Number -->
-        <div>
-            <x-input-label for="phone_number" :value="__('Phone Number')" />
-            <x-text-input id="phone_number" class="block mt-1 w-full" type="text" name="phone_number" :value="old('phone_number')" required autofocus autocomplete="username" oninput="inputmask(this)" />
-            <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
-        </div>
+        <label class="block">
+            <span class="label">Telefon raqam</span>
+            <div class="flex rounded-lg shadow-sm">
+                <span class="inline-flex items-center rounded-l-lg border border-r-0 border-ink-200 bg-ink-100 px-3 text-sm font-semibold text-ink-500">
+                    +998
+                </span>
+                <input type="tel" name="phone_number" value="{{ old('phone_number') }}" required autofocus
+                       inputmode="numeric" autocomplete="tel" placeholder="90 123 45 67"
+                       class="input tabular rounded-l-none @error('phone_number') input-error @enderror">
+            </div>
+            @error('phone_number') <span class="field-error">{{ $message }}</span> @enderror
+        </label>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <label class="block" x-data="{ show: false }">
+            <span class="label">Parol</span>
+            <div class="relative">
+                <input :type="show ? 'text' : 'password'" name="password" required autocomplete="current-password"
+                       class="input pr-11 @error('password') input-error @enderror" placeholder="••••••••">
+                <button type="button" @click="show = !show"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-ink-400 hover:bg-ink-100"
+                        aria-label="Parolni ko'rsatish">
+                    <x-icon name="user" class="h-4 w-4" x-show="!show"/>
+                    <x-icon name="lock" class="h-4 w-4" x-show="show" x-cloak/>
+                </button>
+            </div>
+            @error('password') <span class="field-error">{{ $message }}</span> @enderror
+        </label>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
+        <label class="flex items-center gap-2">
+            <input type="checkbox" name="remember"
+                   class="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
+            <span class="text-sm text-ink-600">Meni eslab qol</span>
+        </label>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-full">
+            Kirish
+            <x-icon name="chevron-right"/>
+        </button>
     </form>
-
-    <script>
-        function inputmask(y) {
-            var x = y.value.replace(/\D/g, '');
-            if (x.length > 9) x = x.slice(0, 9);
-
-            var a = x.match(/(\d{0,2})(\d{0,3})(\d{0,2})(\d{0,2})/);
-            y.value = !a[2] ? a[1] : '(' + a[1] + ') ' + a[2] + (a[3] ? '-' + a[3] + (a[4] ? '-' + a[4] : '') : '');
-        }
-    </script>
 </x-guest-layout>

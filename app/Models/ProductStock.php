@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\ProductStockType;
+use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\ProductStockFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductStock extends Model
 {
     /** @use HasFactory<ProductStockFactory> */
-    use HasFactory;
+    use HasFactory, BelongsToCompany;
 
     protected $table = 'product_stocks';
 
@@ -26,17 +27,20 @@ class ProductStock extends Model
     {
         return [
             'quantity' => 'integer',
-            'type' => ProductStockType::class
+            'type' => ProductStockType::class,
         ];
+    }
+
+    /** Zaxiraga qanday ta'sir qiladi: kirim +, chiqim -. */
+    public function stockDelta(): int
+    {
+        return $this->type === ProductStockType::Add
+            ? $this->quantity
+            : -$this->quantity;
     }
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class, 'company_id');
     }
 }

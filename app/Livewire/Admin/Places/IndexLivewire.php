@@ -2,103 +2,124 @@
 
 namespace App\Livewire\Admin\Places;
 
+use App\Casts\PlaceStatusEnum;
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Place;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class IndexLivewire extends Component
 {
-    use WithPagination;
-    protected $paginationTheme = 'bootstrap';
+    use WithPagination, WithCompany;
 
-    public $name, $capacity, $company_id;
+    public string $search = '';
 
-    public $search = '';
+    public bool $showForm = false;
 
-    public $place_id;
+    public ?int $placeId = null;
 
-    public function mount()
+    public string $name = '';
+
+    public $capacity = 4;
+
+    public function updatedSearch(): void
     {
-        $this->company_id = auth()->user()->getCompany()->id;
+        $this->resetPage();
     }
 
-    public function hydrate()
+    public function createPlace(): void
     {
-        // Har safar component yuklanganda company_id ni o'rnatamiz
-        if (!$this->company_id) {
-            $this->company_id = auth()->user()->getCompany()->id;
+        $this->reset(['placeId', 'name']);
+        $this->capacity = 4;
+        $this->resetValidation();
+        $this->showForm = true;
+    }
+
+    public function edit(int $id): void
+    {
+        $place = Place::query()
+            ->select(['id', 'name', 'capacity'])
+            ->forCompany($this->companyId())
+            ->find($id);
+
+        if (! $place) {
+            return;
         }
-    }
 
-    public function create()
-    {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'capacity' => 'nullable|integer',
-        ]);
-
-        // Company_id ni tekshiramiz va o'rnatamiz
-        if (!$this->company_id) {
-            $this->company_id = auth()->user()->getCompany()->id;
-        }
-
-        Place::query()->create([
-            'name' => $this->name,
-            'capacity' => $this->capacity,
-            'company_id' => $this->company_id,
-        ]);
-
-        $this->dispatch('closeModal');
-        $this->resetInputFields();
-    }
-
-    private function resetInputFields()
-    {
-        $this->name = '';
-        $this->capacity = '';
-        $this->company_id = auth()->user()->getCompany()->id;
-        $this->place_id = null;
-    }
-
-    public function edit($id)
-    {
-        $place = Place::query()->findOrFail($id);
-        $this->place_id = $place->id;
-        $this->name = $place->name;
+        $this->placeId = $place->id;
+        $this->name = (string) $place->name;
         $this->capacity = $place->capacity;
-        $this->company_id = $place->company_id;
+        $this->resetValidation();
+        $this->showForm = true;
     }
 
-    public function update()
+    public function save(): void
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'capacity' => 'required|string|max:255',
+        $data = $this->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'capacity' => ['required', 'integer', 'min:1', 'max:500'],
+        ], [
+            'name.required' => 'Joy nomini kiriting.',
+            'capacity.required' => 'Sig\'imni kiriting.',
+            'capacity.integer' => 'Sig\'im raqam bo\'lishi kerak.',
         ]);
 
-        $place = Place::query()->findOrFail($this->place_id);
-        $place->update([
-            'name' => $this->name,
-            'capacity' => $this->capacity,
-        ]);
+        if ($this->placeId) {
+            Place::query()
+                ->forCompany($this->companyId())
+                ->whereKey($this->placeId)
+                ->update(['name' => $data['name'], 'capacity' => $data['capacity']]);
+        } else {
+            Place::create([
+                'name' => $data['name'],
+                'capacity' => $data['capacity'],
+                'company_id' => $this->companyId(),
+                'status' => PlaceStatusEnum::Empty,
+            ]);
+        }
 
-        $this->resetInputFields();
-        $this->dispatch('closeModal');
+        $this->closeForm();
+        $this->dispatch('toast', type: 'success', message: 'Joy saqlandi.');
     }
 
-    public function delete($id)
+    public function closeForm(): void
     {
-        Place::query()->findOrFail($id)->delete();
+        $this->showForm = false;
+        $this->reset(['placeId', 'name']);
+        $this->capacity = 4;
+        $this->resetValidation();
+    }
+
+    /** Band stolni o'chirib bo'lmaydi: ochiq hisob yo'qolib qoladi. */
+    public function delete(int $id): void
+    {
+        $place = Place::query()
+            ->select(['id', 'status'])
+            ->forCompany($this->companyId())
+            ->find($id);
+
+        if (! $place) {
+            return;
+        }
+
+        if ($place->isBusy()) {
+            $this->dispatch('toast', type: 'error', message: 'Stol band. Avval hisobni yoping.');
+
+            return;
+        }
+
+        $place->delete();
+        $this->dispatch('toast', type: 'success', message: 'Joy o\'chirildi.');
     }
 
     public function render()
     {
-        $places = Place::query()->with('company')
-            ->when($this->search, function ($query) {
-                return $query->where('name', 'like', '%' . $this->search . '%');
-            })
-            ->where('company_id', auth()->user()->getCompany()->id)
-            ->orderByDesc('id')->paginate(15);
+        $places = Place::query()
+            ->select(['id', 'name', 'status', 'capacity'])
+            ->forCompany($this->companyId())
+            ->when($this->search, fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
+            ->orderBy('name')
+            ->paginate(15);
 
         return view('livewire.admin.places.index-livewire', compact('places'));
     }

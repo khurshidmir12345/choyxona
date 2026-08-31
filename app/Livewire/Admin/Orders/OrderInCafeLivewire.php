@@ -2,297 +2,352 @@
 
 namespace App\Livewire\Admin\Orders;
 
-use App\Models\Place;
-use App\Models\Order;
-use App\Models\Product;
 use App\Casts\OrderStatusEnum;
-use App\Casts\OrderTypeEnum;
+use App\Casts\PlaceStatusEnum;
+use App\Livewire\Concerns\WithCompany;
+use App\Models\Order;
+use App\Models\Place;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Services\OrderService;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
+/**
+ * Zal POS: stollar taxtasi + tanlangan stol uchun buyurtma ekrani.
+ *
+ * Bu yerda birorta Eloquent model public xususiyat sifatida saqlanmaydi.
+ * Livewire har bir bosishda public xususiyatlarni to'liq serializatsiya
+ * qiladi — ilgari 100 ta mahsulot va ochiq buyurtma har bosishda
+ * brauzerga borib kelardi.
+ */
 class OrderInCafeLivewire extends Component
 {
-    public $place_id;
-    public $showModal = false;
-    public $selectedPlace = null;
-    public $currentOrder = null;
-    public $showOrderModal = false;
-    public $selectedProducts = [];
-    public $quantities = [];
-    public $discount = 0;
-    public $selectedCategory = null;
-    public $givenAmount = 0;
-    public $changeAmount = 0;
+    use WithCompany;
 
-    public function startOrder($place_id)
+    public ?int $placeId = null;
+
+    public ?int $activeOrderId = null;
+
+    /** @var array<int, array{product_id:int,name:string,price:int,discount:int,quantity:int}> */
+    public array $cart = [];
+
+    public ?int $selectedCategory = null;
+
+    public string $search = '';
+
+    public int $discount = 0;
+
+    public $givenAmount = null;
+
+    public function mount(?int $place_id = null): void
     {
-        $this->place_id = $place_id;
-        $this->selectedPlace = Place::query()->find($place_id);
-        $this->showModal = true;
+        if ($place_id) {
+            $this->openTable($place_id);
+        }
     }
 
-    public function updateOrder($place_id)
+    // ---------------------------------------------------------------- stollar
+
+    #[Computed]
+    public function places(): Collection
     {
-        $this->place_id = $place_id;
-        $this->selectedPlace = Place::query()->find($place_id);
-        
-        // Find existing open order for this place
-        $this->currentOrder = Order::where('place_id', $place_id)
-            ->where('status', OrderStatusEnum::Opened)
-            ->where('company_id', auth()->user()->getCompany()->id)
+        $places = Place::query()
+            ->select(['id', 'name', 'status', 'capacity'])
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->get();
+
+        // Band stollar uchun joriy hisob — bitta so'rovda, stol boshiga emas.
+        $openOrders = Order::query()
+            ->select(['id', 'place_id', 'amount', 'created_at'])
+            ->forCompany($this->companyId())
+            ->opened()
+            ->whereNotNull('place_id')
+            ->get()
+            ->keyBy('place_id');
+
+        return $places->map(function (Place $place) use ($openOrders) {
+            $order = $openOrders->get($place->id);
+            $place->setAttribute('open_order_amount', $order?->amount);
+            $place->setAttribute('open_order_since', $order?->created_at);
+
+            return $place;
+        });
+    }
+
+    #[Computed]
+    public function categories(): Collection
+    {
+        return ProductCategory::query()
+            ->select(['id', 'name'])
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function products(): Collection
+    {
+        return Product::query()
+            ->select(Product::CARD_COLUMNS)
+            ->forCompany($this->companyId())
+            ->when($this->selectedCategory, fn ($q) => $q->where('category_id', $this->selectedCategory))
+            ->search($this->search)
+            ->orderBy('name')
+            ->limit(200)
+            ->get();
+    }
+
+    #[Computed]
+    public function activePlace(): ?Place
+    {
+        if (! $this->placeId) {
+            return null;
+        }
+
+        return Place::query()
+            ->select(['id', 'name', 'status', 'capacity'])
+            ->forCompany($this->companyId())
+            ->find($this->placeId);
+    }
+
+    // ---------------------------------------------------------------- amallar
+
+    /**
+     * Stolni ochadi. Yangi stol uchun buyurtma darhol yaratilmaydi —
+     * u birinchi saqlashda paydo bo'ladi, shunda tasodifiy bosishdan
+     * bo'sh buyurtmalar to'planmaydi.
+     */
+    public function openTable(int $placeId): void
+    {
+        $place = Place::query()
+            ->select(['id', 'name', 'status', 'capacity'])
+            ->forCompany($this->companyId())
+            ->find($placeId);
+
+        if (! $place) {
+            return;
+        }
+
+        $this->resetOrderState();
+        $this->placeId = $place->id;
+
+        $order = Order::query()
+            ->select(['id', 'discount'])
+            ->forCompany($this->companyId())
+            ->where('place_id', $place->id)
+            ->opened()
+            ->latest('id')
             ->first();
-        
-        if ($this->currentOrder) {
-            // Load existing order details
-            $orderDetails = $this->currentOrder->orderDetails()->with('product')->get();
-            $this->selectedProducts = [];
-            
-            foreach ($orderDetails as $detail) {
-                $this->selectedProducts[$detail->product_id] = [
-                    'id' => $detail->product_id,
-                    'name' => $detail->product->name,
-                    'price' => $detail->price,
-                    'image' => $detail->product->image,
-                    'quantity' => $detail->quantity
-                ];
-            }
-            
-            $this->showOrderModal = true;
-        } else {
-            // No existing order, create new one
-            $this->showModal = true;
+
+        if ($order) {
+            $this->activeOrderId = $order->id;
+            $this->discount = (int) $order->discount;
+            $this->cart = $this->loadCart($order->id);
         }
     }
 
-    public function createOrder()
+    public function closePanel(): void
     {
-        if (!$this->selectedPlace) {
+        $this->resetOrderState();
+        $this->placeId = null;
+    }
+
+    public function addProduct(int $productId): void
+    {
+        if (isset($this->cart[$productId])) {
+            $this->cart[$productId]['quantity']++;
+
             return;
         }
 
-        // Create new order
-        $this->currentOrder = Order::create([
-            'company_id' => auth()->user()->getCompany()->id,
-            'place_id' => $this->selectedPlace->id,
-            'user_id' => auth()->user()->id,
-            'type' => OrderTypeEnum::Cafe,
-            'status' => OrderStatusEnum::Opened,
-            'amount' => 0,
-            'total_amount' => 0,
-            'discount' => 0,
-        ]);
+        $product = Product::query()
+            ->select(['id', 'name', 'sell_price', 'discount'])
+            ->forCompany($this->companyId())
+            ->find($productId);
 
-        // Update place status to busy
-        $this->selectedPlace->update(['status' => \App\Casts\PlaceStatusEnum::Busy]);
-
-        $this->showModal = false;
-        $this->showOrderModal = true;
-    }
-
-    public function addProduct($productId)
-    {
-        $product = Product::find($productId);
-        if (!$product) return;
-
-        if (!isset($this->selectedProducts[$productId])) {
-            $this->selectedProducts[$productId] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->sell_price, // Single item price
-                'image' => $product->image,
-                'quantity' => 1
-            ];
-        } else {
-            $this->selectedProducts[$productId]['quantity']++;
-        }
-
-        $this->updateOrderTotal();
-    }
-
-    public function removeProduct($productId)
-    {
-        if (isset($this->selectedProducts[$productId])) {
-            unset($this->selectedProducts[$productId]);
-            $this->updateOrderTotal();
-        }
-    }
-
-    public function updateQuantity($productId, $quantity)
-    {
-        if (isset($this->selectedProducts[$productId])) {
-            if ($quantity <= 0) {
-                $this->removeProduct($productId);
-            } else {
-                $this->selectedProducts[$productId]['quantity'] = $quantity;
-                $this->updateOrderTotal();
-            }
-        }
-    }
-
-    public function updatedDiscount()
-    {
-        $this->updateOrderTotal();
-    }
-
-    public function updatedGivenAmount()
-    {
-        $this->calculateChange();
-    }
-
-    private function updateOrderTotal()
-    {
-        $total = 0;
-        foreach ($this->selectedProducts as $product) {
-            $total += $product['price'] * $product['quantity']; // price is single item price
-        }
-
-        if ($this->currentOrder) {
-            $discountAmount = ($total * $this->discount) / 100;
-            $finalTotal = $total - $discountAmount;
-            
-            $this->currentOrder->update([
-                'amount' => $total,
-                'total_amount' => $finalTotal,
-                'discount' => $this->discount
-            ]);
-        }
-
-        // Calculate change amount
-        $this->calculateChange();
-    }
-
-    public function calculateChange()
-    {
-        $total = 0;
-        foreach ($this->selectedProducts as $product) {
-            $total += $product['price'] * $product['quantity'];
-        }
-        
-        $discountAmount = ($total * $this->discount) / 100;
-        $finalTotal = $total - $discountAmount;
-        
-        $this->changeAmount = (int)$this->givenAmount - (int)$finalTotal;
-        if ($this->changeAmount < 0) {
-            $this->changeAmount = 0;
-        }
-    }
-
-    public function saveOrder()
-    {
-        if (!$this->currentOrder || empty($this->selectedProducts)) {
+        if (! $product) {
             return;
         }
 
-        // Clear existing order details
-        $this->currentOrder->orderDetails()->delete();
-
-        // Save new order details
-        foreach ($this->selectedProducts as $product) {
-            $this->currentOrder->orderDetails()->create([
-                'product_id' => $product['id'],
-                'worker_id' => auth()->user()->id,
-                'quantity' => $product['quantity'],
-                'price' => $product['price'], // Single item price
-                'total_amount' => $product['price'] * $product['quantity'], // price * quantity
-                'discount' => 0,
-            ]);
-        }
-
-        $orderId = $this->currentOrder->id;
-        $this->closeOrderModal();
-        $this->dispatch('orderCreated', orderId: $orderId);
+        $this->cart[$productId] = [
+            'product_id' => $product->id,
+            'name' => $product->name,
+            'price' => (int) $product->sell_price,
+            'discount' => (int) $product->discount,
+            'quantity' => 1,
+        ];
     }
 
-    public function closeOrder()
+    public function updateQuantity(int $productId, int $quantity): void
     {
-        if (!$this->currentOrder) {
+        if (! isset($this->cart[$productId])) {
             return;
         }
 
-        $orderId = $this->currentOrder->id;
-        
-        // Save order details before closing
-        if (!empty($this->selectedProducts)) {
-            // Clear existing order details
-            $this->currentOrder->orderDetails()->delete();
-            
-            // Save new order details
-            foreach ($this->selectedProducts as $product) {
-                $this->currentOrder->orderDetails()->create([
-                    'product_id' => $product['id'],
-                    'worker_id' => auth()->user()->id,
-                    'quantity' => $product['quantity'],
-                    'price' => $product['price'], // Single item price
-                    'total_amount' => $product['price'] * $product['quantity'], // price * quantity
-                    'discount' => 0,
-                ]);
-            }
-        }
-        
-        $this->currentOrder->update(['status' => OrderStatusEnum::Done]);
-        
-        // Update place status to empty
-        if ($this->selectedPlace) {
-            $this->selectedPlace->update(['status' => \App\Casts\PlaceStatusEnum::Empty->value]);
+        if ($quantity < 1) {
+            $this->removeProduct($productId);
+
+            return;
         }
 
-        $this->closeOrderModal();
-        
-        // Redirect to print page
-        return redirect()->route('admin.orders.print', $orderId);
+        $this->cart[$productId]['quantity'] = $quantity;
     }
 
-    public function closeOrderModal()
+    public function removeProduct(int $productId): void
     {
-        $this->showOrderModal = false;
-        $this->currentOrder = null;
-        $this->selectedProducts = [];
-        $this->selectedPlace = null;
-        $this->place_id = null;
-        $this->givenAmount = 0;
-        $this->changeAmount = 0;
+        unset($this->cart[$productId]);
+    }
+
+    public function updatedDiscount(): void
+    {
+        $this->discount = max(0, min(100, (int) $this->discount));
+    }
+
+    public function saveOrder(OrderService $orders): void
+    {
+        $order = $this->ensureOrder($orders);
+
+        if (! $order) {
+            return;
+        }
+
+        $orders->syncItems($order, array_values($this->cart), $this->discount, (int) auth()->id());
+        $this->dispatch('toast', type: 'success', message: 'Buyurtma saqlandi.');
+    }
+
+    public function closeOrder(OrderService $orders)
+    {
+        $order = $this->ensureOrder($orders);
+
+        if (! $order) {
+            return null;
+        }
+
+        $orders->closeTableOrder($order, array_values($this->cart), $this->discount, (int) auth()->id());
+
+        $this->resetOrderState();
+        $this->placeId = null;
+
+        return redirect()->route('admin.orders.print', $order->id);
+    }
+
+    /** Stolni bo'shatadi: ochiq hisob bekor qilinadi. */
+    public function clearTable(OrderService $orders): void
+    {
+        if ($this->activeOrderId) {
+            $order = Order::query()
+                ->forCompany($this->companyId())
+                ->find($this->activeOrderId);
+
+            if ($order) {
+                $orders->cancelTableOrder($order);
+            }
+        } elseif ($this->placeId) {
+            Place::query()
+                ->forCompany($this->companyId())
+                ->whereKey($this->placeId)
+                ->update(['status' => PlaceStatusEnum::Empty->value]);
+        }
+
+        $this->resetOrderState();
+        $this->placeId = null;
+        $this->dispatch('toast', type: 'success', message: 'Stol bo\'shatildi.');
+    }
+
+    // ---------------------------------------------------------------- summalar
+
+    #[Computed]
+    public function subtotal(): int
+    {
+        $service = app(OrderService::class);
+
+        return array_reduce(
+            $this->cart,
+            fn (int $carry, array $item) => $carry + $service->lineTotal($item),
+            0
+        );
+    }
+
+    #[Computed]
+    public function total(): int
+    {
+        return app(OrderService::class)->applyDiscount($this->subtotal, $this->discount);
+    }
+
+    #[Computed]
+    public function change(): int
+    {
+        return max(0, (int) $this->givenAmount - $this->total);
+    }
+
+    // ---------------------------------------------------------------- ichki
+
+    /** Ochiq buyurtmani topadi, bo'lmasa shu payt yaratadi. */
+    private function ensureOrder(OrderService $orders): ?Order
+    {
+        if ($this->cart === [] || ! $this->placeId) {
+            $this->dispatch('toast', type: 'error', message: 'Avval mahsulot tanlang.');
+
+            return null;
+        }
+
+        $order = $this->activeOrderId
+            ? Order::query()->forCompany($this->companyId())->find($this->activeOrderId)
+            : null;
+
+        if ($order) {
+            return $order;
+        }
+
+        $place = $this->activePlace;
+
+        if (! $place) {
+            return null;
+        }
+
+        $order = $orders->openTableOrder($place, (int) $this->companyId(), (int) auth()->id());
+        $this->activeOrderId = $order->id;
+        unset($this->activePlace, $this->places);
+
+        return $order;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function loadCart(int $orderId): array
+    {
+        return Order::query()
+            ->findOrFail($orderId)
+            ->orderDetails()
+            ->select(['order_details.product_id', 'order_details.price', 'order_details.discount', 'order_details.quantity'])
+            ->with(['product:id,name'])
+            ->get()
+            ->mapWithKeys(fn ($detail) => [
+                (int) $detail->product_id => [
+                    'product_id' => (int) $detail->product_id,
+                    'name' => $detail->product?->name ?? 'Nomsiz',
+                    'price' => (int) $detail->price,
+                    'discount' => (int) $detail->discount,
+                    'quantity' => (int) $detail->quantity,
+                ],
+            ])
+            ->all();
+    }
+
+    private function resetOrderState(): void
+    {
+        $this->activeOrderId = null;
+        $this->cart = [];
         $this->discount = 0;
-    }
-
-    public function cancelOrder()
-    {
-        $this->place_id = '';
-        $this->showModal = false;
-        $this->selectedPlace = null;
-    }
-
-    public function clearPlace()
-    {
-        if (!$this->currentOrder || !$this->selectedPlace) {
-            return;
-        }
-
-        // Delete the order and its details
-        $this->currentOrder->orderDetails()->delete();
-        $this->currentOrder->delete();
-
-        // Update place status to empty
-        $this->selectedPlace->update(['status' => \App\Casts\PlaceStatusEnum::Empty->value]);
-
-        // Close modal and reset
-        $this->closeOrderModal();
-        
-        // Show success message
-        session()->flash('message', 'Joy muvaffaqiyatli bo\'shatildi!');
+        $this->givenAmount = null;
+        $this->search = '';
+        $this->selectedCategory = null;
     }
 
     public function render()
     {
-        $places = Place::query()->where('company_id', auth()->user()->getCompany()->id)->get();
-        $categories = \App\Models\ProductCategory::query()->where('company_id', auth()->user()->getCompany()->id)->get();
-        
-        $productsQuery = Product::query()->where('company_id', auth()->user()->getCompany()->id);
-        
-        if ($this->selectedCategory) {
-            $productsQuery->where('category_id', $this->selectedCategory);
-        }
-        
-        $products = $productsQuery->get();
-        
-        return view('livewire.admin.orders.order-in-cafe-livewire', compact('places', 'products', 'categories'));
+        return view('livewire.admin.orders.order-in-cafe-livewire');
     }
 }

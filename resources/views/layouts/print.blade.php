@@ -3,221 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chek - {{ $order->company->name ?? 'Choyxona' }}</title>
-    
-    <!-- Print-optimized CSS -->
+    <title>{{ $title ?? 'Chek' }}</title>
     <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Chek 58/80 mm termoprinter uchun. Tashqi CSS yuklanmaydi —
+           kassa kompyuterida internet bo'lmasligi mumkin. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            line-height: 1.2;
-            color: #000;
-            background: #fff;
-        }
-
-        /* Receipt container */
-        .receipt {
-            max-width: 280px;
-            margin: 0 auto;
-            padding: 8px;
-            border: 1px solid #ccc;
-        }
-
-        /* Header styles */
-        .receipt-header {
-            text-align: center;
-            border-bottom: 1px dashed #ccc;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-        }
-
-        .company-name {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-
-        .receipt-title {
+            font-family: 'Courier New', ui-monospace, monospace;
             font-size: 12px;
-            margin-bottom: 3px;
+            line-height: 1.35;
+            color: #000;
+            background: #eceef2;
+            padding: 24px 12px;
         }
 
-        .order-info {
-            font-size: 9px;
-            color: #666;
-            line-height: 1.1;
+        .sheet {
+            width: 302px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
         }
 
-        /* Items table */
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 8px 0;
-            font-size: 9px;
+        .center { text-align: center; }
+        .right  { text-align: right; }
+        .bold   { font-weight: 700; }
+        .muted  { color: #555; }
+        .small  { font-size: 11px; }
+
+        .brand { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+
+        .rule {
+            border: 0;
+            border-top: 1px dashed #999;
+            margin: 10px 0;
         }
 
-        .items-table th,
-        .items-table td {
-            padding: 2px 1px;
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 3px 0; vertical-align: top; }
+        thead th {
+            font-size: 11px;
             text-align: left;
-            border-bottom: 1px solid #eee;
-            vertical-align: top;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
         }
+        tbody td { border-bottom: 1px dotted #ccc; }
 
-        .items-table th {
-            font-weight: bold;
-            border-bottom: 1px solid #ccc;
-            font-size: 9px;
-        }
-
-        .item-name {
-            width: 45%;
-            word-wrap: break-word;
-            word-break: break-word;
-        }
-
-        .item-price-qty {
-            width: 35%;
-            text-align: center;
-        }
-
-        .item-total {
-            width: 20%;
-            text-align: right;
-            white-space: nowrap;
-        }
-
-
-
-        /* Total section */
-        .total-section {
-            border-top: 1px dashed #ccc;
-            padding-top: 8px;
-            margin-top: 8px;
-            font-size: 9px;
-        }
-
-        .total-row {
+        .totals { margin-top: 10px; }
+        .totals div {
             display: flex;
             justify-content: space-between;
-            margin: 2px 0;
-            align-items: center;
+            padding: 2px 0;
         }
-
-        .total-amount {
-            font-size: 11px;
-            font-weight: bold;
+        .totals .grand {
             border-top: 1px solid #000;
-            padding-top: 3px;
+            margin-top: 6px;
+            padding-top: 6px;
+            font-size: 15px;
+            font-weight: 700;
         }
 
-        /* Footer */
-        .receipt-footer {
-            text-align: center;
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px dashed #ccc;
-            font-size: 8px;
-            color: #666;
-            line-height: 1.1;
+        .toolbar {
+            width: 302px;
+            margin: 0 auto 14px;
+            display: flex;
+            gap: 8px;
         }
-
-        /* Print button (hidden when printing) */
-        .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Hide print button when printing */
-        @media print {
-            .print-button {
-                display: none;
-            }
-            
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            
-            .receipt {
-                border: none;
-                max-width: none;
-            }
-        }
-
-        /* Discount styling */
-        .discount {
-            color: #dc3545;
-            font-size: 8px;
+        .toolbar button, .toolbar a {
+            flex: 1;
             display: block;
-            margin-top: 1px;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 8px;
+            font: inherit;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
         }
+        .toolbar .go   { background: #12866f; color: #fff; }
+        .toolbar .back { background: #fff; color: #384153; border: 1px solid #d5dae3; }
 
-        /* Worker info */
-        .worker-info {
-            font-size: 8px;
-            color: #666;
-            margin-top: 3px;
-        }
-
-        /* Ensure text doesn't overflow */
-        .receipt * {
-            max-width: 100%;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-        }
-
-        /* Compact spacing for better fit */
-        .receipt > div {
-            margin-bottom: 5px;
-        }
-
-        .receipt > div:last-child {
-            margin-bottom: 0;
+        @media print {
+            body { background: #fff; padding: 0; }
+            .sheet { width: auto; box-shadow: none; padding: 0; }
+            .toolbar { display: none; }
+            @page { margin: 4mm; }
         }
     </style>
 </head>
 <body>
-    <!-- Print button -->
-    <button class="print-button" onclick="window.print()">
-        🖨️ Bosib chiqarish (Ctrl+P)
-    </button>
+<div class="toolbar">
+    <a class="back" href="{{ route('orders.index') }}">Orqaga</a>
+    <button type="button" class="go" onclick="window.print()">Chop etish</button>
+</div>
 
-    <!-- Receipt content -->
-    <div class="receipt">
-        {{ $slot }}
-    </div>
+<div class="sheet">
+    {{ $slot }}
+</div>
 
-    <!-- JavaScript for print functionality -->
-    <script>
-        // Listen for print event from Livewire
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('print-receipt', () => {
-                window.print();
-            });
-        });
-
-        // Auto print when page loads (optional)
-        // window.onload = function() {
-        //     setTimeout(() => {
-        //         window.print();
-        //     }, 500);
-        // };
-    </script>
+<script>
+    // Chek sahifasi ochilishi bilan chop etish oynasi chiqadi.
+    window.addEventListener('load', () => setTimeout(() => window.print(), 350));
+</script>
 </body>
-</html> 
+</html>

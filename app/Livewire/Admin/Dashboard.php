@@ -2,301 +2,250 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductCategory;
+use App\Casts\OrderStatusEnum;
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Expense;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use App\Models\Order;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
+/**
+ * Savdo paneli.
+ *
+ * Hisob-kitoblarning hammasi SQL tomonida. Ilgari davr ichidagi barcha
+ * buyurtmalar mahsulotlari bilan xotiraga yuklanardi, grafik esa har bir kun
+ * uchun ikkita alohida so'rov qilardi (bir oy = 60+ so'rov).
+ */
 class Dashboard extends Component
 {
-    public $startDate;
-    public $endDate;
-    public $selectedPeriod = 'month';
-    public $chartData = [];
-    public $totalRevenue = 0;
-    public $totalProfit = 0;
-    public $totalOrders = 0;
-    public $totalApprovedExpenses = 0;
-    public $topProducts = [];
-    public $topCategories = [];
-    public $profitMargin = 0;
-    public $averageProfit = 0;
-    public $dailyAverage = 0;
+    use WithCompany;
 
-    public function mount()
+    public const PERIODS = [
+        'today' => 'Bugun',
+        'yesterday' => 'Kecha',
+        'week' => 'Shu hafta',
+        'month' => 'Shu oy',
+        'last_month' => 'O\'tgan oy',
+        'custom' => 'Boshqa davr',
+    ];
+
+    public string $selectedPeriod = 'month';
+
+    public string $startDate = '';
+
+    public string $endDate = '';
+
+    public function mount(): void
     {
-        $this->setDateRange();
-        $this->loadDashboardData();
+        $this->applyPeriod();
     }
 
-    public function updatedSelectedPeriod()
+    public function updatedSelectedPeriod(): void
     {
-        $this->setDateRange();
-        $this->loadDashboardData();
-        $this->dispatch('chart-updated');
+        $this->applyPeriod();
     }
 
-    public function updatedStartDate()
+    public function updatedStartDate(): void
     {
         $this->selectedPeriod = 'custom';
-        $this->loadDashboardData();
-        $this->dispatch('chart-updated');
     }
 
-    public function updatedEndDate()
+    public function updatedEndDate(): void
     {
         $this->selectedPeriod = 'custom';
-        $this->loadDashboardData();
-        $this->dispatch('chart-updated');
     }
 
-    private function setDateRange()
+    private function applyPeriod(): void
     {
-        switch ($this->selectedPeriod) {
-            case 'today':
-                $this->startDate = Carbon::today()->format('Y-m-d');
-                $this->endDate = Carbon::today()->format('Y-m-d');
-                break;
-            case 'yesterday':
-                $this->startDate = Carbon::yesterday()->format('Y-m-d');
-                $this->endDate = Carbon::yesterday()->format('Y-m-d');
-                break;
-            case 'week':
-                $this->startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
-                $this->endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
-                break;
-            case 'month':
-                $this->startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-                $this->endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
-                break;
-            case 'last_month':
-                $this->startDate = Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d');
-                $this->endDate = Carbon::now()->subMonth()->endOfMonth()->format('Y-m-d');
-                break;
+        $now = CarbonImmutable::now();
+
+        [$start, $end] = match ($this->selectedPeriod) {
+            'today' => [$now->startOfDay(), $now->endOfDay()],
+            'yesterday' => [$now->subDay()->startOfDay(), $now->subDay()->endOfDay()],
+            'week' => [$now->startOfWeek(), $now->endOfWeek()],
+            'last_month' => [$now->subMonth()->startOfMonth(), $now->subMonth()->endOfMonth()],
+            'custom' => [null, null],
+            default => [$now->startOfMonth(), $now->endOfMonth()],
+        };
+
+        if ($start && $end) {
+            $this->startDate = $start->format('Y-m-d');
+            $this->endDate = $end->format('Y-m-d');
         }
     }
 
-    public function loadDashboardData()
+    /** @return array{0: CarbonImmutable, 1: CarbonImmutable} */
+    private function range(): array
     {
-        $startDate = Carbon::parse($this->startDate)->startOfDay();
-        $endDate = Carbon::parse($this->endDate)->endOfDay();
-        $companyId = auth()->user()->getCompany()->id;
+        $start = rescue(fn () => CarbonImmutable::parse($this->startDate), CarbonImmutable::now()->startOfMonth(), false);
+        $end = rescue(fn () => CarbonImmutable::parse($this->endDate), CarbonImmutable::now()->endOfMonth(), false);
 
-        // Get orders for the selected period
-        $orders = Order::where('company_id', $companyId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'done')
-            ->with('orderDetails.product')
-            ->get();
-
-        // Get approved expenses for the selected period
-        $approvedExpenses = Expense::where('company_id', $companyId)
-            ->whereBetween('expense_date', [$startDate, $endDate])
-            ->where('status', 'approved')
-            ->get();
-
-        // Calculate total revenue
-        $this->totalRevenue = $orders->sum('total_amount');
-
-        // Calculate total orders
-        $this->totalOrders = $orders->count();
-
-        // Calculate total approved expenses
-        $this->totalApprovedExpenses = $approvedExpenses->sum('amount');
-
-        // Calculate profit
-        $this->calculateProfit($orders);
-
-        // Calculate additional metrics
-        $this->calculateAdditionalMetrics($orders);
-
-        // Generate chart data (monthly view)
-        $this->generateMonthlyChartData($startDate, $endDate, $companyId);
-
-        // Get top products
-        $this->getTopProducts($orders);
-
-        // Get top categories
-        $this->getTopCategories($orders);
-
-        // Emit event to update chart
-        $this->dispatch('chart-updated');
-    }
-
-    private function calculateProfit($orders)
-    {
-        $totalProfit = 0;
-
-        foreach ($orders as $order) {
-            foreach ($order->orderDetails as $detail) {
-                if ($detail->product) {
-                    $profitPerUnit = $detail->product->sell_price - $detail->product->price;
-                    $totalProfit += $profitPerUnit * $detail->quantity;
-                }
-            }
+        if ($end->lessThan($start)) {
+            [$start, $end] = [$end, $start];
         }
 
-        $this->totalProfit = $totalProfit;
-    }
-
-    private function calculateAdditionalMetrics($orders)
-    {
-        // Calculate profit margin
-        $this->profitMargin = $this->totalRevenue > 0 ? round(($this->totalProfit / $this->totalRevenue) * 100, 1) : 0;
-
-        // Calculate average profit per order
-        $this->averageProfit = $this->totalOrders > 0 ? round($this->totalProfit / $this->totalOrders) : 0;
-
-        // Calculate daily average
-        $daysDiff = Carbon::parse($this->startDate)->diffInDays(Carbon::parse($this->endDate)) + 1;
-        $this->dailyAverage = $daysDiff > 0 ? round($this->totalRevenue / $daysDiff) : 0;
-    }
-
-    private function generateMonthlyChartData($startDate, $endDate, $companyId)
-    {
-        $chartData = [];
-        $daysDiff = $startDate->diffInDays($endDate) + 1;
-
-        if ($daysDiff <= 31) {
-            // Kunlik chart - har kun uchun ma'lumot
-            $currentDate = $startDate->copy();
-            while ($currentDate <= $endDate) {
-                $dayOrders = Order::where('company_id', $companyId)
-                    ->whereDate('created_at', $currentDate)
-                    ->where('status', 'done')
-                    ->sum('total_amount');
-
-                $dayExpenses = Expense::where('company_id', $companyId)
-                    ->whereDate('expense_date', $currentDate)
-                    ->where('status', 'approved')
-                    ->sum('amount');
-
-                $chartData[] = [
-                    'date' => $currentDate->format('d.m.Y'),
-                    'sales' => (float)$dayOrders,
-                    'expenses' => (float)$dayExpenses,
-                    'profit' => (float)($dayOrders - $dayExpenses)
-                ];
-                $currentDate->addDay();
-            }
-        } else {
-            // Oylik chart - har oy uchun ma'lumot
-            $currentDate = $startDate->copy()->startOfMonth();
-            $endOfPeriod = $endDate->copy()->endOfMonth();
-            while ($currentDate <= $endOfPeriod) {
-                $monthStart = $currentDate->copy()->startOfMonth();
-                $monthEnd = $currentDate->copy()->endOfMonth();
-                if ($monthStart < $startDate) {
-                    $monthStart = $startDate->copy();
-                }
-                if ($monthEnd > $endDate) {
-                    $monthEnd = $endDate->copy();
-                }
-
-                $monthOrders = Order::where('company_id', $companyId)
-                    ->whereBetween('created_at', [$monthStart, $monthEnd])
-                    ->where('status', 'done')
-                    ->sum('total_amount');
-
-                $monthExpenses = Expense::where('company_id', $companyId)
-                    ->whereBetween('expense_date', [$monthStart, $monthEnd])
-                    ->where('status', 'approved')
-                    ->sum('amount');
-
-                $chartData[] = [
-                    'date' => $currentDate->format('M Y'),
-                    'sales' => (float)$monthOrders,
-                    'expenses' => (float)$monthExpenses,
-                    'profit' => (float)($monthOrders - $monthExpenses)
-                ];
-                $currentDate->addMonth();
-            }
-        }
-
-        // Agar butun davrda hech qanday ma'lumot bo'lmasa, bitta 0 nuqta chiqsin
-        if (empty($chartData) || (array_sum(array_column($chartData, 'sales')) === 0 && array_sum(array_column($chartData, 'expenses')) === 0)) {
-            $chartData = [
-                [
-                    'date' => $startDate->format($daysDiff <= 31 ? 'd.m.Y' : 'M Y'),
-                    'sales' => 0,
-                    'expenses' => 0,
-                    'profit' => 0
-                ]
-            ];
-        }
-
-        $this->chartData = $chartData;
-    }
-
-    private function getTopProducts($orders)
-    {
-        $productStats = [];
-
-        foreach ($orders as $order) {
-            foreach ($order->orderDetails as $detail) {
-                if ($detail->product) {
-                    $productId = $detail->product->id;
-                    $productName = $detail->product->name;
-
-                    if (!isset($productStats[$productId])) {
-                        $productStats[$productId] = [
-                            'name' => $productName,
-                            'quantity' => 0,
-                            'revenue' => 0
-                        ];
-                    }
-
-                    $productStats[$productId]['quantity'] += $detail->quantity;
-                    $productStats[$productId]['revenue'] += $detail->quantity * $detail->product->sell_price;
-                }
-            }
-        }
-
-        // Sort by revenue and take top 5
-        uasort($productStats, function($a, $b) {
-            return $b['revenue'] <=> $a['revenue'];
-        });
-
-        $this->topProducts = array_slice($productStats, 0, 5, true);
-    }
-
-    private function getTopCategories($orders)
-    {
-        $categoryStats = [];
-
-        foreach ($orders as $order) {
-            foreach ($order->orderDetails as $detail) {
-                if ($detail->product && $detail->product->category) {
-                    $categoryId = $detail->product->category->id;
-                    $categoryName = $detail->product->category->name;
-
-                    if (!isset($categoryStats[$categoryId])) {
-                        $categoryStats[$categoryId] = [
-                            'name' => $categoryName,
-                            'quantity' => 0,
-                            'revenue' => 0
-                        ];
-                    }
-
-                    $categoryStats[$categoryId]['quantity'] += $detail->quantity;
-                    $categoryStats[$categoryId]['revenue'] += $detail->quantity * $detail->product->sell_price;
-                }
-            }
-        }
-
-        // Sort by revenue and take top 5
-        uasort($categoryStats, function($a, $b) {
-            return $b['revenue'] <=> $a['revenue'];
-        });
-
-        $this->topCategories = array_slice($categoryStats, 0, 5, true);
+        return [$start->startOfDay(), $end->endOfDay()];
     }
 
     public function render()
     {
-        return view('livewire.admin.dashboard');
+        [$start, $end] = $this->range();
+        $companyId = $this->companyId();
+
+        $sales = Order::query()
+            ->forCompany($companyId)
+            ->done()
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('COUNT(*) as orders_count, COALESCE(SUM(total_amount), 0) as revenue')
+            ->first();
+
+        $revenue = (int) $sales->revenue;
+        $ordersCount = (int) $sales->orders_count;
+
+        // Foyda: sotuvdan tushgan pul minus sotilgan mahsulotlar tannarxi.
+        // Narx tarixiy (order_details.total_amount), tannarx joriy (products.price).
+        $cost = (int) DB::table('order_details')
+            ->join('orders', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'products.id', '=', 'order_details.product_id')
+            ->where('orders.company_id', $companyId)
+            ->where('orders.status', OrderStatusEnum::Done->value)
+            ->whereNull('orders.deleted_at')
+            ->whereNull('order_details.deleted_at')
+            ->whereBetween('orders.created_at', [$start, $end])
+            ->sum(DB::raw('order_details.quantity * COALESCE(products.price, 0)'));
+
+        $profit = $revenue - $cost;
+
+        $expenses = (float) Expense::query()
+            ->forCompany($companyId)
+            ->where('status', 'approved')
+            ->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()])
+            ->sum('amount');
+
+        $days = max(1, $start->diffInDays($end) + 1);
+
+        return view('livewire.admin.dashboard', [
+            'revenue' => $revenue,
+            'ordersCount' => $ordersCount,
+            'profit' => $profit,
+            'expenses' => $expenses,
+            'netProfit' => $profit - $expenses,
+            'profitMargin' => $revenue > 0 ? round($profit / $revenue * 100, 1) : 0,
+            'averageCheck' => $ordersCount > 0 ? (int) round($revenue / $ordersCount) : 0,
+            'dailyAverage' => (int) round($revenue / $days),
+            'chartData' => $this->chartData($companyId, $start, $end),
+            'topProducts' => $this->topProducts($companyId, $start, $end),
+            'topCategories' => $this->topCategories($companyId, $start, $end),
+            'ordersByType' => $this->ordersByType($companyId, $start, $end),
+        ]);
+    }
+
+    /**
+     * Sotuv va xarajat dinamikasi. Davr 62 kundan qisqa bo'lsa kunlik,
+     * aks holda oylik. Ikkala qator ham bittadan guruhlangan so'rov.
+     */
+    private function chartData(?int $companyId, CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        $days = $start->diffInDays($end) + 1;
+        $daily = $days <= 62;
+
+        $bucketOf = function (string $column) use ($daily): string {
+            $pattern = $daily ? '%Y-%m-%d' : '%Y-%m';
+
+            return DB::connection()->getDriverName() === 'sqlite'
+                ? "strftime('{$pattern}', {$column})"
+                : "DATE_FORMAT({$column}, '{$pattern}')";
+        };
+
+        $salesByBucket = Order::query()
+            ->forCompany($companyId)
+            ->done()
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw($bucketOf('created_at').' as bucket')
+            ->selectRaw('COALESCE(SUM(total_amount), 0) as value')
+            ->groupBy('bucket')
+            ->pluck('value', 'bucket');
+
+        $expensesByBucket = Expense::query()
+            ->forCompany($companyId)
+            ->where('status', 'approved')
+            ->whereBetween('expense_date', [$start->toDateString(), $end->toDateString()])
+            ->selectRaw($bucketOf('expense_date').' as bucket')
+            ->selectRaw('COALESCE(SUM(amount), 0) as value')
+            ->groupBy('bucket')
+            ->pluck('value', 'bucket');
+
+        $points = [];
+        $cursor = $daily ? $start : $start->startOfMonth();
+
+        while ($cursor->lessThanOrEqualTo($end)) {
+            $key = $cursor->format($daily ? 'Y-m-d' : 'Y-m');
+
+            $points[] = [
+                'label' => $cursor->format($daily ? 'd.m' : 'm.Y'),
+                'sales' => (float) ($salesByBucket[$key] ?? 0),
+                'expenses' => (float) ($expensesByBucket[$key] ?? 0),
+            ];
+
+            $cursor = $daily ? $cursor->addDay() : $cursor->addMonth();
+        }
+
+        return $points;
+    }
+
+    private function topProducts(?int $companyId, CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        return DB::table('order_details')
+            ->join('orders', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'products.id', '=', 'order_details.product_id')
+            ->where('orders.company_id', $companyId)
+            ->where('orders.status', OrderStatusEnum::Done->value)
+            ->whereNull('orders.deleted_at')
+            ->whereNull('order_details.deleted_at')
+            ->whereBetween('orders.created_at', [$start, $end])
+            ->groupBy('products.id', 'products.name')
+            ->select('products.name')
+            ->selectRaw('SUM(order_details.quantity) as quantity')
+            ->selectRaw('SUM(order_details.total_amount) as revenue')
+            ->orderByDesc('revenue')
+            ->limit(7)
+            ->get()
+            ->all();
+    }
+
+    private function topCategories(?int $companyId, CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        return DB::table('order_details')
+            ->join('orders', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'products.id', '=', 'order_details.product_id')
+            ->join('product_categories', 'product_categories.id', '=', 'products.category_id')
+            ->where('orders.company_id', $companyId)
+            ->where('orders.status', OrderStatusEnum::Done->value)
+            ->whereNull('orders.deleted_at')
+            ->whereNull('order_details.deleted_at')
+            ->whereBetween('orders.created_at', [$start, $end])
+            ->groupBy('product_categories.id', 'product_categories.name')
+            ->select('product_categories.name')
+            ->selectRaw('SUM(order_details.quantity) as quantity')
+            ->selectRaw('SUM(order_details.total_amount) as revenue')
+            ->orderByDesc('revenue')
+            ->limit(7)
+            ->get()
+            ->all();
+    }
+
+    private function ordersByType(?int $companyId, CarbonImmutable $start, CarbonImmutable $end): array
+    {
+        return Order::query()
+            ->forCompany($companyId)
+            ->done()
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy('type')
+            ->select('type')
+            ->selectRaw('COUNT(*) as orders_count')
+            ->selectRaw('COALESCE(SUM(total_amount), 0) as revenue')
+            ->get()
+            ->all();
     }
 }

@@ -1,73 +1,56 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Livewire\Admin\Categories\IndexLivewire as CategoryIndex;
 use App\Livewire\Admin\Dashboard;
-use App\Livewire\Admin\Orders\CreateOrderLivewire;
-use App\Livewire\Admin\Orders\OrderCompleted;
 use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
 use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
-use App\Models\Place;
+use App\Livewire\Admin\Orders\CreateLivewire as QuickSale;
+use App\Livewire\Admin\Orders\DeletedOrdersLivewire as DeletedOrders;
+use App\Livewire\Admin\Orders\IndexLivewire as OrderIndex;
+use App\Livewire\Admin\Orders\OrderCompleted;
+use App\Livewire\Admin\Orders\OrderInCafeLivewire as HallPos;
+use App\Livewire\Admin\Places\IndexLivewire as PlaceIndex;
+use App\Livewire\Admin\ProductStock\IndexLivewire as StockIndex;
+use App\Livewire\Admin\Products\IndexLivewire as ProductIndex;
+use App\Livewire\Admin\Profile;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('home');
-    }
-    return view('auth.login');
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
 });
 
-// Redirect authenticated users from login to home
-Route::get('/login', function () {
-    if (auth()->check()) {
-        return redirect()->route('home');
-    }
-    return redirect()->route('login');
-});
-
-Route::get('/home', function () {
-    return view('welcome');
-})->middleware('auth')->name('home');
-
-
-//Route::get('/dashboard', function () {
-//    return view('dashboard');
-//})->middleware(['auth', 'verified'])->name('dashboard');
-
+/*
+ * Har bir sahifa to'g'ridan-to'g'ri Livewire komponenti.
+ * Ilgari oradagi bo'sh blade fayllar bor edi va marshrut nomlari
+ * sahifa mazmuniga mos kelmasdi ("/product/rooms" — joylar ro'yxati).
+ */
 Route::middleware('auth')->group(function () {
-    // Dashboard route
+    Route::redirect('/home', '/dashboard')->name('home');
+
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    
-    // Profile routes
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/admin/profile', function () {return view('admin.profile');})->name('admin.profile');
 
-    Route::prefix('product')->group(function () {
-        Route::get('/index', function () {return view('admin.products.index');})->name('products.index');
-        Route::get('/categories', function () {return view('admin.categories.index');})->name('categories.index');
-        Route::get('/rooms', function () {return view('admin.places.index');})->name('places.index');
-        Route::get('/orders', function () {return view('admin.orders.index');})->name('orders.index');
-        Route::get('/orders/deleted', function () {return view('admin.orders.deleted');})->name('orders.deleted');
-        Route::get('/cafe', function () {return view('admin.orders.cafe');})->name('cafe.create');
-    });
-    Route::prefix('product-stock')->group(function () {
-        Route::get('/product-stock', function () {return view('admin.product-stock.index');})->name('product-stock.index');
-    });
+    // Sotuv
+    Route::get('/pos/zal', HallPos::class)->name('cafe.create');
+    Route::get('/pos/zal/{place_id}', HallPos::class)->name('admin.orders.place');
+    Route::get('/pos/tez-sotuv', QuickSale::class)->name('orders.create');
+    Route::get('/buyurtmalar', OrderIndex::class)->name('orders.index');
+    Route::get('/buyurtmalar/arxiv', DeletedOrders::class)->name('orders.deleted');
+    Route::get('/buyurtmalar/{id}/chek', OrderCompleted::class)->name('admin.orders.print');
 
-    // Expense routes
-    Route::prefix('expense-cat')->group(function () {
-        Route::get('/expense-cat', function () {return view('admin.expense-categories.index');})->name('expense-categories.index');
-    });
-    
-    Route::prefix('expenses')->group(function () {
-        Route::get('/expenses', function () {return view('admin.expenses.index');})->name('expenses.index');
-    });
+    // Katalog
+    Route::get('/mahsulotlar', ProductIndex::class)->name('products.index');
+    Route::get('/kategoriyalar', CategoryIndex::class)->name('categories.index');
+    Route::get('/zaxira', StockIndex::class)->name('product-stock.index');
+    Route::get('/joylar', PlaceIndex::class)->name('places.index');
 
-    Route::get('/admin/orders/place/{place_id}', App\Livewire\Admin\Orders\OrderInCafeLivewire::class)->name('admin.orders.place');
-    
-    // Print route for completed orders
-    Route::get('/order/{id}/print', OrderCompleted::class)->name('admin.orders.print');
+    // Moliya
+    Route::get('/xarajatlar', ExpenseIndex::class)->name('expenses.index');
+    Route::get('/xarajat-kategoriyalari', ExpenseCategoryIndex::class)->name('expense-categories.index');
+
+    // Sozlamalar
+    Route::get('/profil', Profile::class)->name('admin.profile');
 });
 
 require __DIR__.'/auth.php';

@@ -2,138 +2,183 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Company;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
+/**
+ * Profil va kompaniya sozlamalari.
+ *
+ * Diqqat: users jadvalida email ustuni yo'q — ilgari bu forma uni
+ * yangilashga urinardi va har safar SQL xatosi bilan tugardi.
+ * Email faqat kompaniyada saqlanadi.
+ */
 class Profile extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithCompany;
 
-    public $user;
-    public $company;
-    
-    // User fields
-    public $name;
-    public $email;
-    public $phone_number;
-    public $current_password;
-    public $new_password;
-    public $confirm_password;
-    
-    // Company fields
-    public $company_name;
-    public $company_address;
-    public $company_phone;
-    public $company_email;
-    public $company_description;
-    
-    public $showPasswordForm = false;
-    public $showCompanyForm = false;
+    public string $name = '';
 
-    public function mount()
+    public string $phone_number = '';
+
+    public string $current_password = '';
+
+    public string $new_password = '';
+
+    public string $new_password_confirmation = '';
+
+    public string $company_name = '';
+
+    public string $company_address = '';
+
+    public string $company_phone = '';
+
+    public string $company_email = '';
+
+    public string $company_description = '';
+
+    public string $open_time = '';
+
+    public string $close_time = '';
+
+    public $logo = null;
+
+    public string $tab = 'profile';
+
+    public function mount(): void
     {
-        $this->user = Auth::user();
-        $this->company = $this->user->getCompany();
-        
-        // Load user data
-        $this->name = $this->user->name;
-        $this->email = $this->user->email;
-        $this->phone_number = $this->user->phone_number;
-        
-        // Load company data
-        if ($this->company) {
-            $this->company_name = $this->company->name;
-            $this->company_address = $this->company->address;
-            $this->company_phone = $this->company->phone_number;
-            $this->company_email = $this->company->email;
-            $this->company_description = $this->company->description;
+        $user = auth()->user();
+
+        $this->name = (string) $user->name;
+        $this->phone_number = (string) $user->phone_number;
+
+        $company = $this->company();
+
+        if ($company) {
+            $this->company_name = (string) $company->name;
+            $this->company_address = (string) $company->address;
+            $this->company_phone = (string) $company->phone_number;
+            $this->company_email = (string) $company->email;
+            $this->company_description = (string) $company->description;
+            $this->open_time = (string) $company->open_time;
+            $this->close_time = (string) $company->close_time;
         }
     }
 
-    public function updateProfile()
+    private function company(): ?Company
     {
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $this->user->id,
-            'phone_number' => 'required|string|max:20',
-        ]);
-
-        $this->user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-            'phone_number' => $this->phone_number,
-        ]);
-
-        session()->flash('message', 'Profil muvaffaqiyatli yangilandi!');
+        return Company::query()
+            ->select(['id', 'name', 'address', 'phone_number', 'email', 'description', 'logo', 'open_time', 'close_time'])
+            ->find($this->companyId());
     }
 
-    public function updatePassword()
+    public function updateProfile(): void
     {
-        $this->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
-            'confirm_password' => 'required',
+        $userId = auth()->id();
+
+        $data = $this->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone_number' => [
+                'required', 'string', 'max:20',
+                Rule::unique('users', 'phone_number')->ignore($userId)->whereNull('deleted_at'),
+            ],
+        ], [
+            'name.required' => 'Ismni kiriting.',
+            'phone_number.required' => 'Telefon raqamni kiriting.',
+            'phone_number.unique' => 'Bu raqam boshqa foydalanuvchida ishlatilgan.',
         ]);
 
-        if (!Hash::check($this->current_password, $this->user->password)) {
-            session()->flash('error', 'Joriy parol noto\'g\'ri!');
+        User::query()->whereKey($userId)->update($data);
+
+        $this->dispatch('toast', type: 'success', message: 'Profil yangilandi.');
+    }
+
+    public function updatePassword(): void
+    {
+        $this->validate([
+            'current_password' => ['required'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'current_password.required' => 'Joriy parolni kiriting.',
+            'new_password.required' => 'Yangi parolni kiriting.',
+            'new_password.min' => 'Parol kamida 8 ta belgidan iborat bo\'lsin.',
+            'new_password.confirmed' => 'Parollar mos kelmadi.',
+        ]);
+
+        if (! Hash::check($this->current_password, auth()->user()->password)) {
+            $this->addError('current_password', 'Joriy parol noto\'g\'ri.');
+
             return;
         }
 
-        $this->user->update([
-            'password' => Hash::make($this->new_password)
+        User::query()->whereKey(auth()->id())->update([
+            'password' => Hash::make($this->new_password),
         ]);
 
-        $this->current_password = '';
-        $this->new_password = '';
-        $this->confirm_password = '';
-        $this->showPasswordForm = false;
-
-        session()->flash('message', 'Parol muvaffaqiyatli yangilandi!');
+        $this->reset(['current_password', 'new_password', 'new_password_confirmation']);
+        $this->dispatch('toast', type: 'success', message: 'Parol yangilandi.');
     }
 
-    public function updateCompany()
+    public function updateCompany(): void
     {
-        $this->validate([
-            'company_name' => 'required|string|max:255',
-            'company_address' => 'nullable|string|max:500',
-            'company_phone' => 'nullable|string|max:20',
-            'company_email' => 'nullable|email|max:255',
-            'company_description' => 'nullable|string|max:1000',
-        ]);
+        $company = $this->company();
 
-        if ($this->company) {
-            $this->company->update([
-                'name' => $this->company_name,
-                'address' => $this->company_address,
-                'phone_number' => $this->company_phone,
-                'email' => $this->company_email,
-                'description' => $this->company_description,
-            ]);
+        if (! $company) {
+            $this->dispatch('toast', type: 'error', message: 'Kompaniya topilmadi.');
+
+            return;
         }
 
-        $this->showCompanyForm = false;
-        session()->flash('message', 'Kompaniya ma\'lumotlari muvaffaqiyatli yangilandi!');
-    }
+        $data = $this->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'company_address' => ['nullable', 'string', 'max:500'],
+            'company_phone' => ['nullable', 'string', 'max:20'],
+            'company_email' => ['nullable', 'email', 'max:255'],
+            'company_description' => ['nullable', 'string', 'max:1000'],
+            'open_time' => ['nullable', 'string', 'max:10'],
+            'close_time' => ['nullable', 'string', 'max:10'],
+            'logo' => ['nullable', 'image', 'max:2048'],
+        ], [
+            'company_name.required' => 'Kompaniya nomini kiriting.',
+            'company_email.email' => 'Email to\'g\'ri emas.',
+            'logo.image' => 'Logotip rasm bo\'lishi kerak.',
+            'logo.max' => 'Logotip 2 MB dan katta bo\'lmasin.',
+        ]);
 
-    public function togglePasswordForm()
-    {
-        $this->showPasswordForm = !$this->showPasswordForm;
-        $this->showCompanyForm = false;
-    }
+        $attributes = [
+            'name' => $data['company_name'],
+            'address' => $data['company_address'] ?? null,
+            'phone_number' => $data['company_phone'] ?: null,
+            'email' => $data['company_email'] ?: null,
+            'description' => $data['company_description'] ?? null,
+            'open_time' => $data['open_time'] ?: null,
+            'close_time' => $data['close_time'] ?: null,
+        ];
 
-    public function toggleCompanyForm()
-    {
-        $this->showCompanyForm = !$this->showCompanyForm;
-        $this->showPasswordForm = false;
+        if ($this->logo) {
+            $attributes['logo'] = $this->logo->store('company', 'public');
+
+            $previous = $company->getRawOriginal('logo');
+            if (filled($previous) && ! str_starts_with($previous, 'http') && Storage::disk('public')->exists($previous)) {
+                Storage::disk('public')->delete($previous);
+            }
+        }
+
+        $company->update($attributes);
+        $this->logo = null;
+
+        $this->dispatch('toast', type: 'success', message: 'Kompaniya ma\'lumotlari yangilandi.');
     }
 
     public function render()
     {
-        return view('livewire.admin.profile');
+        return view('livewire.admin.profile', [
+            'company' => $this->company(),
+        ]);
     }
-} 
+}

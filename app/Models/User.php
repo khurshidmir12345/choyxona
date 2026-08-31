@@ -12,11 +12,9 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, softDeletes;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
-     *
      * @var list<string>
      */
     protected $fillable = [
@@ -31,8 +29,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
      * @var list<string>
      */
     protected $hidden = [
@@ -40,9 +36,12 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /** Bir so'rov ichida kompaniyani qayta-qayta izlamaslik uchun. */
+    private ?int $companyIdCache = null;
+
+    private bool $companyIdResolved = false;
+
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -58,9 +57,28 @@ class User extends Authenticatable
         return $this->belongsTo(Company::class, 'company_id');
     }
 
-    public function getCompany()
+    /** Foydalanuvchi egasi bo'lgan kompaniya (admin uchun). */
+    public function ownedCompany(): HasOne
     {
-        return Company::query()->where('user_id', $this->id)->first() ?? $this->company->id;
+        return $this->hasOne(Company::class, 'user_id');
+    }
+
+    /**
+     * Egalik qilgan kompaniya, bo'lmasa biriktirilgan kompaniya (sotuvchi).
+     * Natija instansiyada keshlanadi — bitta so'rovda ko'pi bilan 1 ta SQL.
+     */
+    public function companyId(): ?int
+    {
+        if ($this->companyIdResolved) {
+            return $this->companyIdCache;
+        }
+
+        $this->companyIdCache = Company::query()
+            ->where('user_id', $this->id)
+            ->value('id') ?? $this->company_id;
+        $this->companyIdResolved = true;
+
+        return $this->companyIdCache;
     }
 
     public function role(): BelongsTo

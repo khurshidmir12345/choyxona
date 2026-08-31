@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use App\Casts\PlaceStatusEnum;
+use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\PlaceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Place extends Model
 {
     /** @use HasFactory<PlaceFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes, BelongsToCompany;
 
     protected $fillable = ['name', 'company_id', 'status', 'capacity'];
 
@@ -19,21 +21,17 @@ class Place extends Model
     {
         return [
             'capacity' => 'integer',
-            'status' => PlaceStatusEnum::class
+            'status' => PlaceStatusEnum::class,
         ];
     }
 
-    public function isStatusEmpty(): bool
+    public function isBusy(): bool
     {
-        return $this->status->value === 'empty';
-    }
-    public function getStatusColor(): string
-    {
-        return $this->status->value === 'empty' ? '#52be80' : '#FF6347';
+        return $this->status === PlaceStatusEnum::Busy;
     }
 
-    public function company(): BelongsTo
+    public function orders(): HasMany
     {
-        return $this->belongsTo(Company::class);
+        return $this->hasMany(Order::class);
     }
 }

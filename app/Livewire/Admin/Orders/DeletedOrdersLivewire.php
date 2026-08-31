@@ -2,97 +2,104 @@
 
 namespace App\Livewire\Admin\Orders;
 
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Services\OrderService;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DeletedOrdersLivewire extends Component
 {
-    use WithPagination;
+    use WithPagination, WithCompany;
 
-    public $from_date, $to_date, $type;
-    public $expandedOrderId = null;
+    public string $fromDate = '';
 
-    protected $paginationTheme = 'bootstrap';
+    public string $toDate = '';
 
-    public function clear_to_date()
+    public string $type = '';
+
+    public ?int $expandedOrderId = null;
+
+    public function updatedFromDate(): void
     {
-        $this->to_date = '';
-        $this->render();
+        $this->resetPage();
     }
 
-    public function clear_from_date()
+    public function updatedToDate(): void
     {
-        $this->from_date = '';
-        $this->render();
+        $this->resetPage();
     }
 
-    public function toggleDetails($orderId)
+    public function updatedType(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['fromDate', 'toDate', 'type']);
+        $this->resetPage();
+    }
+
+    public function toggleDetails(int $orderId): void
     {
         $this->expandedOrderId = $this->expandedOrderId === $orderId ? null : $orderId;
-        
-        // Debug: Check if order details are loaded
-        if ($this->expandedOrderId === $orderId) {
-            $order = Order::withTrashed()->with(['orderDetails' => function($query) {
-                $query->withTrashed()->with(['product', 'worker' => function($workerQuery) {
-                    $workerQuery->withTrashed();
-                }]);
-            }])->find($orderId);
-            
-            if ($order && $order->orderDetails->count() === 0) {
-                session()->flash('message', 'Buyurtma tafsilotlari topilmadi yoki o\'chirilgan.');
-            }
+    }
+
+    public function restore(int $orderId, OrderService $orders): void
+    {
+        $order = Order::withTrashed()->forCompany($this->companyId())->find($orderId);
+
+        if (! $order) {
+            return;
         }
+
+        $orders->restoreOrder($order);
+        $this->dispatch('toast', type: 'success', message: 'Buyurtma tiklandi.');
     }
 
-    public function restore($orderId)
+    public function forceDelete(int $orderId, OrderService $orders): void
     {
-        $order = Order::withTrashed()->findOrFail($orderId);
-        
-        // Order details ni restore qilamiz
-        $order->orderDetails()->withTrashed()->restore();
-        
-        // Order ni restore qilamiz
-        $order->restore();
-        
-        session()->flash('message', 'Buyurtma muvaffaqiyatli tiklandi.');
+        $order = Order::withTrashed()->forCompany($this->companyId())->find($orderId);
+
+        if (! $order) {
+            return;
+        }
+
+        $orders->forceDeleteOrder($order);
+        $this->dispatch('toast', type: 'success', message: 'Buyurtma butunlay o\'chirildi.');
     }
 
-    public function forceDelete($orderId)
+    private function details(): Collection
     {
-        $order = Order::withTrashed()->findOrFail($orderId);
-        
-        // Order details ni to'liq o'chiramiz
-        $order->orderDetails()->withTrashed()->forceDelete();
-        
-        // Order ni to'liq o'chiramiz
-        $order->forceDelete();
-        
-        session()->flash('message', 'Buyurtma to\'liq o\'chirildi.');
+        if (! $this->expandedOrderId) {
+            return collect();
+        }
+
+        return OrderDetail::withTrashed()
+            ->select(['id', 'order_id', 'product_id', 'worker_id', 'quantity', 'price', 'discount', 'total_amount'])
+            ->where('order_id', $this->expandedOrderId)
+            ->with(['product:id,name', 'worker:id,name'])
+            ->get();
     }
 
     public function render()
     {
-        $orders = Order::withTrashed()
-            ->with(['user', 'place', 'company', 'orderDetails' => function($query) {
-                $query->withTrashed()->with(['product', 'worker' => function($workerQuery) {
-                    $workerQuery->withTrashed();
-                }]);
-            }])
-            ->where('company_id', auth()->user()->getCompany()->id)
-            ->whereNotNull('deleted_at')
-            ->when($this->from_date, function ($query) {
-                return $query->whereDate('created_at', '>=', $this->from_date);
-            })
-            ->when($this->to_date, function ($query) {
-                return $query->whereDate('created_at', '<=', $this->to_date);
-            })
-            ->when($this->type, function ($query) {
-                return $query->where('type', $this->type);
-            })
+        $orders = Order::onlyTrashed()
+            ->select(['id', 'user_id', 'place_id', 'amount', 'total_amount', 'discount', 'type', 'status', 'created_at', 'deleted_at'])
+            ->forCompany($this->companyId())
+            ->with(['user:id,name', 'place:id,name'])
+            ->when($this->fromDate, fn ($q) => $q->whereDate('created_at', '>=', $this->fromDate))
+            ->when($this->toDate, fn ($q) => $q->whereDate('created_at', '<=', $this->toDate))
+            ->when($this->type, fn ($q) => $q->where('type', $this->type))
             ->orderByDesc('deleted_at')
-            ->paginate(10);
+            ->paginate(15);
 
-        return view('livewire.admin.orders.deleted-orders-livewire', compact('orders'));
+        return view('livewire.admin.orders.deleted-orders-livewire', [
+            'orders' => $orders,
+            'details' => $this->details(),
+        ]);
     }
-} 
+}

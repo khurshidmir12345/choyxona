@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Database\Factories\OrderDetailFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +23,16 @@ class OrderDetail extends Model
         'total_amount',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'integer',
+            'price' => 'integer',
+            'discount' => 'integer',
+            'total_amount' => 'integer',
+        ];
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
@@ -37,10 +46,5 @@ class OrderDetail extends Model
     public function worker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'worker_id');
-    }
-
-    public function getCreatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y H:i');
     }
 }

@@ -25,17 +25,14 @@ class Company extends Model
         'latitude',
         'longitude',
         'open_time',
-        'close_time'
+        'close_time',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'open_time' => 'timestamp',
-            'close_time' => 'timestamp',
-        ];
-    }
-
+    /**
+     * open_time / close_time 2025_05_04 migratsiyasidan keyin oddiy matn
+     * ("09:00"). Ilgari ular 'timestamp' ga cast qilinardi, natijada
+     * Carbon parse qilishga urinib xato berardi.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -51,12 +48,12 @@ class Company extends Model
         return $this->hasMany(Product::class);
     }
 
-    public function product_categories(): HasMany
+    public function productCategories(): HasMany
     {
         return $this->hasMany(ProductCategory::class);
     }
 
-    public function product_stocks(): HasMany
+    public function productStocks(): HasMany
     {
         return $this->hasMany(ProductStock::class);
     }
@@ -66,5 +63,16 @@ class Company extends Model
         return $this->hasMany(Place::class);
     }
 
+    public function logoUrl(): ?string
+    {
+        if (blank($this->logo)) {
+            return null;
+        }
 
+        if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
+            return $this->logo;
+        }
+
+        return asset('storage/'.ltrim($this->logo, '/'));
+    }
 }

@@ -2,80 +2,97 @@
 
 namespace App\Livewire\Admin\Products;
 
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Product;
+use App\Models\ProductCategory;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class IndexLivewire extends Component
 {
-    use WithPagination;
+    use WithPagination, WithCompany;
 
-    public $editProductId = null;
-    public  $showProductId = null;
+    public string $search = '';
 
+    public ?int $categoryFilter = null;
 
-    protected $paginationTheme = 'bootstrap';
+    public bool $showForm = false;
 
-    public $search = '';
+    public ?int $editProductId = null;
 
-    protected $listeners = ['productCreated', 'productUpdated', 'closeEditModal', 'closeShowModal'];
+    protected $listeners = [
+        'productSaved' => 'onProductSaved',
+        'closeProductForm' => 'closeForm',
+    ];
 
-    public function productCreated()
+    public function updatedSearch(): void
     {
-        $this->render();
-        $this->dispatch('closeModal');
+        $this->resetPage();
     }
 
-    public function productUpdated()
+    public function updatedCategoryFilter(): void
     {
-        $this->render();
+        $this->resetPage();
+    }
+
+    #[Computed]
+    public function categories()
+    {
+        return ProductCategory::query()
+            ->select(['id', 'name'])
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function onProductSaved(): void
+    {
+        $this->dispatch('toast', type: 'success', message: 'Mahsulot saqlandi.');
+    }
+
+    public function create(): void
+    {
+        $this->editProductId = null;
+        $this->showForm = true;
+    }
+
+    public function edit(int $productId): void
+    {
+        $this->editProductId = $productId;
+        $this->showForm = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->showForm = false;
         $this->editProductId = null;
     }
 
-    public function edit($product_id)
+    /**
+     * Mahsulot soft-delete qilinadi: qattiq o'chirish order_details'ni
+     * kaskad bilan olib ketardi va savdo tarixini yo'q qilardi.
+     */
+    public function delete(int $productId): void
     {
-        $this->editProductId = $product_id;
-    }
+        Product::query()
+            ->forCompany($this->companyId())
+            ->whereKey($productId)
+            ->delete();
 
-    public function show($product_id)
-    {
-        $this->showProductId = $product_id;
+        $this->dispatch('toast', type: 'success', message: 'Mahsulot o\'chirildi.');
     }
-
-    public function delete($id)
-    {
-        Product::query()->findOrFail($id)->delete();
-        session()->flash('message', 'Mahsulot o‘chirildi.');
-    }
-
-    public function openCreateModal()
-    {
-        $this->dispatch('openAddProductModal');
-        $this->dispatch('clearCreateMessages');
-    }
-
-    public function closeEditModal()
-    {
-        $this->editProductId = null;
-    }
-
-    public function closeShowModal()
-    {
-        $this->showProductId = null;
-    }
-
 
     public function render()
     {
-        $companyId = auth()->user()->getCompany()->id;
-        $products = Product::with('category', 'company')
-            ->where('company_id', $companyId)
-            ->when($this->search, function ($query) {
-                return $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('code', 'like', '%' . $this->search . '%')
-                    ->orWhere('sell_price', 'like', '%' . $this->search . '%');
-            })
-            ->orderByDesc('id')->paginate(15);
+        $products = Product::query()
+            ->select(['id', 'name', 'code', 'image', 'price', 'sell_price', 'discount', 'current_stock', 'category_id'])
+            ->forCompany($this->companyId())
+            ->with(['category:id,name'])
+            ->search($this->search)
+            ->when($this->categoryFilter, fn ($q) => $q->where('category_id', $this->categoryFilter))
+            ->latest('id')
+            ->paginate(15);
 
         return view('livewire.admin.products.index-livewire', compact('products'));
     }

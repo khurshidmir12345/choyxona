@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Models\Concerns\BelongsToCompany;
 use Database\Factories\ExpenseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */
-    use HasFactory;
+    use HasFactory, BelongsToCompany;
+
+    public const STATUSES = ['pending', 'approved', 'rejected'];
 
     protected $fillable = [
         'company_id',
@@ -26,14 +29,24 @@ class Expense extends Model
         'status',
     ];
 
-    protected $casts = [
-        'amount' => 'decimal:2',
-        'expense_date' => 'date',
-    ];
-
-    public function company(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return [
+            'amount' => 'decimal:2',
+            'expense_date' => 'date',
+        ];
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            $q->where('title', 'like', '%'.$term.'%')
+                ->orWhere('description', 'like', '%'.$term.'%');
+        });
     }
 
     public function category(): BelongsTo
@@ -44,20 +57,5 @@ class Expense extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function getCreatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['created_at'])->format('d.m.Y H:i');
-    }
-
-    public function getUpdatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['updated_at'])->format('d.m.Y H:i');
-    }
-
-    public function getExpenseDateAttribute()
-    {
-        return Carbon::parse($this->attributes['expense_date'])->format('d.m.Y');
     }
 }

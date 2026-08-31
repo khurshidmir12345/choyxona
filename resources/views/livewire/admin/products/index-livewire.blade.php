@@ -1,72 +1,112 @@
 <div>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Mahsulot nomi yoki kodi bo‘yicha qidirish...">
-        <a href="#" data-bs-toggle="modal" data-bs-target="#add_product" class="btn btn-success btn-rounded" wire:click="openCreateModal">
-            <i class="fa fa-plus">  Yangi mahsulot</i>
-        </a>
+    <x-ui.page-header title="Mahsulotlar" subtitle="Menyu va narxlar">
+        <button type="button" class="btn btn-primary" wire:click="create">
+            <x-icon name="plus"/>
+            Yangi mahsulot
+        </button>
+    </x-ui.page-header>
+
+    <div class="card mb-4">
+        <div class="grid gap-3 p-4 sm:grid-cols-[1fr_16rem]">
+            <label class="relative block">
+                <span class="label">Qidirish</span>
+                <x-icon name="search" class="pointer-events-none absolute left-3 top-[2.15rem] h-4 w-4 text-ink-400"/>
+                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
+                       placeholder="Nomi yoki kodi…">
+            </label>
+            <label class="block">
+                <span class="label">Kategoriya</span>
+                <select wire:model.live="categoryFilter" class="select">
+                    <option value="">Barchasi</option>
+                    @foreach($this->categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </div>
     </div>
 
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Kod</th>
-            <th>Rasm</th>
-            <th>Nomi</th>
-            <th>Narxi</th>
-            <th>Soni</th>
-            <th>Turi</th>
-            <th>Amallar</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($products as $product)
-            <tr>
-                <td>{{str_pad($product->code, 5, '0', STR_PAD_LEFT)}}</td>
-                <td>
-                    @if ($product->image)
-                        <img src="{{ $product->image }}" alt="{{ $product->name }}" style="width: 70px; height: 70px; padding: 0; margin: 0;" class="object-cover rounded">
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        </svg>
-                    @endif
-                </td>
-                <td>{{ $product->name }}</td>
-                <td>{{ number_format($product->sell_price, 0, ',', ' ') }}</td>
-                <td class="fw-bold">{{ $product->current_stock }}</td>
-                <td>
-                    <p class="category-label" style="background-color: #e0f2fe; color: #1e40af; padding: 8px 12px; border-radius: 6px; font-weight: 500; display: inline-block; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                        {{ $product->category->name }}
-                    </p>
-                </td>
-                <td>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#show_product"
-                       wire:click="show({{ $product->id }})" class="btn btn-info btn-sm">Ko‘rish</a>
-                    <a href="#" class="btn btn-warning btn-sm" wire:click="edit({{ $product->id }})"
-                       data-bs-toggle="modal" data-bs-target="#edit_product"
-                    >Tahrirlash</a>
-                    <button wire:click="delete({{ $product->id }})" class="btn btn-danger btn-sm">O‘chirish</button>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-    <div class="mt-2">
-        {{ $products->links() }}
+    <div class="card">
+        @if($products->isEmpty())
+            <x-ui.empty icon="box" title="Mahsulot yo'q"
+                        description="Menyuga birinchi mahsulotni qo'shing."/>
+        @else
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="w-16">Kod</th>
+                        <th class="w-16"></th>
+                        <th>Nomi</th>
+                        <th>Kategoriya</th>
+                        <th class="text-right">Tannarx</th>
+                        <th class="text-right">Sotuv narxi</th>
+                        <th class="text-center">Zaxira</th>
+                        <th class="text-right">Amallar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($products as $product)
+                        <tr wire:key="product-{{ $product->id }}">
+                            <td class="tabular text-xs font-semibold text-ink-500">{{ $product->formattedCode() }}</td>
+                            <td>
+                                <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-ink-100">
+                                    @if($product->imageUrl())
+                                        <img src="{{ $product->imageUrl() }}" alt="" loading="lazy"
+                                             class="h-full w-full object-cover" onerror="this.remove()">
+                                    @else
+                                        <x-icon name="image" class="h-4 w-4 text-ink-300"/>
+                                    @endif
+                                </span>
+                            </td>
+                            <td>
+                                <span class="font-semibold text-ink-900">{{ $product->name }}</span>
+                                @if($product->discount > 0)
+                                    <span class="badge badge-red ml-1">-{{ $product->discount }}%</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($product->category)
+                                    <span class="badge badge-brand">{{ $product->category->name }}</span>
+                                @else
+                                    <span class="text-ink-300">—</span>
+                                @endif
+                            </td>
+                            <td class="tabular text-right text-ink-500">
+                                {{ number_format((int) $product->price, 0, ',', ' ') }}
+                            </td>
+                            <td class="tabular text-right font-bold text-ink-900">
+                                {{ number_format((int) $product->sell_price, 0, ',', ' ') }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {{ ($product->current_stock ?? 0) > 0 ? 'badge-green' : 'badge-red' }} tabular">
+                                    {{ (int) ($product->current_stock ?? 0) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button" class="btn btn-sm btn-ghost"
+                                            wire:click="edit({{ $product->id }})" title="Tahrirlash">
+                                        <x-icon name="edit"/>
+                                    </button>
+                                    <x-ui.confirm :action="'delete('.$product->id.')'"/>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="border-t border-ink-200/80 px-4 py-3">
+                {{ $products->links() }}
+            </div>
+        @endif
     </div>
 
-    @if ($showProductId)
-        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-md modal-dialog-scrollable">
-                @livewire('admin.products.show-livewire', ['product_id' => $showProductId])
-            </div>
-        </div>
-    @endif
-    @if ($editProductId)
-        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-md modal-dialog-scrollable">
-                @livewire('admin.products.edit-livewire', ['product_id' => $editProductId])
-            </div>
-        </div>
+    @if($showForm)
+        @livewire('admin.products.form-livewire',
+                  ['productId' => $editProductId],
+                  key('product-form-'.($editProductId ?? 'new')))
     @endif
 </div>

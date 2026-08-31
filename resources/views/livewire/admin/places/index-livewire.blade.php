@@ -1,94 +1,100 @@
 <div>
-    <!-- Search and Add Button -->
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <input type="text" wire:model.live="search" class="form-control w-50" placeholder="Joy nomi bo‘yicha qidirish...">
-        <button class="btn btn-success btn-rounded ms-2" data-bs-toggle="modal" data-bs-target="#placeModal" wire:click="$set('place_id', null)">
-            <i class="fa fa-plus"> Joy qo‘shish</i>
+    <x-ui.page-header title="Joylar" subtitle="Stol, so'ri va xonalar">
+        <a href="{{ route('cafe.create') }}" class="btn btn-secondary" wire:navigate>
+            <x-icon name="table"/>
+            Zalga o'tish
+        </a>
+        <button type="button" class="btn btn-primary" wire:click="createPlace">
+            <x-icon name="plus"/>
+            Joy qo'shish
         </button>
-    </div>
+    </x-ui.page-header>
 
-    <!-- Places Table -->
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Nomi</th>
-            <th>Xolati</th>
-            <th>Sig‘imi</th>
-            <th>Amallar</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($places as $index => $place)
-            <tr>
-                <td>{{ $loop->iteration }}</td>
-                <td>{{ $place->name }}</td>
-                <td>
-                    @if($place->status->value == \App\Casts\PlaceStatusEnum::Busy->value)
-                        <span class="badge bg-danger">Band</span>
-                    @elseif($place->status->value == \App\Casts\PlaceStatusEnum::Empty->value)
-                        <span class="badge bg-success">Bo‘sh</span>
-                    @else
-                        <span class="badge bg-secondary">Noma’lum</span>
-                    @endif
-                </td>
-                <td>{{ $place->capacity }}</td>
-                <td>
-                    <button class="btn btn-sm btn-warning" wire:click="edit({{ $place->id }})" data-bs-toggle="modal" data-bs-target="#placeModal">
-                        Tahrirlash
-                    </button>
-                    <button class="btn btn-sm btn-danger" wire:click="delete({{ $place->id }})" onclick="confirm('Rostdan ham o‘chirmoqchimisiz?') || event.stopImmediatePropagation()">
-                        O‘chirish
-                    </button>
-                </td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-
-    {{ $places->links() }}
-
-    <!-- Create/Edit Modal -->
-    <div wire:ignore.self class="modal fade" id="placeModal" tabindex="-1" aria-labelledby="placeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form wire:submit.prevent="{{ $place_id ? 'update' : 'create' }}">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="placeModalLabel">
-                            {{ $place_id ? 'Joyni tahrirlash' : 'Yangi joy qo‘shish' }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
-                    </div>
-                    @if ($errors->any())
-                        <div class="alert alert-danger mt-2 mx-3">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Joy nomi</label>
-                            <input type="text" wire:model.defer="name" class="form-control" placeholder="Masalan: Zaxira xona">
-                            @error('name') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Sig‘imi</label>
-                            <input type="number" wire:model.defer="capacity" class="form-control" placeholder="Masalan: 50">
-                            @error('capacity') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
-                        <button type="submit" class="btn btn-primary">
-                            {{ $place_id ? 'Saqlash' : 'Qo‘shish' }}
-                        </button>
-                    </div>
-                </div>
-            </form>
+    <div class="card mb-4">
+        <div class="p-4">
+            <label class="relative block max-w-md">
+                <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"/>
+                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
+                       placeholder="Joy nomi bo'yicha qidirish…">
+            </label>
         </div>
     </div>
+
+    <div class="card">
+        @if($places->isEmpty())
+            <x-ui.empty icon="table" title="Joy yo'q"
+                        description="Zalda buyurtma qabul qilish uchun stol qo'shing."/>
+        @else
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="w-12">#</th>
+                        <th>Nomi</th>
+                        <th>Holati</th>
+                        <th class="text-center">Sig'imi</th>
+                        <th class="text-right">Amallar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($places as $place)
+                        <tr wire:key="place-row-{{ $place->id }}">
+                            <td class="tabular text-ink-400">{{ $loop->iteration }}</td>
+                            <td class="font-semibold text-ink-900">{{ $place->name }}</td>
+                            <td>
+                                @if($place->isBusy())
+                                    <span class="badge badge-red">Band</span>
+                                @else
+                                    <span class="badge badge-green">Bo'sh</span>
+                                @endif
+                            </td>
+                            <td class="tabular text-center">{{ $place->capacity }}</td>
+                            <td>
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button" class="btn btn-sm btn-ghost"
+                                            wire:click="edit({{ $place->id }})" title="Tahrirlash">
+                                        <x-icon name="edit"/>
+                                    </button>
+                                    <x-ui.confirm :action="'delete('.$place->id.')'"/>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="border-t border-ink-200/80 px-4 py-3">
+                {{ $places->links() }}
+            </div>
+        @endif
+    </div>
+
+    @if($showForm)
+        <x-ui.modal :title="$placeId ? 'Joyni tahrirlash' : 'Yangi joy'" close="closeForm">
+            <form wire:submit="save" class="space-y-4 p-5">
+                <label class="block">
+                    <span class="label">Nomi</span>
+                    <input type="text" wire:model="name" class="input @error('name') input-error @enderror"
+                           placeholder="Masalan: 1-so'ri" autofocus>
+                    @error('name') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <label class="block">
+                    <span class="label">Sig'imi (necha kishilik)</span>
+                    <input type="number" wire:model="capacity" min="1" inputmode="numeric"
+                           class="input tabular @error('capacity') input-error @enderror">
+                    @error('capacity') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <div class="flex justify-end gap-2 border-t border-ink-200/80 pt-4">
+                    <button type="button" class="btn btn-secondary" wire:click="closeForm">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">
+                        <x-icon name="check"/>
+                        Saqlash
+                    </button>
+                </div>
+            </form>
+        </x-ui.modal>
+    @endif
 </div>

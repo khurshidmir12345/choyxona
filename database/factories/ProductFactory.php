@@ -7,31 +7,33 @@ use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
+ * @extends Factory<\App\Models\Product>
  */
 class ProductFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        $company = Company::inRandomOrder()->first();
-        $category = ProductCategory::inRandomOrder()->first();
+        $price = fake()->numberBetween(2_000, 60_000);
 
         return [
-            'name' => $this->faker->words(3, true),
-            'price' => $this->faker->randomFloat(2, 1000, 100000),
-            'sell_price' => $this->faker->randomFloat(2, 1000, 100000),
-            'extra_price' => $this->faker->randomFloat(2, 500, 10000),
-            'image' => $this->faker->imageUrl(),
-            'discount' => 5,
-            'current_stock' => rand(10, 100),
-            'company_id' => $company->id,
-            'category_id' => $category->id,
-            'code' => $this->faker->unique()->randomNumber(5),
+            'name' => ucfirst(fake()->words(2, true)),
+            'price' => $price,
+            'sell_price' => $price + fake()->numberBetween(1_000, 30_000),
+            'extra_price' => fake()->numberBetween(500, 10_000),
+            'image' => null,
+            'discount' => 0,
+            'current_stock' => fake()->numberBetween(10, 100),
+            'company_id' => Company::factory(),
+            'category_id' => ProductCategory::factory(),
+            'code' => fake()->unique()->numberBetween(10_000, 99_999),
         ];
+    }
+
+    public function forCompany(Company $company): static
+    {
+        return $this->state(fn () => [
+            'company_id' => $company->id,
+            'category_id' => ProductCategory::factory()->for($company),
+        ]);
     }
 }

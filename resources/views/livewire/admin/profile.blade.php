@@ -1,248 +1,161 @@
-<div class="container-fluid">
-    <!-- Flash Messages -->
-    @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('message') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+<div>
+    <x-ui.page-header title="Sozlamalar" subtitle="Profil, xavfsizlik va kompaniya ma'lumotlari"/>
 
-    @if (session()->has('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    <div class="mb-4 flex gap-1 rounded-xl border border-ink-200 bg-white p-1 shadow-card">
+        @foreach(['profile' => 'Profil', 'security' => 'Xavfsizlik', 'company' => 'Kompaniya'] as $key => $label)
+            <button type="button" wire:click="$set('tab', '{{ $key }}')"
+                    class="flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors
+                           {{ $tab === $key ? 'bg-brand-600 text-white' : 'text-ink-600 hover:bg-ink-100' }}">
+                {{ $label }}
+            </button>
+        @endforeach
+    </div>
 
-    <div class="row">
-        <!-- User Profile Section -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="fas fa-user text-primary me-2"></i>
-                        Foydalanuvchi Ma'lumotlari
-                    </h5>
+    @if($tab === 'profile')
+        <div class="card max-w-2xl">
+            <div class="card-head"><h2 class="card-title">Foydalanuvchi ma'lumotlari</h2></div>
+            <form wire:submit="updateProfile" class="space-y-4 p-5">
+                <label class="block">
+                    <span class="label">Ism</span>
+                    <input type="text" wire:model="name" class="input @error('name') input-error @enderror">
+                    @error('name') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <label class="block">
+                    <span class="label">Telefon raqam</span>
+                    <input type="text" wire:model="phone_number"
+                           class="input tabular @error('phone_number') input-error @enderror"
+                           placeholder="+998 90 123 45 67">
+                    @error('phone_number') <span class="field-error">{{ $message }}</span> @enderror
+                    <span class="hint">Tizimga shu raqam bilan kirasiz.</span>
+                </label>
+
+                <div class="border-t border-ink-200/80 pt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <x-icon name="check"/>
+                        Saqlash
+                    </button>
                 </div>
-                <div class="card-body">
-                    <form wire:submit.prevent="updateProfile">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Ism</label>
-                                    <input type="text" wire:model="name" class="form-control" required>
-                                    @error('name') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Telefon raqam</label>
-                                    <input type="text" wire:model="phone_number" class="form-control" required>
-                                    @error('phone_number') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" wire:model="email" class="form-control" required>
-                            @error('email') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Saqlash
-                            </button>
-                        </div>
-                    </form>
+            </form>
+        </div>
+    @endif
 
-                    <!-- Password Change Section -->
-                    <hr>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0">Parolni o'zgartirish</h6>
-                        <button type="button" wire:click="togglePasswordForm" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-key me-1"></i>
-                            {{ $showPasswordForm ? 'Bekor qilish' : 'O\'zgartirish' }}
+    @if($tab === 'security')
+        <div class="card max-w-2xl">
+            <div class="card-head"><h2 class="card-title">Parolni o'zgartirish</h2></div>
+            <form wire:submit="updatePassword" class="space-y-4 p-5">
+                <label class="block">
+                    <span class="label">Joriy parol</span>
+                    <input type="password" wire:model="current_password" autocomplete="current-password"
+                           class="input @error('current_password') input-error @enderror">
+                    @error('current_password') <span class="field-error">{{ $message }}</span> @enderror
+                </label>
+
+                <label class="block">
+                    <span class="label">Yangi parol</span>
+                    <input type="password" wire:model="new_password" autocomplete="new-password"
+                           class="input @error('new_password') input-error @enderror">
+                    @error('new_password') <span class="field-error">{{ $message }}</span> @enderror
+                    <span class="hint">Kamida 8 ta belgi.</span>
+                </label>
+
+                <label class="block">
+                    <span class="label">Yangi parolni takrorlang</span>
+                    <input type="password" wire:model="new_password_confirmation" autocomplete="new-password"
+                           class="input">
+                </label>
+
+                <div class="border-t border-ink-200/80 pt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <x-icon name="lock"/>
+                        Parolni yangilash
+                    </button>
+                </div>
+            </form>
+        </div>
+    @endif
+
+    @if($tab === 'company')
+        <div class="card max-w-3xl">
+            <div class="card-head"><h2 class="card-title">Kompaniya</h2></div>
+
+            @if(! $company)
+                <x-ui.empty icon="store" title="Kompaniya biriktirilmagan"
+                            description="Hisobingizga kompaniya bog'lanmagan. Administratorga murojaat qiling."/>
+            @else
+                <form wire:submit="updateCompany" class="space-y-4 p-5">
+                    <div class="flex items-center gap-4">
+                        <span class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-ink-100">
+                            @if($logo)
+                                <img src="{{ $logo->temporaryUrl() }}" alt="" class="h-full w-full object-cover">
+                            @elseif($company->logoUrl())
+                                <img src="{{ $company->logoUrl() }}" alt="" class="h-full w-full object-cover">
+                            @else
+                                <x-icon name="store" class="h-6 w-6 text-ink-300"/>
+                            @endif
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <span class="label">Logotip</span>
+                            <input type="file" wire:model="logo" accept="image/*"
+                                   class="block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0
+                                          file:bg-ink-100 file:px-3 file:py-2 file:text-sm file:font-semibold
+                                          file:text-ink-700 hover:file:bg-ink-200">
+                            @error('logo') <span class="field-error">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="block sm:col-span-2">
+                            <span class="label">Nomi</span>
+                            <input type="text" wire:model="company_name"
+                                   class="input @error('company_name') input-error @enderror">
+                            @error('company_name') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="block">
+                            <span class="label">Telefon</span>
+                            <input type="text" wire:model="company_phone" class="input tabular">
+                            @error('company_phone') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="block">
+                            <span class="label">Email</span>
+                            <input type="email" wire:model="company_email"
+                                   class="input @error('company_email') input-error @enderror">
+                            @error('company_email') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="block sm:col-span-2">
+                            <span class="label">Manzil</span>
+                            <input type="text" wire:model="company_address" class="input">
+                            @error('company_address') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+
+                        <label class="block">
+                            <span class="label">Ochilish vaqti</span>
+                            <input type="time" wire:model="open_time" class="input tabular">
+                        </label>
+
+                        <label class="block">
+                            <span class="label">Yopilish vaqti</span>
+                            <input type="time" wire:model="close_time" class="input tabular">
+                        </label>
+
+                        <label class="block sm:col-span-2">
+                            <span class="label">Izoh</span>
+                            <textarea wire:model="company_description" rows="3" class="textarea"></textarea>
+                            @error('company_description') <span class="field-error">{{ $message }}</span> @enderror
+                        </label>
+                    </div>
+
+                    <div class="border-t border-ink-200/80 pt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <x-icon name="check"/>
+                            Saqlash
                         </button>
                     </div>
-
-                    @if($showPasswordForm)
-                        <form wire:submit.prevent="updatePassword">
-                            <div class="mb-3">
-                                <label class="form-label">Joriy parol</label>
-                                <input type="password" wire:model="current_password" class="form-control" required>
-                                @error('current_password') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Yangi parol</label>
-                                        <input type="password" wire:model="new_password" class="form-control" required>
-                                        @error('new_password') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Yangi parolni tasdiqlang</label>
-                                        <input type="password" wire:model="confirm_password" class="form-control" required>
-                                        @error('confirm_password') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-key me-2"></i>Parolni o'zgartirish
-                                </button>
-                            </div>
-                        </form>
-                    @endif
-                </div>
-            </div>
+                </form>
+            @endif
         </div>
-
-        <!-- Company Information Section -->
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="fas fa-building text-success me-2"></i>
-                        Kompaniya Ma'lumotlari
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($company)
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0">Kompaniya ma'lumotlari</h6>
-                            <button type="button" wire:click="toggleCompanyForm" class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-edit me-1"></i>
-                                {{ $showCompanyForm ? 'Bekor qilish' : 'Tahrirlash' }}
-                            </button>
-                        </div>
-
-                        @if($showCompanyForm)
-                            <form wire:submit.prevent="updateCompany">
-                                <div class="mb-3">
-                                    <label class="form-label">Kompaniya nomi</label>
-                                    <input type="text" wire:model="company_name" class="form-control" required>
-                                    @error('company_name') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Manzil</label>
-                                    <textarea wire:model="company_address" class="form-control" rows="2"></textarea>
-                                    @error('company_address') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Telefon</label>
-                                            <input type="text" wire:model="company_phone" class="form-control">
-                                            @error('company_phone') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" wire:model="company_email" class="form-control">
-                                            @error('company_email') <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Tavsif</label>
-                                    <textarea wire:model="company_description" class="form-control" rows="3"></textarea>
-                                    @error('company_description') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-save me-2"></i>Saqlash
-                                    </button>
-                                </div>
-                            </form>
-                        @else
-                            <!-- Display Company Info -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Kompaniya nomi:</label>
-                                        <p class="mb-0">{{ $company_name }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Telefon:</label>
-                                        <p class="mb-0">{{ $company_phone ?: 'Kiritilmagan' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Email:</label>
-                                        <p class="mb-0">{{ $company_email ?: 'Kiritilmagan' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Manzil:</label>
-                                        <p class="mb-0">{{ $company_address ?: 'Kiritilmagan' }}</p>
-                                    </div>
-                                </div>
-                                @if($company_description)
-                                    <div class="col-12">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Tavsif:</label>
-                                            <p class="mb-0">{{ $company_description }}</p>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                    @else
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Kompaniya ma'lumotlari topilmadi.
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Additional Information -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="fas fa-info-circle text-info me-2"></i>
-                        Qo'shimcha Ma'lumotlar
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Hisob yaratilgan</h6>
-                                <p class="fw-bold">{{ $user->created_at->format('d.m.Y') }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Oxirgi tashrif</h6>
-                                <p class="fw-bold">{{ $user->updated_at->format('d.m.Y H:i') }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Rol</h6>
-                                <p class="fw-bold">{{ $user->role->name ?? 'Aniqlanmagan' }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h6 class="text-muted">Status</h6>
-                                <span class="badge bg-success">Faol</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> 
+    @endif
+</div>

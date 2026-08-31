@@ -2,211 +2,163 @@
 
 namespace App\Livewire\Admin\Orders;
 
-use App\Casts\OrderStatusEnum;
 use App\Casts\OrderTypeEnum;
-use App\Models\Order;
-use App\Models\OrderDetail;
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\OrderService;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
+/**
+ * Yetkazib berish va olib ketish uchun tez sotuv ekrani.
+ * Buyurtma bir urinishda ochiladi va yopiladi.
+ */
 class CreateLivewire extends Component
 {
-    public $categories;
-    public $orderTypes = ['delivery' => 'Dostavka ', 'takeaway' => 'Olib ketish'];
-    public $orderType = 'delivery';
-    public $company_id;
+    use WithCompany;
 
-    public $place;
-    public $products;
-    public $selectedProducts = [];
-    public $orderDiscount;
-    public $orderAmount = 0;
-    public $orderTotalAmount = 0;
-    public $givenAmount = 0;
-    public $changeAmount = 0;
-    public $searchQuery = '';
-    public $selectedCategory = null;
+    public const TYPES = [
+        'delivery' => 'Yetkazib berish',
+        'takeaway' => 'Olib ketish',
+    ];
 
+    public string $orderType = 'takeaway';
 
-    public function mount()
+    /** @var array<int, array{product_id:int,name:string,price:int,discount:int,quantity:int}> */
+    public array $cart = [];
+
+    public int $orderDiscount = 0;
+
+    public $givenAmount = null;
+
+    public string $search = '';
+
+    public ?int $selectedCategory = null;
+
+    #[Computed]
+    public function categories(): Collection
     {
-        $this->company_id = auth()->user()->getCompany()->id;
-        $this->loadCategories();
-        $this->loadProducts();
+        return ProductCategory::query()
+            ->select(['id', 'name'])
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->get();
     }
 
-    public function loadCategories()
+    #[Computed]
+    public function products(): Collection
     {
-        $this->categories = ProductCategory::query()->where('company_id', auth()->user()->getCompany()->id)->get();
+        return Product::query()
+            ->select(Product::CARD_COLUMNS)
+            ->forCompany($this->companyId())
+            ->when($this->selectedCategory, fn ($q) => $q->where('category_id', $this->selectedCategory))
+            ->search($this->search)
+            ->orderBy('name')
+            ->limit(200)
+            ->get();
     }
 
-    public function selectCategory($categoryId = null)
+    public function selectCategory(?int $categoryId = null): void
     {
         $this->selectedCategory = $categoryId;
-        $this->loadProducts();
     }
 
-    public function loadProducts()
+    public function addProduct(int $productId): void
     {
-        $this->products = Product::query()
-            ->where('company_id', auth()->user()->getCompany()->id)
-        ->when($this->selectedCategory, function ($query) {
-            return $query->where('category_id', $this->selectedCategory);
-        })->when($this->searchQuery, function ($query) {
-            return $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->searchQuery . '%')
-                  ->orWhere('code', 'like', '%' . $this->searchQuery . '%');
-            });
-        })->orderByDesc('id')->get();
-    }
+        if (isset($this->cart[$productId])) {
+            $this->cart[$productId]['quantity']++;
 
-    public function updatedSearchQuery()
-    {
-        $this->loadProducts();
-    }
-
-    public function updatedOrderDiscount()
-    {
-        $this->calculateTotals();
-    }
-
-    public function updatedGivenAmount()
-    {
-        $this->calculateChange();
-    }
-
-    public function addProduct(Product $product)
-    {
-        // Check if product already exists in the order
-        $existingProduct = collect($this->selectedProducts)->firstWhere('id', $product->id);
-
-        if ($existingProduct) {
-            // Increment quantity if product already exists
-            $this->selectedProducts = collect($this->selectedProducts)->map(function ($item) use ($product) {
-                if ($item['id'] === $product->id) {
-                    $item['quantity'] += 1;
-                    $item['price'] = $product->sell_price; // Single item price
-                    $total_price = $item['price'] * $item['quantity'];
-                    $discount_amount = $total_price * ((int)$item['discount'] / 100);
-                    $item['total_amount'] = $total_price - (int)$discount_amount;
-                }
-                return $item;
-            })->toArray();
-
-        } else {
-            // Add new product to the order
-            $this->selectedProducts[] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->sell_price, // Single item price
-                'discount' => $product->discount ?? 0,
-                'quantity' => 1,
-                'total_amount' => $product->sell_price * (1 - ((int)$product->discount ?? 0) / 100),
-            ];
-        }
-
-        $this->calculateTotals();
-    }
-
-    public function removeProduct($index)
-    {
-        unset($this->selectedProducts[$index]);
-        $this->selectedProducts = array_values($this->selectedProducts);
-        $this->calculateTotals();
-    }
-
-    public function updateQuantity($index, $quantity)
-    {
-        if ($quantity < 1) {
-            $quantity = 1;
-        }
-
-        $product = $this->selectedProducts[$index];
-        $product['quantity'] = $quantity;
-        $product['price'] = $this->products->firstWhere('id', $product['id'])->sell_price ?? 0; // Single item price
-        $total_price = $product['price'] * $product['quantity'];
-        $discount_amount = $total_price * ($product['discount'] / 100);
-        $product['total_amount'] = (int)$total_price - (int)$discount_amount;
-
-        $this->selectedProducts[$index] = $product;
-        $this->calculateTotals();
-    }
-
-    public function calculateTotals()
-    {
-        // Calculate order amount (sum of all order details total amounts)
-        $this->orderAmount = collect($this->selectedProducts)->sum('total_amount');
-
-        // Calculate order total amount (order amount - order discount)
-        $this->orderTotalAmount = (int)$this->orderAmount - ((int)$this->orderAmount * ((int)$this->orderDiscount) / 100);
-
-        if ($this->orderTotalAmount < 0) {
-            $this->orderTotalAmount = 0;
-        }
-
-        // Calculate change amount
-        $this->calculateChange();
-    }
-
-    public function calculateChange()
-    {
-        $this->changeAmount = (int)$this->givenAmount - (int)$this->orderTotalAmount;
-        if ($this->changeAmount < 0) {
-            $this->changeAmount = 0;
-        }
-    }
-
-    public function saveOrder()
-    {
-        if (empty($this->selectedProducts)) {
-            session()->flash('error', 'Please add at least one product to the order.');
             return;
         }
 
-        // Create the order
-        $order = Order::create([
-            'company_id' => auth()->user()->getCompany()->id,
-            'place_id' => null,
-            'user_id' => auth()->id(),
-            'amount' => $this->orderAmount,
-            'total_amount' => $this->orderTotalAmount,
-            'discount' => $this->orderDiscount ?? 0,
-            'type' => $this->orderType,
-            'status' => OrderStatusEnum::Done->value,
-        ]);
+        $product = Product::query()
+            ->select(['id', 'name', 'sell_price', 'discount'])
+            ->forCompany($this->companyId())
+            ->find($productId);
 
-        // Create order details
-        foreach ($this->selectedProducts as $product) {
-            OrderDetail::query()->create([
-                'order_id' => $order->id,
-                'product_id' => $product['id'],
-                'worker_id' => auth()->id(),
-                'discount' => $product['discount'],
-                'quantity' => $product['quantity'],
-                'price' => $product['price'], // Single item price
-                'total_amount' => $product['total_amount'], // Already calculated with discount
-            ]);
-
-            $old_product = Product::query()->find($product['id']);
-            $old_product->decrement('current_stock', $product['quantity']);
-            $this->dispatch('refresh_index');
+        if (! $product) {
+            return;
         }
 
-        // Clear all variables after successful order creation
-        $this->selectedProducts = [];
-        $this->orderDiscount = 0;
-        $this->orderAmount = 0;
-        $this->orderTotalAmount = 0;
-        $this->givenAmount = 0;
-        $this->changeAmount = 0;
-        $this->searchQuery = '';
-        $this->selectedCategory = null;
-        $this->orderType = 'takeaway';
-        
-        // Redirect to order view or list
-        session()->flash('success', 'Order created successfully!');
-        $this->dispatch('closeModal');
+        $this->cart[$productId] = [
+            'product_id' => $product->id,
+            'name' => $product->name,
+            'price' => (int) $product->sell_price,
+            'discount' => (int) $product->discount,
+            'quantity' => 1,
+        ];
+    }
+
+    public function updateQuantity(int $productId, int $quantity): void
+    {
+        if (! isset($this->cart[$productId])) {
+            return;
+        }
+
+        if ($quantity < 1) {
+            $this->removeProduct($productId);
+
+            return;
+        }
+
+        $this->cart[$productId]['quantity'] = $quantity;
+    }
+
+    public function removeProduct(int $productId): void
+    {
+        unset($this->cart[$productId]);
+    }
+
+    public function updatedOrderDiscount(): void
+    {
+        $this->orderDiscount = max(0, min(100, (int) $this->orderDiscount));
+    }
+
+    #[Computed]
+    public function subtotal(): int
+    {
+        $service = app(OrderService::class);
+
+        return array_reduce(
+            $this->cart,
+            fn (int $carry, array $item) => $carry + $service->lineTotal($item),
+            0
+        );
+    }
+
+    #[Computed]
+    public function total(): int
+    {
+        return app(OrderService::class)->applyDiscount($this->subtotal, $this->orderDiscount);
+    }
+
+    #[Computed]
+    public function change(): int
+    {
+        return max(0, (int) $this->givenAmount - $this->total);
+    }
+
+    public function saveOrder(OrderService $orders)
+    {
+        if ($this->cart === []) {
+            $this->dispatch('toast', type: 'error', message: 'Kamida bitta mahsulot tanlang.');
+
+            return null;
+        }
+
+        $order = $orders->createDirectOrder(
+            (int) $this->companyId(),
+            (int) auth()->id(),
+            OrderTypeEnum::from($this->orderType),
+            array_values($this->cart),
+            $this->orderDiscount,
+        );
+
+        $this->reset(['cart', 'orderDiscount', 'givenAmount', 'search', 'selectedCategory']);
+
+        return redirect()->route('admin.orders.print', $order->id);
     }
 
     public function render()

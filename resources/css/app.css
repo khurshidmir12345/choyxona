@@ -1,3 +1,247 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ------------------------------------------------------------------ asoslar */
+
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-ink-50 text-ink-800 antialiased;
+        font-feature-settings: 'cv02', 'cv03', 'cv04', 'tnum';
+    }
+
+    /* Raqamlar ustunlarda tekis tursin — narx va summalar uchun muhim. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-ink-200;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-ink-300;
+    }
+}
+
+/* -------------------------------------------------------------- komponentlar */
+
+@layer components {
+
+    /* --- tugmalar --- */
+
+    .btn {
+        @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg
+               border border-transparent px-3.5 py-2 text-sm font-semibold leading-5
+               transition-colors duration-100
+               focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+               disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn svg {
+        @apply h-4 w-4 shrink-0;
+    }
+
+    .btn-primary {
+        @apply bg-brand-600 text-white hover:bg-brand-700 focus-visible:outline-brand-600;
+    }
+
+    .btn-secondary {
+        @apply border-ink-200 bg-white text-ink-700 hover:bg-ink-50 focus-visible:outline-ink-400;
+    }
+
+    .btn-ghost {
+        @apply text-ink-600 hover:bg-ink-100 hover:text-ink-900;
+    }
+
+    .btn-danger {
+        @apply bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600;
+    }
+
+    .btn-danger-soft {
+        @apply border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+    }
+
+    .btn-success {
+        @apply bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:outline-emerald-600;
+    }
+
+    .btn-sm {
+        @apply gap-1.5 rounded-md px-2.5 py-1.5 text-xs;
+    }
+
+    .btn-sm svg {
+        @apply h-3.5 w-3.5;
+    }
+
+    .btn-lg {
+        @apply rounded-xl px-5 py-3 text-base;
+    }
+
+    .btn-icon {
+        @apply h-9 w-9 p-0;
+    }
+
+    /* --- kartalar --- */
+
+    .card {
+        @apply rounded-xl border border-ink-200/80 bg-white shadow-card;
+    }
+
+    .card-head {
+        @apply flex flex-wrap items-center justify-between gap-3 border-b border-ink-200/80 px-5 py-4;
+    }
+
+    .card-title {
+        @apply text-sm font-semibold text-ink-900;
+    }
+
+    .card-body {
+        @apply p-5;
+    }
+
+    /* --- forma --- */
+
+    .label {
+        @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-500;
+    }
+
+    .input,
+    .select,
+    .textarea {
+        @apply block w-full rounded-lg border-ink-200 bg-white px-3 py-2 text-sm text-ink-900
+               placeholder:text-ink-400
+               focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25;
+    }
+
+    .input-error {
+        @apply border-red-400 focus:border-red-500 focus:ring-red-500/25;
+    }
+
+    .field-error {
+        @apply mt-1 block text-xs font-medium text-red-600;
+    }
+
+    .hint {
+        @apply mt-1 block text-xs text-ink-500;
+    }
+
+    /* --- nishonlar --- */
+
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold;
+    }
+
+    .badge-gray   { @apply bg-ink-100 text-ink-700; }
+    .badge-green  { @apply bg-emerald-50 text-emerald-700; }
+    .badge-red    { @apply bg-red-50 text-red-700; }
+    .badge-amber  { @apply bg-amber-50 text-amber-700; }
+    .badge-blue   { @apply bg-blue-50 text-blue-700; }
+    .badge-brand  { @apply bg-brand-50 text-brand-700; }
+
+    /* --- jadval --- */
+
+    .table-wrap {
+        @apply overflow-x-auto;
+    }
+
+    .table {
+        @apply w-full border-collapse text-sm;
+    }
+
+    .table thead th {
+        @apply whitespace-nowrap border-b border-ink-200 bg-ink-50/70 px-4 py-3 text-left
+               text-xs font-semibold uppercase tracking-wide text-ink-500;
+    }
+
+    .table tbody td {
+        @apply border-b border-ink-100 px-4 py-3 align-middle text-ink-700;
+    }
+
+    .table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .table tbody tr:hover td {
+        @apply bg-ink-50/60;
+    }
+
+    /* --- yon menyu --- */
+
+    .nav-link {
+        @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-300
+               transition-colors hover:bg-white/5 hover:text-white;
+    }
+
+    .nav-link-active {
+        @apply bg-brand-600/20 text-white;
+    }
+
+    .nav-link svg {
+        @apply h-[18px] w-[18px] shrink-0;
+    }
+
+    .nav-section {
+        @apply px-3 pb-1.5 pt-5 text-[11px] font-semibold uppercase tracking-widest text-ink-500;
+    }
+
+    .nav-sub-link {
+        @apply block rounded-md py-1.5 pl-11 pr-3 text-sm text-ink-400 transition-colors
+               hover:text-white;
+    }
+
+    .nav-sub-link-active {
+        @apply font-semibold text-white;
+    }
+
+    /* --- POS --- */
+
+    .pos-tile {
+        @apply flex flex-col justify-between rounded-xl border border-ink-200 bg-white p-3 text-left
+               shadow-card transition-all duration-100
+               hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-pop
+               active:translate-y-0 active:shadow-card
+               disabled:pointer-events-none disabled:opacity-40;
+    }
+
+    .chip {
+        @apply whitespace-nowrap rounded-full border border-ink-200 bg-white px-3.5 py-1.5
+               text-sm font-medium text-ink-600 transition-colors hover:border-brand-300 hover:text-brand-700;
+    }
+
+    .chip-active {
+        @apply border-brand-600 bg-brand-600 text-white hover:border-brand-600 hover:text-white;
+    }
+
+    /* --- sahifalash (Livewire tailwind mavzusi) --- */
+
+    .pagination-wrap nav {
+        @apply flex items-center justify-between;
+    }
+}
+
+/* --------------------------------------------------------------- chop etish */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}

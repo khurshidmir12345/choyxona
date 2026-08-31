@@ -2,47 +2,221 @@
 
 namespace App\Livewire\Admin\ProductStock;
 
+use App\Casts\ProductStockType;
+use App\Livewire\Concerns\WithCompany;
 use App\Models\Product;
 use App\Models\ProductStock;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Kirim / chiqim jurnali.
+ *
+ * Muhim: har bir yozuv products.current_stock ga ta'sir qiladi, shuning uchun
+ * tahrirlash va o'chirish eski ta'sirni qaytarib, yangisini qo'llaydi.
+ * Ilgari faqat qo'shish zaxirani o'zgartirardi — tahrir va o'chirishdan
+ * keyin qoldiq haqiqatdan uzoqlashib ketardi.
+ */
 class IndexLivewire extends Component
 {
-    use WithPagination;
+    use WithPagination, WithCompany;
 
-    public $editProductId = null;
+    public string $search = '';
 
-    protected $paginationTheme = 'bootstrap';
+    public string $typeFilter = '';
 
-    protected $listeners = ['productStockCreated' => 'render', 'closeEditModal'];
+    public bool $showForm = false;
 
+    public ?int $stockId = null;
 
-    public function edit($product_id)
+    public $product_id = '';
+
+    public $quantity = '';
+
+    public string $type = 'add';
+
+    public function updatedSearch(): void
     {
-       $this->editProductId = $product_id;
+        $this->resetPage();
     }
 
-    public function closeEditModal()
+    public function updatedTypeFilter(): void
     {
-        $this->editProductId = null;
+        $this->resetPage();
     }
 
-    public function delete($stock_id)
+    #[Computed]
+    public function products()
     {
-        $productStock = ProductStock::findOrFail($stock_id);
-        $productStock->delete();
-        $this->render();
+        return Product::query()
+            ->select(['id', 'name', 'code', 'current_stock'])
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function createMovement(): void
+    {
+        $this->reset(['stockId', 'product_id', 'quantity']);
+        $this->type = 'add';
+        $this->resetValidation();
+        $this->showForm = true;
+    }
+
+    public function edit(int $id): void
+    {
+        $stock = ProductStock::query()
+            ->select(['id', 'product_id', 'quantity', 'type'])
+            ->forCompany($this->companyId())
+            ->find($id);
+
+        if (! $stock) {
+            return;
+        }
+
+        $this->stockId = $stock->id;
+        $this->product_id = $stock->product_id;
+        $this->quantity = $stock->quantity;
+        $this->type = $stock->type->value;
+        $this->resetValidation();
+        $this->showForm = true;
+    }
+
+    public function save(): void
+    {
+        $data = $this->validate([
+            'product_id' => [
+                'required',
+                Rule::exists('products', 'id')->where('company_id', $this->companyId()),
+            ],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'type' => ['required', Rule::in(ProductStockType::values())],
+        ], [
+            'product_id.required' => 'Mahsulotni tanlang.',
+            'product_id.exists' => 'Bunday mahsulot yo\'q.',
+            'quantity.required' => 'Miqdorni kiriting.',
+            'quantity.min' => 'Miqdor kamida 1 bo\'lishi kerak.',
+            'type.required' => 'Turini tanlang.',
+        ]);
+
+        $type = ProductStockType::from($data['type']);
+        $delta = $type === ProductStockType::Add ? (int) $data['quantity'] : -(int) $data['quantity'];
+
+        $existing = $this->stockId
+            ? ProductStock::query()->forCompany($this->companyId())->find($this->stockId)
+            : null;
+
+        if ($this->stockId && ! $existing) {
+            return;
+        }
+
+        $previousDelta = $existing?->stockDelta() ?? 0;
+        $previousProductId = $existing?->product_id;
+
+        // Chiqim zaxiradan ko'p bo'lmasin.
+        $available = (int) Product::query()
+            ->forCompany($this->companyId())
+            ->whereKey($data['product_id'])
+            ->value('current_stock');
+
+        if ($previousProductId === (int) $data['product_id']) {
+            $available -= $previousDelta;
+        }
+
+        if ($available + $delta < 0) {
+            $this->addError('quantity', "Zaxirada {$available} ta bor, chiqim shundan oshib ketdi.");
+
+            return;
+        }
+
+        DB::transaction(function () use ($existing, $data, $type, $delta, $previousDelta, $previousProductId) {
+            if ($existing && $previousProductId) {
+                $this->applyStockDelta($previousProductId, -$previousDelta);
+            }
+
+            if ($existing) {
+                $existing->update([
+                    'product_id' => (int) $data['product_id'],
+                    'quantity' => (int) $data['quantity'],
+                    'type' => $type,
+                ]);
+            } else {
+                ProductStock::create([
+                    'company_id' => $this->companyId(),
+                    'product_id' => (int) $data['product_id'],
+                    'quantity' => (int) $data['quantity'],
+                    'type' => $type,
+                ]);
+            }
+
+            $this->applyStockDelta((int) $data['product_id'], $delta);
+        });
+
+        $this->closeForm();
+        unset($this->products);
+        $this->dispatch('toast', type: 'success', message: 'Harakat saqlandi.');
+    }
+
+    public function closeForm(): void
+    {
+        $this->showForm = false;
+        $this->reset(['stockId', 'product_id', 'quantity']);
+        $this->type = 'add';
+        $this->resetValidation();
+    }
+
+    public function delete(int $id): void
+    {
+        $stock = ProductStock::query()
+            ->select(['id', 'product_id', 'quantity', 'type'])
+            ->forCompany($this->companyId())
+            ->find($id);
+
+        if (! $stock) {
+            return;
+        }
+
+        DB::transaction(function () use ($stock) {
+            $this->applyStockDelta((int) $stock->product_id, -$stock->stockDelta());
+            $stock->delete();
+        });
+
+        unset($this->products);
+        $this->dispatch('toast', type: 'success', message: 'Harakat o\'chirildi.');
+    }
+
+    private function applyStockDelta(int $productId, int $delta): void
+    {
+        if ($delta === 0) {
+            return;
+        }
+
+        Product::query()
+            ->whereKey($productId)
+            ->update(['current_stock' => DB::raw('COALESCE(current_stock, 0) + '.$delta)]);
     }
 
     public function render()
     {
+        $movements = ProductStock::query()
+            ->select(['id', 'product_id', 'quantity', 'type', 'created_at'])
+            ->forCompany($this->companyId())
+            ->with(['product:id,name,code'])
+            ->when($this->typeFilter, fn ($q) => $q->where('type', $this->typeFilter))
+            ->when($this->search, fn ($q) => $q->whereHas(
+                'product',
+                fn ($p) => $p->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('code', 'like', '%'.$this->search.'%')
+            ))
+            ->latest('id')
+            ->paginate(15);
 
-        $companyId = auth()->user()->getCompany()->id;
-        $productStock = ProductStock::where('company_id', $companyId)->orderByDesc("id")->paginate(15);
-        $products = Product::where('company_id', $companyId)->orderByDesc("id")->get();
-
-
-        return view('livewire.admin.product-stock.index-livewire', compact('productStock', 'products'));
+        return view('livewire.admin.product-stock.index-livewire', [
+            'movements' => $movements,
+            'stockTypes' => ProductStockType::cases(),
+        ]);
     }
 }
