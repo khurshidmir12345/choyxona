@@ -1,4 +1,4 @@
-<div class="flex min-h-[calc(100vh-4rem)] flex-col">
+<div>
     @include('livewire.admin.orders.partials.pos', [
         'mode' => 'quick',
         'heading' => 'Tez sotuv',

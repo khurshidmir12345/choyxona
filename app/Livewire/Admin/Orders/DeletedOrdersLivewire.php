@@ -14,6 +14,9 @@ class DeletedOrdersLivewire extends Component
 {
     use WithPagination, WithCompany;
 
+    /** Shablon Bootstrap 5 asosida — sahifalash ham shunga mos. */
+    protected $paginationTheme = 'bootstrap';
+
     public string $fromDate = '';
 
     public string $toDate = '';

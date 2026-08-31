@@ -1,0 +1,634 @@
+/*
+ * Choyxona POS — shablonga qo'shimcha uslublar.
+ * Shablon (Corona) o'z Bootstrap 5 ni olib keladi; bu yerda faqat
+ * shablonda yo'q bo'lgan narsalar: sotuv ekrani, stol kartalari,
+ * statistika kartalari. Ranglar shablon palitrasidan olingan.
+ */
+
+:root {
+    --pos-primary: #1F3BB3;
+    --pos-tale: #7DA0FA;
+    --pos-dark-blue: #4747A1;
+    --pos-light-blue: #7978E9;
+    --pos-pink: #F3797E;
+    --pos-success: #4DA761;
+    --pos-warning: #E29E09;
+    --pos-info: #00AAB7;
+    --pos-border: #eef0f7;
+    --pos-radius: 14px;
+}
+
+/* ------------------------------------------------------- sahifa sarlavhasi */
+
+.pos-page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.pos-page-head h3 {
+    margin: 0;
+    font-weight: 700;
+    color: #1e283d;
+}
+
+.pos-page-head p {
+    margin: 4px 0 0;
+    color: #8e94a9;
+    font-size: 0.875rem;
+}
+
+.pos-page-head .pos-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* --------------------------------------------------- statistika kartalari */
+
+.stat-card {
+    border: 0;
+    border-radius: var(--pos-radius);
+    color: #fff;
+    height: 100%;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px -12px rgba(30, 40, 61, .35);
+}
+
+.stat-card .card-body {
+    padding: 1.35rem 1.5rem;
+}
+
+.stat-card .stat-label {
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .85;
+    margin: 0;
+}
+
+.stat-card .stat-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: .55rem 0 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-card .stat-value small {
+    font-size: .8rem;
+    font-weight: 600;
+    opacity: .8;
+}
+
+.stat-card .stat-hint {
+    margin: .5rem 0 0;
+    font-size: .78rem;
+    opacity: .85;
+}
+
+.stat-card .stat-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .2);
+    font-size: 1.3rem;
+}
+
+.stat-blue   { background: var(--pos-tale); }
+.stat-indigo { background: var(--pos-dark-blue); }
+.stat-violet { background: var(--pos-light-blue); }
+.stat-pink   { background: var(--pos-pink); }
+.stat-green  { background: var(--pos-success); }
+.stat-amber  { background: var(--pos-warning); }
+.stat-teal   { background: var(--pos-info); }
+
+/* Oq fonli yengil variant — ikkilamchi ko'rsatkichlar uchun */
+.stat-card.stat-light {
+    background: #fff;
+    color: #1e283d;
+    border: 1px solid var(--pos-border);
+}
+
+.stat-card.stat-light .stat-label { color: #8e94a9; opacity: 1; }
+.stat-card.stat-light .stat-hint  { color: #8e94a9; opacity: 1; }
+
+/* ------------------------------------------------------------ stol kartasi */
+
+.table-card {
+    border: 2px solid transparent;
+    border-radius: var(--pos-radius);
+    background: #fff;
+    padding: 1.15rem 1.25rem;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.table-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px -16px rgba(30, 40, 61, .45);
+}
+
+.table-card.is-free    { border-color: #cfe9d6; }
+.table-card.is-busy    { border-color: #f8ccce; background: #fff8f8; }
+.table-card:hover      { border-color: var(--pos-primary); }
+
+.table-card .table-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e283d;
+    margin: 0;
+}
+
+.table-card .table-meta {
+    color: #8e94a9;
+    font-size: .8rem;
+    margin: .25rem 0 0;
+}
+
+.table-card .table-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.table-card .table-amount {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e283d;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- sotuv ekrani */
+
+.pos-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+@media (min-width: 992px) {
+    .pos-grid { grid-template-columns: 1fr 360px; }
+}
+
+@media (min-width: 1600px) {
+    .pos-grid { grid-template-columns: 1fr 400px; }
+}
+
+.pos-categories {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+}
+
+.pos-categories::-webkit-scrollbar { height: 6px; }
+.pos-categories::-webkit-scrollbar-thumb { background: #dfe3ee; border-radius: 3px; }
+
+.pos-chip {
+    flex: 0 0 auto;
+    border: 1px solid #e3e6f0;
+    background: #fff;
+    color: #5a6377;
+    border-radius: 50px;
+    padding: .45rem 1.1rem;
+    font-size: .85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all .15s ease;
+}
+
+.pos-chip:hover { border-color: var(--pos-primary); color: var(--pos-primary); }
+
+.pos-chip.active {
+    background: var(--pos-primary);
+    border-color: var(--pos-primary);
+    color: #fff;
+}
+
+.pos-products {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (min-width: 576px) { .pos-products { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 992px) { .pos-products { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px){ .pos-products { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1600px){ .pos-products { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+.pos-tile {
+    position: relative;
+    border: 1px solid var(--pos-border);
+    border-radius: var(--pos-radius);
+    background: #fff;
+    padding: 10px;
+    text-align: left;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.pos-tile:hover {
+    transform: translateY(-3px);
+    border-color: var(--pos-primary);
+    box-shadow: 0 14px 26px -16px rgba(31, 59, 179, .55);
+}
+
+.pos-tile.in-cart {
+    border-color: var(--pos-primary);
+    box-shadow: 0 0 0 2px rgba(31, 59, 179, .18);
+}
+
+.pos-tile .tile-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    background: #f4f6fb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 9px;
+}
+
+.pos-tile .tile-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pos-tile .tile-thumb i   { font-size: 1.8rem; color: #c6cbdb; }
+
+.pos-tile .tile-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #1e283d;
+    line-height: 1.3;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.2em;
+}
+
+.pos-tile .tile-price {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--pos-primary);
+    font-variant-numeric: tabular-nums;
+    margin: 6px 0 0;
+}
+
+.pos-tile .tile-stock {
+    font-size: .72rem;
+    font-weight: 600;
+    color: #9aa1b5;
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-tile .tile-stock.is-empty { color: var(--pos-pink); }
+
+.pos-tile .tile-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    border-radius: 50px;
+    background: var(--pos-primary);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px -3px rgba(31, 59, 179, .7);
+}
+
+/* ---------------------------------------------------------------- savat */
+
+.pos-cart {
+    border: 0;
+    border-radius: var(--pos-radius);
+    position: sticky;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 120px);
+}
+
+.pos-cart .cart-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--pos-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pos-cart .cart-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.pos-cart .cart-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: .8rem 1.25rem;
+    border-bottom: 1px solid #f5f6fa;
+}
+
+.pos-cart .cart-line-name {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #1e283d;
+    margin: 0;
+}
+
+.pos-cart .cart-line-price {
+    font-size: .75rem;
+    color: #9aa1b5;
+    margin: 2px 0 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-cart .qty-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    line-height: 1;
+}
+
+.pos-cart .qty-value {
+    min-width: 26px;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-cart .cart-foot {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--pos-border);
+    background: #fafbff;
+    border-radius: 0 0 var(--pos-radius) var(--pos-radius);
+}
+
+.pos-cart .cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 3px 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.pos-cart .cart-total-row.grand {
+    border-top: 1px solid #e5e8f2;
+    margin-top: 6px;
+    padding-top: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* Kichik ekranda savat mahsulotlardan oldin tursin */
+@media (max-width: 991.98px) {
+    .pos-grid .pos-cart-wrap { order: -1; }
+    .pos-cart { position: static; max-height: none; }
+}
+
+/* ------------------------------------------------------------- boshqalar */
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.empty-state i {
+    font-size: 2.6rem;
+    color: #ccd2e3;
+    display: block;
+    margin-bottom: .65rem;
+}
+
+.empty-state h6 { font-weight: 700; color: #5a6377; }
+.empty-state p  { color: #9aa1b5; font-size: .875rem; margin: .25rem 0 0; }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+.table thead th {
+    font-size: .75rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #8e94a9;
+    font-weight: 600;
+}
+
+.thumb-sm {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    object-fit: cover;
+    background: #f4f6fb;
+}
+
+/* Diagramma — kutubxonasiz, sof CSS */
+.mini-chart {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    height: 220px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.mini-chart .chart-col {
+    flex: 1 0 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.mini-chart .chart-bars {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+}
+
+.mini-chart .chart-bars span {
+    width: 46%;
+    border-radius: 4px 4px 0 0;
+    transition: opacity .15s ease;
+}
+
+.mini-chart .bar-sales    { background: var(--pos-tale); }
+.mini-chart .bar-expenses { background: var(--pos-warning); }
+
+.mini-chart .chart-label {
+    font-size: .68rem;
+    color: #9aa1b5;
+    white-space: nowrap;
+}
+
+.mini-chart .chart-col:hover .chart-tip { display: block; }
+
+.mini-chart .chart-tip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e283d;
+    color: #fff;
+    font-size: .72rem;
+    line-height: 1.4;
+    padding: 6px 9px;
+    border-radius: 8px;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.rank-bar {
+    height: 6px;
+    border-radius: 50px;
+    background: #eef0f7;
+    overflow: hidden;
+}
+
+.rank-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 50px;
+    background: var(--pos-tale);
+}
+
+/* ------------------------------------------------------------ kirish sahifasi */
+/* Shablonda auth uchun fon rasmlari yo'q — o'rniga gradient ishlatamiz. */
+
+.auth .login-brand-bg {
+    background: linear-gradient(135deg, #1F3BB3 0%, #4747A1 55%, #7978E9 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth .login-brand-bg::after {
+    content: '';
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .07);
+    top: -140px;
+    right: -140px;
+}
+
+.auth .login-brand-bg::before {
+    content: '';
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .06);
+    bottom: -120px;
+    left: -90px;
+}
+
+.auth .login-brand-inner {
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    padding: 3.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.auth .login-brand-inner h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.auth .login-brand-inner p { opacity: .85; }
+
+.auth .login-brand-inner ul { list-style: none; padding: 0; margin: 2rem 0 0; }
+
+.auth .login-brand-inner li {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: .75rem;
+    opacity: .9;
+    font-size: .9rem;
+}
+
+.auth .login-brand-inner li i {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+}
+
+/* ------------------------------------------------- shablon ustidan tuzatishlar */
+
+/* Uzun (ayniqsa manfiy) summalar karta ichida ikki qatorga bo'linib ketardi */
+.stat-card .stat-value {
+    white-space: nowrap;
+    font-size: clamp(1.15rem, 1.55vw, 1.6rem);
+}
+
+.stat-card .stat-value small { white-space: nowrap; }
+
+.stat-card .stat-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Shablonda "select.form-select" uchun color: #c9c8c8 berilgan —
+   tanlangan qiymat o'chirilgandek och kulrang ko'rinardi.
+   Ustunlik uchun bu yerda ham element + klass ishlatiladi. */
+select.form-select,
+select.form-select:focus {
+    color: #1e283d;
+}
+
+select.form-select option { color: #1e283d; }
+
+/* Shablon karta sarlavhalarini "Har So'zni Bosh Harf" qilib yozadi —
+   o'zbekcha matnda bu g'alati ko'rinadi */
+.card .card-title { text-transform: none; }
+
+/* Jadval ichidagi amal tugmalari bir xil o'lchamda tursin */
+.table .btn-sm {
+    padding: .35rem .6rem;
+    line-height: 1;
+}
+
+.table .btn-sm i { font-size: 1rem; }

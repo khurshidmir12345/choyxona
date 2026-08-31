@@ -14,6 +14,9 @@ class IndexLivewire extends Component
 {
     use WithPagination, WithCompany;
 
+    /** Shablon Bootstrap 5 asosida — sahifalash ham shunga mos. */
+    protected $paginationTheme = 'bootstrap';
+
     public const PAYMENT_METHODS = ['Naqd', 'Karta', 'Bank o\'tkazmasi', 'Boshqa'];
 
     public string $search = '';

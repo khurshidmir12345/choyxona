@@ -1,64 +1,57 @@
 <!DOCTYPE html>
-<html lang="uz" class="h-full">
+<html lang="uz">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Choyxona POS' }}</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pos.css') }}?v={{ filemtime(public_path('css/pos.css')) }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
 </head>
-<body class="h-full bg-ink-950">
-<div class="flex min-h-full">
+<body>
+<div class="container-scroller">
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+        <div class="content-wrapper d-flex align-items-stretch auth px-0 py-0">
+            <div class="row w-100 mx-0">
 
-    {{-- Chapdagi brend paneli (katta ekranda) --}}
-    <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-ink-950 p-12 lg:flex">
-        <div class="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-600/20 blur-3xl"></div>
-        <div class="absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-brand-500/10 blur-3xl"></div>
+                {{-- Brend paneli --}}
+                <div class="col-lg-6 d-none d-lg-block px-0 login-brand-bg">
+                    <div class="login-brand-inner">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="mdi mdi-store" style="font-size:1.8rem"></i>
+                            <span class="fw-bold fs-5">Choyxona POS</span>
+                        </div>
 
-        <div class="relative flex items-center gap-3">
-            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white">
-                <x-icon name="store" class="h-5 w-5"/>
-            </span>
-            <span class="text-lg font-bold text-white">Choyxona POS</span>
-        </div>
+                        <div>
+                            <h1>Zal, yetkazib berish va olib ketish — bitta tizimda.</h1>
+                            <p class="mt-3">
+                                Stollarni boshqaring, chek chiqaring, zaxira va foydani real vaqtda kuzating.
+                            </p>
+                            <ul>
+                                <li><i class="mdi mdi-check"></i> Stollar bo'yicha ochiq hisoblar</li>
+                                <li><i class="mdi mdi-check"></i> Tez sotuv va chek chiqarish</li>
+                                <li><i class="mdi mdi-check"></i> Zaxira va xarajat nazorati</li>
+                            </ul>
+                        </div>
 
-        <div class="relative max-w-md">
-            <h1 class="text-3xl font-bold leading-tight text-white">
-                Zal, yetkazib berish va olib ketish — bitta tizimda.
-            </h1>
-            <p class="mt-4 text-ink-400">
-                Stollarni boshqaring, chek chiqaring, zaxira va foydani real vaqtda kuzating.
-            </p>
+                        <small style="opacity:.6">© {{ date('Y') }} Choyxona POS</small>
+                    </div>
+                </div>
 
-            <ul class="mt-8 space-y-3">
-                @foreach(['Stollar bo\'yicha ochiq hisoblar', 'Tez sotuv va chek chiqarish', 'Zaxira va xarajat nazorati'] as $feature)
-                    <li class="flex items-center gap-3 text-sm text-ink-300">
-                        <span class="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600/20 text-brand-300">
-                            <x-icon name="check" class="h-3 w-3"/>
-                        </span>
-                        {{ $feature }}
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-
-        <p class="relative text-xs text-ink-600">© {{ date('Y') }} Choyxona POS</p>
-    </div>
-
-    {{-- Forma --}}
-    <div class="flex w-full items-center justify-center bg-ink-50 p-6 lg:w-1/2">
-        <div class="w-full max-w-sm">
-            <div class="mb-8 flex items-center gap-3 lg:hidden">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white">
-                    <x-icon name="store" class="h-5 w-5"/>
-                </span>
-                <span class="text-lg font-bold text-ink-900">Choyxona POS</span>
+                {{-- Forma --}}
+                <div class="col-lg-6 col-12 d-flex align-items-center justify-content-center">
+                    <div class="auth-form-light w-100 py-5 px-4 px-sm-5" style="max-width: 460px;">
+                        {{ $slot }}
+                    </div>
+                </div>
             </div>
-
-            {{ $slot }}
         </div>
     </div>
 </div>
+
+<script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
 </body>
 </html>

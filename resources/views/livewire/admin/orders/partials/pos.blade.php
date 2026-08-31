@@ -1,6 +1,6 @@
 {{--
     Ikkala sotuv ekrani uchun umumiy tartib: chapda mahsulot to'ri,
-    o'ngda savat. Ilgari bu ikki joyda ikki xil qilib yozilgan edi.
+    o'ngda savat.
 
     Kutiladigan o'zgaruvchilar:
       heading, subheading, products, categories, cart, subtotal, total, change,
@@ -11,101 +11,99 @@
     $orderService = app(\App\Services\OrderService::class);
 @endphp
 
-<div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_22rem] xl:grid-cols-[1fr_24rem]">
+<div class="pos-grid">
 
     {{-- ------------------------------------------------------- mahsulotlar --}}
-    <div class="flex min-w-0 flex-col">
-        <div class="mb-4 flex flex-wrap items-center gap-3">
-            @if($backAction)
-                <button type="button" class="btn btn-secondary btn-icon" wire:click="{{ $backAction }}"
-                        aria-label="Orqaga">
-                    <x-icon name="chevron-left"/>
-                </button>
-            @endif
-            <div class="min-w-0">
-                <h1 class="truncate text-lg font-bold text-ink-900">{{ $heading }}</h1>
-                <p class="text-sm text-ink-500">{{ $subheading }}</p>
+    <div>
+        <div class="pos-page-head">
+            <div class="d-flex align-items-center gap-3">
+                @if($backAction)
+                    <button type="button" class="btn btn-inverse-primary btn-sm rounded-circle"
+                            style="width:38px;height:38px;padding:0" wire:click="{{ $backAction }}" title="Orqaga">
+                        <i class="mdi mdi-arrow-left"></i>
+                    </button>
+                @endif
+                <div>
+                    <h3>{{ $heading }}</h3>
+                    <p>{{ $subheading }}</p>
+                </div>
             </div>
 
             @if($mode === 'quick')
-                <div class="ml-auto">
-                    <select wire:model.live="orderType" class="select w-44 font-semibold">
+                <div class="pos-head-actions">
+                    <select wire:model.live="orderType" class="form-select fw-semibold" style="min-width: 200px;">
                         @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPES as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
+                            <option value="{{ $value }}" @selected($orderType === $value)>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
             @endif
         </div>
 
-        <div class="mb-3 flex flex-wrap items-center gap-2">
-            <label class="relative min-w-[14rem] flex-1">
-                <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"/>
-                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
-                       placeholder="Nomi yoki kodi bo'yicha qidirish…">
-            </label>
+        <div class="input-group mb-3">
+            <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
+            <input type="search" class="form-control border-start-0 ps-0"
+                   wire:model.live.debounce.300ms="search"
+                   placeholder="Mahsulot nomi yoki kodi bo'yicha qidirish...">
         </div>
 
-        <div class="mb-4 flex gap-2 overflow-x-auto pb-1">
+        <div class="pos-categories">
             <button type="button" wire:click="$set('selectedCategory', null)"
-                    class="chip {{ $selectedCategory === null ? 'chip-active' : '' }}">
+                    class="pos-chip {{ $selectedCategory === null ? 'active' : '' }}">
                 Barchasi
             </button>
             @foreach($categories as $category)
                 <button type="button" wire:key="cat-{{ $category->id }}"
                         wire:click="$set('selectedCategory', {{ $category->id }})"
-                        class="chip {{ (int) $selectedCategory === $category->id ? 'chip-active' : '' }}">
+                        class="pos-chip {{ (int) $selectedCategory === $category->id ? 'active' : '' }}">
                     {{ $category->name }}
                 </button>
             @endforeach
         </div>
 
         @if($products->isEmpty())
-            <div class="card flex-1">
-                <x-ui.empty icon="search" title="Mahsulot topilmadi"
-                            description="Qidiruv so'zini yoki kategoriyani o'zgartirib ko'ring."/>
+            <div class="card">
+                <div class="card-body empty-state">
+                    <i class="mdi mdi-food-off"></i>
+                    <h6>Mahsulot topilmadi</h6>
+                    <p>Qidiruv so'zini yoki kategoriyani o'zgartirib ko'ring.</p>
+                </div>
             </div>
         @else
-            <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div class="pos-products">
                 @foreach($products as $product)
                     @php $inCart = $cart[$product->id]['quantity'] ?? 0; @endphp
                     <button type="button" wire:key="prod-{{ $product->id }}"
                             wire:click="addProduct({{ $product->id }})"
-                            class="pos-tile relative {{ $inCart ? 'border-brand-400 ring-1 ring-brand-400' : '' }}">
+                            class="pos-tile {{ $inCart ? 'in-cart' : '' }}">
 
                         @if($inCart)
-                            <span class="tabular absolute -right-1.5 -top-1.5 z-10 flex h-6 min-w-6 items-center justify-center
-                                         rounded-full bg-brand-600 px-1.5 text-xs font-bold text-white shadow">
-                                {{ $inCart }}
-                            </span>
+                            <span class="tile-count">{{ $inCart }}</span>
                         @endif
 
-                        <span class="mb-2 flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-lg bg-ink-100">
+                        <span class="tile-thumb">
                             @if($product->imageUrl())
                                 <img src="{{ $product->imageUrl() }}" alt="" loading="lazy"
-                                     class="h-full w-full object-cover" onerror="this.remove()">
+                                     onerror="this.remove()">
                             @else
-                                <x-icon name="image" class="h-7 w-7 text-ink-300"/>
+                                <i class="mdi mdi-image-outline"></i>
                             @endif
                         </span>
 
-                        <span class="line-clamp-2 text-sm font-semibold leading-snug text-ink-900">
-                            {{ $product->name }}
-                        </span>
+                        <p class="tile-name">{{ $product->name }}</p>
 
-                        <span class="mt-2 flex items-end justify-between gap-1">
-                            <span>
-                                <span class="tabular block text-sm font-bold text-brand-700">
-                                    {{ number_format((int) $product->sell_price, 0, ',', ' ') }}
+                        <p class="tile-price">
+                            {{ number_format((int) $product->sell_price, 0, ',', ' ') }}
+                            @if($product->discount > 0)
+                                <span class="badge badge-danger ms-1" style="font-size:.65rem">
+                                    -{{ $product->discount }}%
                                 </span>
-                                @if($product->discount > 0)
-                                    <span class="badge badge-red mt-1">-{{ $product->discount }}%</span>
-                                @endif
-                            </span>
-                            <span class="tabular text-[11px] font-medium
-                                         {{ ($product->current_stock ?? 0) > 0 ? 'text-ink-400' : 'text-red-500' }}">
-                                {{ (int) ($product->current_stock ?? 0) }} dona
-                            </span>
+                            @endif
+                        </p>
+
+                        <span class="tile-stock {{ ($product->current_stock ?? 0) > 0 ? '' : 'is-empty' }}">
+                            <i class="mdi mdi-package-variant-closed"></i>
+                            {{ (int) ($product->current_stock ?? 0) }} dona
                         </span>
                     </button>
                 @endforeach
@@ -114,57 +112,57 @@
     </div>
 
     {{-- ------------------------------------------------------------- savat --}}
-    <div class="order-first lg:order-none lg:sticky lg:top-20 lg:self-start">
-        <div class="card flex max-h-[calc(100vh-6rem)] flex-col">
-            <div class="card-head">
-                <h2 class="card-title flex items-center gap-2">
-                    <x-icon name="cart" class="h-4 w-4 text-ink-400"/>
+    <div class="pos-cart-wrap">
+        <div class="card pos-cart">
+            <div class="cart-head">
+                <h6 class="mb-0 fw-bold">
+                    <i class="mdi mdi-cart-outline text-primary me-1"></i>
                     Savat
-                    <span class="badge badge-gray">{{ count($cart) }}</span>
-                </h2>
+                    <span class="badge badge-outline-primary ms-1">{{ count($cart) }}</span>
+                </h6>
                 @if(count($cart))
-                    <span class="tabular text-sm font-bold text-ink-900">
-                        {{ number_format($total, 0, ',', ' ') }} so'm
-                    </span>
+                    <span class="fw-bold tabular">{{ number_format($total, 0, ',', ' ') }} so'm</span>
                 @endif
             </div>
 
             @if(empty($cart))
-                <x-ui.empty icon="cart" title="Savat bo'sh"
-                            description="Mahsulot ustiga bosing — u shu yerga tushadi."/>
+                <div class="card-body empty-state">
+                    <i class="mdi mdi-cart-off"></i>
+                    <h6>Savat bo'sh</h6>
+                    <p>Mahsulot ustiga bosing — u shu yerga tushadi.</p>
+                </div>
             @else
-                <div class="min-h-0 flex-1 divide-y divide-ink-100 overflow-y-auto">
+                <div class="cart-body">
                     @foreach($cart as $line)
-                        <div class="flex items-start gap-2 px-4 py-3" wire:key="cart-{{ $line['product_id'] }}">
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-semibold text-ink-900">{{ $line['name'] }}</p>
-                                <p class="tabular mt-0.5 text-xs text-ink-500">
+                        <div class="cart-line" wire:key="cart-{{ $line['product_id'] }}">
+                            <div class="flex-grow-1 min-w-0">
+                                <p class="cart-line-name text-truncate">{{ $line['name'] }}</p>
+                                <p class="cart-line-price">
                                     {{ number_format($line['price'], 0, ',', ' ') }} so'm
                                     @if($line['discount'] > 0)
-                                        <span class="ml-1 font-semibold text-red-600">-{{ $line['discount'] }}%</span>
+                                        <span class="text-danger fw-semibold">-{{ $line['discount'] }}%</span>
                                     @endif
                                 </p>
                             </div>
 
-                            <div class="flex shrink-0 items-center gap-1">
-                                <button type="button" class="btn btn-sm btn-secondary h-7 w-7 p-0"
-                                        wire:click="updateQuantity({{ $line['product_id'] }}, {{ $line['quantity'] - 1 }})"
-                                        aria-label="Kamaytirish">
-                                    <x-icon name="minus"/>
+                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                <button type="button" class="btn btn-inverse-primary qty-btn"
+                                        wire:click="updateQuantity({{ $line['product_id'] }}, {{ $line['quantity'] - 1 }})">
+                                    <i class="mdi mdi-minus"></i>
                                 </button>
-                                <span class="tabular w-7 text-center text-sm font-bold">{{ $line['quantity'] }}</span>
-                                <button type="button" class="btn btn-sm btn-secondary h-7 w-7 p-0"
-                                        wire:click="updateQuantity({{ $line['product_id'] }}, {{ $line['quantity'] + 1 }})"
-                                        aria-label="Ko'paytirish">
-                                    <x-icon name="plus"/>
+                                <span class="qty-value">{{ $line['quantity'] }}</span>
+                                <button type="button" class="btn btn-inverse-primary qty-btn"
+                                        wire:click="updateQuantity({{ $line['product_id'] }}, {{ $line['quantity'] + 1 }})">
+                                    <i class="mdi mdi-plus"></i>
                                 </button>
                             </div>
 
-                            <div class="w-20 shrink-0 text-right">
-                                <span class="tabular text-sm font-bold text-ink-900">
+                            <div class="text-end flex-shrink-0" style="width: 78px;">
+                                <span class="fw-bold tabular d-block">
                                     {{ number_format($orderService->lineTotal($line), 0, ',', ' ') }}
                                 </span>
-                                <button type="button" class="mt-0.5 block w-full text-right text-[11px] font-medium text-ink-400 hover:text-red-600"
+                                <button type="button" class="btn btn-link btn-sm p-0 text-danger"
+                                        style="font-size:.72rem"
                                         wire:click="removeProduct({{ $line['product_id'] }})">
                                     o'chirish
                                 </button>
@@ -173,61 +171,59 @@
                     @endforeach
                 </div>
 
-                <div class="shrink-0 space-y-3 border-t border-ink-200/80 bg-ink-50/60 p-4">
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="block">
-                            <span class="label">Chegirma %</span>
+                <div class="cart-foot">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted mb-1">Chegirma %</label>
                             <input type="number" min="0" max="100" inputmode="numeric"
-                                   wire:model.live.debounce.400ms="{{ $discountField }}"
-                                   class="input tabular py-1.5" placeholder="0" onfocus="this.select()">
-                        </label>
-                        <label class="block">
-                            <span class="label">Berilgan pul</span>
-                            <input type="number" min="0" inputmode="numeric" wire:model.live.debounce.400ms="givenAmount"
-                                   class="input tabular py-1.5" placeholder="0" onfocus="this.select()">
-                        </label>
+                                   wire:model.live.debounce.500ms="{{ $discountField }}"
+                                   class="form-control form-control-sm tabular" placeholder="0"
+                                   onfocus="this.select()">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-muted mb-1">Berilgan pul</label>
+                            <input type="number" min="0" inputmode="numeric"
+                                   wire:model.live.debounce.500ms="givenAmount"
+                                   class="form-control form-control-sm tabular" placeholder="0"
+                                   onfocus="this.select()">
+                        </div>
                     </div>
 
-                    <dl class="tabular space-y-1.5 text-sm">
-                        <div class="flex justify-between">
-                            <dt class="text-ink-500">Oraliq jami</dt>
-                            <dd class="font-semibold text-ink-800">{{ number_format($subtotal, 0, ',', ' ') }}</dd>
+                    <div class="cart-total-row">
+                        <span class="text-muted">Oraliq jami</span>
+                        <span class="fw-semibold">{{ number_format($subtotal, 0, ',', ' ') }}</span>
+                    </div>
+                    @if($discountValue > 0)
+                        <div class="cart-total-row text-danger">
+                            <span>Chegirma {{ $discountValue }}%</span>
+                            <span class="fw-semibold">-{{ number_format($subtotal - $total, 0, ',', ' ') }}</span>
                         </div>
-                        @if($discountValue > 0)
-                            <div class="flex justify-between text-red-600">
-                                <dt>Chegirma {{ $discountValue }}%</dt>
-                                <dd class="font-semibold">-{{ number_format($subtotal - $total, 0, ',', ' ') }}</dd>
-                            </div>
-                        @endif
-                        <div class="flex justify-between border-t border-ink-200 pt-2 text-base">
-                            <dt class="font-bold text-ink-900">To'lov</dt>
-                            <dd class="font-bold text-brand-700">{{ number_format($total, 0, ',', ' ') }}</dd>
+                    @endif
+                    <div class="cart-total-row grand">
+                        <span>To'lov</span>
+                        <span class="text-primary">{{ number_format($total, 0, ',', ' ') }}</span>
+                    </div>
+                    @if((int) $givenAmount > 0)
+                        <div class="cart-total-row text-success fw-semibold">
+                            <span>Qaytim</span>
+                            <span>{{ number_format($change, 0, ',', ' ') }}</span>
                         </div>
-                        @if((int) $givenAmount > 0)
-                            <div class="flex justify-between text-emerald-700">
-                                <dt class="font-semibold">Qaytim</dt>
-                                <dd class="font-bold">{{ number_format($change, 0, ',', ' ') }}</dd>
-                            </div>
-                        @endif
-                    </dl>
+                    @endif
 
-                    <div class="space-y-2">
+                    <div class="d-grid gap-2 mt-3">
                         @if($mode === 'quick')
-                            <button type="button" class="btn btn-primary btn-lg w-full" wire:click="saveOrder"
+                            <button type="button" class="btn btn-primary btn-lg" wire:click="saveOrder"
                                     wire:loading.attr="disabled">
-                                <x-icon name="printer"/>
-                                Sotuvni yakunlash
+                                <i class="mdi mdi-printer me-1"></i> Sotuvni yakunlash
                             </button>
                         @else
-                            <button type="button" class="btn btn-primary btn-lg w-full" wire:click="closeOrder"
+                            <button type="button" class="btn btn-primary btn-lg" wire:click="closeOrder"
                                     wire:loading.attr="disabled">
-                                <x-icon name="printer"/>
-                                Hisobni yopish va chek
+                                <i class="mdi mdi-printer me-1"></i> Hisobni yopish va chek
                             </button>
-                            <button type="button" class="btn btn-secondary w-full" wire:click="saveOrder"
+                            <button type="button" class="btn btn-inverse-primary" wire:click="saveOrder"
                                     wire:loading.attr="disabled">
-                                <x-icon name="check"/>
-                                Saqlab qo'yish
+                                <i class="mdi mdi-content-save-outline me-1"></i> Saqlab qo'yish
                             </button>
                         @endif
                     </div>
@@ -235,23 +231,14 @@
             @endif
 
             @if($mode === 'hall' && ($activeOrderId ?? null))
-                <div class="shrink-0 border-t border-ink-200/80 p-3">
-                    <div x-data="{ armed: false }" @click.outside="armed = false">
-                        <button type="button" x-show="!armed" @click="armed = true"
-                                class="btn btn-ghost btn-sm w-full text-ink-500 hover:text-red-600">
-                            <x-icon name="trash"/>
-                            Stolni bo'shatish
-                        </button>
-                        <div x-show="armed" x-cloak class="space-y-2">
-                            <p class="text-xs text-ink-600">Ochiq hisob bekor qilinadi. Davom etilsinmi?</p>
-                            <div class="flex gap-2">
-                                <button type="button" class="btn btn-danger btn-sm flex-1" wire:click="clearTable"
-                                        @click="armed = false">Ha, bo'shat</button>
-                                <button type="button" class="btn btn-secondary btn-sm flex-1"
-                                        @click="armed = false">Bekor</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="px-3 py-2 border-top">
+                    <x-confirm-button call="clearTable()"
+                                      title="Stol bo'shatilsinmi?"
+                                      text="Ochiq hisob bekor qilinadi va o'chib ketadi."
+                                      confirm-text="Ha, bo'shat"
+                                      icon="mdi-broom"
+                                      label="Stolni bo'shatish"
+                                      class="btn btn-inverse-danger btn-sm w-100"/>
                 </div>
             @endif
         </div>

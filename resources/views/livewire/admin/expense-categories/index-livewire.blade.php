@@ -1,120 +1,129 @@
 <div>
-    <x-ui.page-header title="Xarajat kategoriyalari" subtitle="Chiqimlarni guruhlash">
-        <a href="{{ route('expenses.index') }}" class="btn btn-secondary" wire:navigate>
-            <x-icon name="wallet"/>
-            Xarajatlar
-        </a>
-        <button type="button" class="btn btn-primary" wire:click="createCategory">
-            <x-icon name="plus"/>
-            Kategoriya qo'shish
-        </button>
-    </x-ui.page-header>
+    <div class="pos-page-head">
+        <div>
+            <h3>Xarajat kategoriyalari</h3>
+            <p>Chiqimlarni guruhlash</p>
+        </div>
+        <div class="pos-head-actions">
+            <a href="{{ route('expenses.index') }}" class="btn btn-inverse-primary btn-rounded">
+                <i class="mdi mdi-wallet-outline me-1"></i> Xarajatlar
+            </a>
+            <button type="button" class="btn btn-primary btn-rounded" wire:click="createCategory">
+                <i class="mdi mdi-plus me-1"></i> Kategoriya qo'shish
+            </button>
+        </div>
+    </div>
 
     <div class="card mb-4">
-        <div class="p-4">
-            <label class="relative block max-w-md">
-                <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"/>
-                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
-                       placeholder="Nomi yoki izohi bo'yicha qidirish…">
-            </label>
+        <div class="card-body">
+            <div class="input-group" style="max-width: 420px;">
+                <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
+                <input type="search" wire:model.live.debounce.300ms="search"
+                       class="form-control border-start-0 ps-0" placeholder="Nomi yoki izohi bo'yicha qidirish...">
+            </div>
         </div>
     </div>
 
     <div class="card">
-        @if($categories->isEmpty())
-            <x-ui.empty icon="folder" title="Kategoriya yo'q"
-                        description="Xarajatlarni turlarga ajratish uchun kategoriya qo'shing."/>
-        @else
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th class="w-12"></th>
-                        <th>Nomi</th>
-                        <th>Izoh</th>
-                        <th class="text-center">Xarajatlar</th>
-                        <th>Holati</th>
-                        <th class="text-right">Amallar</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($categories as $category)
-                        <tr wire:key="exp-cat-{{ $category->id }}">
-                            <td>
-                                <span class="block h-6 w-6 rounded-md"
-                                      style="background-color: {{ $category->color ?: '#3b82f6' }}"></span>
-                            </td>
-                            <td class="font-semibold text-ink-900">{{ $category->name }}</td>
-                            <td class="max-w-xs truncate text-ink-500">{{ $category->description ?: '—' }}</td>
-                            <td class="text-center">
-                                <span class="badge badge-gray tabular">{{ $category->expenses_count }}</span>
-                            </td>
-                            <td>
-                                <button type="button" wire:click="toggleStatus({{ $category->id }})"
-                                        class="badge {{ $category->is_active ? 'badge-green' : 'badge-gray' }}">
-                                    {{ $category->is_active ? 'Faol' : 'Nofaol' }}
-                                </button>
-                            </td>
-                            <td>
-                                <div class="flex items-center justify-end gap-1">
-                                    <button type="button" class="btn btn-sm btn-ghost"
-                                            wire:click="edit({{ $category->id }})" title="Tahrirlash">
-                                        <x-icon name="edit"/>
-                                    </button>
-                                    <x-ui.confirm :action="'delete('.$category->id.')'"/>
-                                </div>
-                            </td>
+        <div class="card-body">
+            @if($categories->isEmpty())
+                <div class="empty-state">
+                    <i class="mdi mdi-folder-outline"></i>
+                    <h6>Kategoriya yo'q</h6>
+                    <p>Xarajatlarni turlarga ajratish uchun kategoriya qo'shing.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th style="width:60px"></th>
+                            <th>Nomi</th>
+                            <th>Izoh</th>
+                            <th class="text-center">Xarajatlar</th>
+                            <th>Holati</th>
+                            <th class="text-end">Amallar</th>
                         </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                        @foreach($categories as $category)
+                            <tr wire:key="exp-cat-{{ $category->id }}">
+                                <td>
+                                    <span class="d-inline-block rounded"
+                                          style="width:26px;height:26px;background: {{ $category->color ?: '#3b82f6' }}"></span>
+                                </td>
+                                <td class="fw-semibold">{{ $category->name }}</td>
+                                <td class="text-muted text-truncate" style="max-width:280px">
+                                    {{ $category->description ?: '—' }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-outline-primary tabular">{{ $category->expenses_count }}</span>
+                                </td>
+                                <td>
+                                    <button type="button" class="badge border-0 {{ $category->is_active ? 'badge-success' : 'badge-secondary' }}"
+                                            wire:click="toggleStatus({{ $category->id }})">
+                                        {{ $category->is_active ? 'Faol' : 'Nofaol' }}
+                                    </button>
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <button type="button" class="btn btn-inverse-primary btn-sm"
+                                            wire:click="edit({{ $category->id }})" title="Tahrirlash">
+                                        <i class="mdi mdi-pencil-outline"></i>
+                                    </button>
+                                    <x-confirm-button :call="'delete('.$category->id.')'"
+                                                      title="Kategoriya o'chirilsinmi?"/>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="border-t border-ink-200/80 px-4 py-3">
-                {{ $categories->links() }}
-            </div>
-        @endif
+                <div class="mt-3">{{ $categories->links() }}</div>
+            @endif
+        </div>
     </div>
 
     @if($showForm)
-        <x-ui.modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" close="closeForm">
-            <form wire:submit="save" class="space-y-4 p-5">
-                <label class="block">
-                    <span class="label">Nomi</span>
-                    <input type="text" wire:model="name" class="input @error('name') input-error @enderror"
-                           placeholder="Masalan: Kommunal to'lovlar" autofocus>
-                    @error('name') <span class="field-error">{{ $message }}</span> @enderror
-                </label>
-
-                <label class="block">
-                    <span class="label">Izoh</span>
-                    <textarea wire:model="description" rows="3" class="textarea" placeholder="Ixtiyoriy"></textarea>
-                    @error('description') <span class="field-error">{{ $message }}</span> @enderror
-                </label>
-
-                <div>
-                    <span class="label">Rang</span>
-                    <div class="flex flex-wrap items-center gap-2">
-                        @foreach(['#3b82f6', '#12866f', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#64748b'] as $swatch)
-                            <button type="button" wire:click="$set('color', '{{ $swatch }}')"
-                                    class="h-8 w-8 rounded-lg ring-offset-2 transition
-                                           {{ $color === $swatch ? 'ring-2 ring-ink-900' : '' }}"
-                                    style="background-color: {{ $swatch }}"
-                                    aria-label="{{ $swatch }}"></button>
-                        @endforeach
-                        <input type="color" wire:model="color" class="h-8 w-12 cursor-pointer rounded border-ink-200">
+        <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" close="closeForm">
+            <form wire:submit="save">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nomi</label>
+                        <input type="text" wire:model="name" autofocus
+                               class="form-control @error('name') is-invalid @enderror"
+                               placeholder="Masalan: Kommunal to'lovlar">
+                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                    @error('color') <span class="field-error">{{ $message }}</span> @enderror
-                </div>
 
-                <div class="flex justify-end gap-2 border-t border-ink-200/80 pt-4">
-                    <button type="button" class="btn btn-secondary" wire:click="closeForm">Bekor qilish</button>
-                    <button type="submit" class="btn btn-primary">
-                        <x-icon name="check"/>
-                        Saqlash
-                    </button>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Izoh</label>
+                        <textarea wire:model="description" rows="3" class="form-control"
+                                  placeholder="Ixtiyoriy"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-semibold">Rang</label>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            @foreach(['#1F3BB3', '#7DA0FA', '#4DA761', '#E29E09', '#F3797E', '#7978E9', '#00AAB7'] as $swatch)
+                                <button type="button" wire:click="$set('color', '{{ $swatch }}')"
+                                        class="rounded border-0 p-0"
+                                        style="width:32px;height:32px;background: {{ $swatch }};
+                                               outline: {{ $color === $swatch ? '3px solid #1e283d' : 'none' }};
+                                               outline-offset: 2px"
+                                        aria-label="{{ $swatch }}"></button>
+                            @endforeach
+                            <input type="color" wire:model="color" class="form-control form-control-color"
+                                   style="width:52px">
+                        </div>
+                        @error('color') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-inverse-secondary" wire:click="closeForm">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-check me-1"></i> Saqlash</button>
                 </div>
             </form>
-        </x-ui.modal>
+        </x-modal>
     @endif
 </div>

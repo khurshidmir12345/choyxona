@@ -1,107 +1,121 @@
 <div>
-    <x-ui.page-header title="Mahsulotlar" subtitle="Menyu va narxlar">
-        <button type="button" class="btn btn-primary" wire:click="create">
-            <x-icon name="plus"/>
-            Yangi mahsulot
-        </button>
-    </x-ui.page-header>
+    <div class="pos-page-head">
+        <div>
+            <h3>Mahsulotlar</h3>
+            <p>Menyu va narxlar</p>
+        </div>
+        <div class="pos-head-actions">
+            <button type="button" class="btn btn-primary btn-rounded" wire:click="create">
+                <i class="mdi mdi-plus me-1"></i> Yangi mahsulot
+            </button>
+        </div>
+    </div>
 
     <div class="card mb-4">
-        <div class="grid gap-3 p-4 sm:grid-cols-[1fr_16rem]">
-            <label class="relative block">
-                <span class="label">Qidirish</span>
-                <x-icon name="search" class="pointer-events-none absolute left-3 top-[2.15rem] h-4 w-4 text-ink-400"/>
-                <input type="search" wire:model.live.debounce.250ms="search" class="input pl-9"
-                       placeholder="Nomi yoki kodi…">
-            </label>
-            <label class="block">
-                <span class="label">Kategoriya</span>
-                <select wire:model.live="categoryFilter" class="select">
-                    <option value="">Barchasi</option>
-                    @foreach($this->categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
-            </label>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label small fw-semibold text-muted">Qidirish</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="mdi mdi-magnify text-muted"></i>
+                        </span>
+                        <input type="search" wire:model.live.debounce.300ms="search"
+                               class="form-control border-start-0 ps-0" placeholder="Nomi yoki kodi...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted">Kategoriya</label>
+                    <select wire:model.live="categoryFilter" class="form-select">
+                        <option value="">Barchasi</option>
+                        @foreach($this->categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card">
-        @if($products->isEmpty())
-            <x-ui.empty icon="box" title="Mahsulot yo'q"
-                        description="Menyuga birinchi mahsulotni qo'shing."/>
-        @else
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th class="w-16">Kod</th>
-                        <th class="w-16"></th>
-                        <th>Nomi</th>
-                        <th>Kategoriya</th>
-                        <th class="text-right">Tannarx</th>
-                        <th class="text-right">Sotuv narxi</th>
-                        <th class="text-center">Zaxira</th>
-                        <th class="text-right">Amallar</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($products as $product)
-                        <tr wire:key="product-{{ $product->id }}">
-                            <td class="tabular text-xs font-semibold text-ink-500">{{ $product->formattedCode() }}</td>
-                            <td>
-                                <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-ink-100">
+        <div class="card-body">
+            @if($products->isEmpty())
+                <div class="empty-state">
+                    <i class="mdi mdi-food-variant"></i>
+                    <h6>Mahsulot yo'q</h6>
+                    <p>Menyuga birinchi mahsulotni qo'shing.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th>Kod</th>
+                            <th style="width:60px"></th>
+                            <th>Nomi</th>
+                            <th>Kategoriya</th>
+                            <th class="text-end">Tannarx</th>
+                            <th class="text-end">Sotuv narxi</th>
+                            <th class="text-center">Zaxira</th>
+                            <th class="text-end">Amallar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($products as $product)
+                            <tr wire:key="product-{{ $product->id }}">
+                                <td class="text-muted tabular small">{{ $product->formattedCode() }}</td>
+                                <td>
                                     @if($product->imageUrl())
                                         <img src="{{ $product->imageUrl() }}" alt="" loading="lazy"
-                                             class="h-full w-full object-cover" onerror="this.remove()">
+                                             class="thumb-sm" onerror="this.remove()">
                                     @else
-                                        <x-icon name="image" class="h-4 w-4 text-ink-300"/>
+                                        <span class="thumb-sm d-inline-flex align-items-center justify-content-center">
+                                            <i class="mdi mdi-image-outline text-muted"></i>
+                                        </span>
                                     @endif
-                                </span>
-                            </td>
-                            <td>
-                                <span class="font-semibold text-ink-900">{{ $product->name }}</span>
-                                @if($product->discount > 0)
-                                    <span class="badge badge-red ml-1">-{{ $product->discount }}%</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($product->category)
-                                    <span class="badge badge-brand">{{ $product->category->name }}</span>
-                                @else
-                                    <span class="text-ink-300">—</span>
-                                @endif
-                            </td>
-                            <td class="tabular text-right text-ink-500">
-                                {{ number_format((int) $product->price, 0, ',', ' ') }}
-                            </td>
-                            <td class="tabular text-right font-bold text-ink-900">
-                                {{ number_format((int) $product->sell_price, 0, ',', ' ') }}
-                            </td>
-                            <td class="text-center">
-                                <span class="badge {{ ($product->current_stock ?? 0) > 0 ? 'badge-green' : 'badge-red' }} tabular">
-                                    {{ (int) ($product->current_stock ?? 0) }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="flex items-center justify-end gap-1">
-                                    <button type="button" class="btn btn-sm btn-ghost"
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ $product->name }}</span>
+                                    @if($product->discount > 0)
+                                        <span class="badge badge-danger ms-1">-{{ $product->discount }}%</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($product->category)
+                                        <span class="badge badge-outline-primary">{{ $product->category->name }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td class="text-end tabular text-muted">
+                                    {{ number_format((int) $product->price, 0, ',', ' ') }}
+                                </td>
+                                <td class="text-end tabular fw-bold">
+                                    {{ number_format((int) $product->sell_price, 0, ',', ' ') }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge {{ ($product->current_stock ?? 0) > 0 ? 'badge-success' : 'badge-danger' }} tabular">
+                                        {{ (int) ($product->current_stock ?? 0) }}
+                                    </span>
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <button type="button" class="btn btn-inverse-primary btn-sm"
                                             wire:click="edit({{ $product->id }})" title="Tahrirlash">
-                                        <x-icon name="edit"/>
+                                        <i class="mdi mdi-pencil-outline"></i>
                                     </button>
-                                    <x-ui.confirm :action="'delete('.$product->id.')'"/>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            </div>
+                                    <x-confirm-button :call="'delete('.$product->id.')'"
+                                                      title="Mahsulot o'chirilsinmi?"
+                                                      text="Savdo tarixi saqlanib qoladi."/>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="border-t border-ink-200/80 px-4 py-3">
-                {{ $products->links() }}
-            </div>
-        @endif
+                <div class="mt-3">{{ $products->links() }}</div>
+            @endif
+        </div>
     </div>
 
     @if($showForm)

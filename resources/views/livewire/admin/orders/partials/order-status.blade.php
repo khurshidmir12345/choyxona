@@ -1,10 +1,10 @@
 @php
     $map = [
-        'opened' => ['Ochiq', 'badge-blue'],
-        'done' => ['Yopilgan', 'badge-green'],
-        'closed' => ['Yopilgan', 'badge-gray'],
-        'cancelled' => ['Bekor qilingan', 'badge-red'],
+        'opened' => ['Ochiq', 'badge-info'],
+        'done' => ['Yopilgan', 'badge-success'],
+        'closed' => ['Yopilgan', 'badge-secondary'],
+        'cancelled' => ['Bekor qilingan', 'badge-danger'],
     ];
-    [$label, $tone] = $map[$status?->value] ?? ['—', 'badge-gray'];
+    [$label, $tone] = $map[$status?->value] ?? ['—', 'badge-secondary'];
 @endphp
 <span class="badge {{ $tone }}">{{ $label }}</span>

@@ -1,53 +1,61 @@
 <x-guest-layout>
-    <h1 class="text-2xl font-bold tracking-tight text-ink-900">Xush kelibsiz</h1>
-    <p class="mt-1.5 text-sm text-ink-500">Davom etish uchun tizimga kiring.</p>
+    <div class="d-lg-none d-flex align-items-center gap-2 mb-4 text-primary">
+        <i class="mdi mdi-store" style="font-size:1.6rem"></i>
+        <span class="fw-bold fs-5">Choyxona POS</span>
+    </div>
+
+    <h4 class="fw-bold mb-1">Xush kelibsiz</h4>
+    <h6 class="fw-light text-muted mb-4">Davom etish uchun tizimga kiring.</h6>
 
     @if (session('status'))
-        <div class="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-            {{ session('status') }}
-        </div>
+        <div class="alert alert-success">{{ session('status') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}" class="mt-7 space-y-4">
+    <form method="POST" action="{{ route('login') }}" class="pt-2">
         @csrf
 
-        <label class="block">
-            <span class="label">Telefon raqam</span>
-            <div class="flex rounded-lg shadow-sm">
-                <span class="inline-flex items-center rounded-l-lg border border-r-0 border-ink-200 bg-ink-100 px-3 text-sm font-semibold text-ink-500">
-                    +998
-                </span>
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Telefon raqam</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light fw-semibold">+998</span>
                 <input type="tel" name="phone_number" value="{{ old('phone_number') }}" required autofocus
                        inputmode="numeric" autocomplete="tel" placeholder="90 123 45 67"
-                       class="input tabular rounded-l-none @error('phone_number') input-error @enderror">
+                       class="form-control form-control-lg tabular @error('phone_number') is-invalid @enderror">
             </div>
-            @error('phone_number') <span class="field-error">{{ $message }}</span> @enderror
-        </label>
+            @error('phone_number') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+        </div>
 
-        <label class="block" x-data="{ show: false }">
-            <span class="label">Parol</span>
-            <div class="relative">
-                <input :type="show ? 'text' : 'password'" name="password" required autocomplete="current-password"
-                       class="input pr-11 @error('password') input-error @enderror" placeholder="••••••••">
-                <button type="button" @click="show = !show"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-ink-400 hover:bg-ink-100"
+        <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Parol</label>
+            <div class="input-group">
+                <input type="password" name="password" id="password" required autocomplete="current-password"
+                       placeholder="••••••••"
+                       class="form-control form-control-lg @error('password') is-invalid @enderror">
+                <button class="btn btn-outline-secondary" type="button" id="togglePassword"
                         aria-label="Parolni ko'rsatish">
-                    <x-icon name="user" class="h-4 w-4" x-show="!show"/>
-                    <x-icon name="lock" class="h-4 w-4" x-show="show" x-cloak/>
+                    <i class="mdi mdi-eye-outline"></i>
                 </button>
             </div>
-            @error('password') <span class="field-error">{{ $message }}</span> @enderror
-        </label>
+            @error('password') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+        </div>
 
-        <label class="flex items-center gap-2">
-            <input type="checkbox" name="remember"
-                   class="h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
-            <span class="text-sm text-ink-600">Meni eslab qol</span>
-        </label>
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" name="remember" id="remember">
+            <label class="form-check-label text-muted" for="remember">Meni eslab qol</label>
+        </div>
 
-        <button type="submit" class="btn btn-primary btn-lg w-full">
-            Kirish
-            <x-icon name="chevron-right"/>
+        <button type="submit" class="btn btn-primary btn-lg w-100 auth-form-btn">
+            Kirish <i class="mdi mdi-arrow-right ms-1"></i>
         </button>
     </form>
+
+    <script>
+        // Parolni ko'rsatish/yashirish
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const field = document.getElementById('password');
+            const shown = field.type === 'text';
+            field.type = shown ? 'password' : 'text';
+            this.querySelector('i').className = shown ? 'mdi mdi-eye-outline' : 'mdi mdi-eye-off-outline';
+        });
+    </script>
 </x-guest-layout>

@@ -1,147 +1,213 @@
 <div>
-    <x-ui.page-header title="Bosh sahifa" subtitle="Savdo va foyda ko'rsatkichlari">
-        <div class="flex flex-wrap items-center gap-2">
-            <select wire:model.live="selectedPeriod" class="select w-40">
+    <div class="pos-page-head">
+        <div>
+            <h3>Bosh sahifa</h3>
+            <p>Savdo va foyda ko'rsatkichlari</p>
+        </div>
+        <div class="pos-head-actions">
+            <select wire:model.live="selectedPeriod" class="form-select" style="width:auto">
                 @foreach(\App\Livewire\Admin\Dashboard::PERIODS as $value => $label)
                     <option value="{{ $value }}" @selected($selectedPeriod === $value)>{{ $label }}</option>
                 @endforeach
             </select>
-            <input type="date" wire:model.live="startDate" value="{{ $startDate }}" class="input w-40">
-            <input type="date" wire:model.live="endDate" value="{{ $endDate }}" class="input w-40">
+            <input type="date" wire:model.live="startDate" value="{{ $startDate }}" class="form-control" style="width:auto">
+            <input type="date" wire:model.live="endDate" value="{{ $endDate }}" class="form-control" style="width:auto">
         </div>
-    </x-ui.page-header>
-
-    {{-- ----------------------------------------------------- asosiy raqamlar --}}
-    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <x-ui.stat label="Tushum" :value="number_format($revenue, 0, ',', ' ')" suffix="so'm"
-                   icon="coins" tone="green"
-                   :hint="'Kuniga o\'rtacha '.number_format($dailyAverage, 0, ',', ' ').' so\'m'"/>
-
-        <x-ui.stat label="Yalpi foyda" :value="number_format($profit, 0, ',', ' ')" suffix="so'm"
-                   icon="trend-up" tone="brand"
-                   :hint="'Rentabellik '.$profitMargin.'%'"/>
-
-        <x-ui.stat label="Xarajatlar" :value="number_format($expenses, 0, ',', ' ')" suffix="so'm"
-                   icon="wallet" tone="amber" hint="Faqat tasdiqlangan"/>
-
-        <x-ui.stat label="Sof foyda" :value="number_format($netProfit, 0, ',', ' ')" suffix="so'm"
-                   :icon="$netProfit >= 0 ? 'trend-up' : 'trend-down'"
-                   :tone="$netProfit >= 0 ? 'green' : 'red'"
-                   hint="Foyda − xarajat"/>
     </div>
 
-    <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <x-ui.stat label="Buyurtmalar" :value="number_format($ordersCount, 0, ',', ' ')"
-                   icon="receipt" tone="blue"/>
-        <x-ui.stat label="O'rtacha chek" :value="number_format($averageCheck, 0, ',', ' ')" suffix="so'm"
-                   icon="cart" tone="gray"/>
+    {{-- ----------------------------------------------------- asosiy raqamlar --}}
+    <div class="row">
+        <div class="col-md-6 col-xl-3 grid-margin">
+            <div class="card stat-card stat-blue">
+                <div class="card-body d-flex align-items-start justify-content-between">
+                    <div>
+                        <p class="stat-label">Tushum</p>
+                        <p class="stat-value">{{ number_format($revenue, 0, ',', ' ') }} <small>so'm</small></p>
+                        <p class="stat-hint">Kuniga o'rtacha {{ number_format($dailyAverage, 0, ',', ' ') }}</p>
+                    </div>
+                    <span class="stat-icon"><i class="mdi mdi-cash-multiple"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3 grid-margin">
+            <div class="card stat-card stat-violet">
+                <div class="card-body d-flex align-items-start justify-content-between">
+                    <div>
+                        <p class="stat-label">Yalpi foyda</p>
+                        <p class="stat-value">{{ number_format($profit, 0, ',', ' ') }} <small>so'm</small></p>
+                        <p class="stat-hint">Rentabellik {{ $profitMargin }}%</p>
+                    </div>
+                    <span class="stat-icon"><i class="mdi mdi-trending-up"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3 grid-margin">
+            <div class="card stat-card stat-amber">
+                <div class="card-body d-flex align-items-start justify-content-between">
+                    <div>
+                        <p class="stat-label">Xarajatlar</p>
+                        <p class="stat-value">{{ number_format($expenses, 0, ',', ' ') }} <small>so'm</small></p>
+                        <p class="stat-hint">Faqat tasdiqlangan</p>
+                    </div>
+                    <span class="stat-icon"><i class="mdi mdi-wallet-outline"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3 grid-margin">
+            <div class="card stat-card {{ $netProfit >= 0 ? 'stat-green' : 'stat-pink' }}">
+                <div class="card-body d-flex align-items-start justify-content-between">
+                    <div>
+                        <p class="stat-label">Sof foyda</p>
+                        <p class="stat-value">{{ number_format($netProfit, 0, ',', ' ') }} <small>so'm</small></p>
+                        <p class="stat-hint">Foyda − xarajat</p>
+                    </div>
+                    <span class="stat-icon">
+                        <i class="mdi mdi-{{ $netProfit >= 0 ? 'trending-up' : 'trending-down' }}"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ------------------------------------------------- ikkilamchi raqamlar --}}
+    <div class="row">
+        <div class="col-6 col-md-4 col-xl-2 grid-margin">
+            <div class="card stat-card stat-light">
+                <div class="card-body">
+                    <p class="stat-label">Buyurtmalar</p>
+                    <p class="stat-value">{{ number_format($ordersCount, 0, ',', ' ') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-3 grid-margin">
+            <div class="card stat-card stat-light">
+                <div class="card-body">
+                    <p class="stat-label">O'rtacha chek</p>
+                    <p class="stat-value">{{ number_format($averageCheck, 0, ',', ' ') }} <small>so'm</small></p>
+                </div>
+            </div>
+        </div>
 
         @foreach($ordersByType as $row)
             @php
-                $typeLabel = match($row->type?->value ?? $row->type) {
-                    'delivery' => 'Yetkazib berish',
-                    'takeaway' => 'Olib ketish',
-                    'cafe' => 'Zalda',
-                    default => 'Boshqa',
+                $typeValue = $row->type?->value ?? $row->type;
+                [$typeLabel, $typeIcon] = match($typeValue) {
+                    'delivery' => ['Yetkazib berish', 'mdi-truck-delivery-outline'],
+                    'takeaway' => ['Olib ketish', 'mdi-shopping-outline'],
+                    'cafe' => ['Zalda', 'mdi-sofa-outline'],
+                    default => ['Boshqa', 'mdi-help-circle-outline'],
                 };
             @endphp
-            <x-ui.stat :label="$typeLabel" :value="number_format((int) $row->revenue, 0, ',', ' ')" suffix="so'm"
-                       icon="store" tone="gray"
-                       :hint="$row->orders_count.' ta buyurtma'"/>
+            <div class="col-6 col-md-4 col-xl-2 grid-margin">
+                <div class="card stat-card stat-light">
+                    <div class="card-body">
+                        <p class="stat-label"><i class="mdi {{ $typeIcon }} me-1"></i>{{ $typeLabel }}</p>
+                        <p class="stat-value">{{ number_format((int) $row->revenue, 0, ',', ' ') }}</p>
+                        <p class="stat-hint">{{ $row->orders_count }} ta buyurtma</p>
+                    </div>
+                </div>
+            </div>
         @endforeach
     </div>
 
     {{-- --------------------------------------------------------------- grafik --}}
-    <div class="mt-4 card">
-        <div class="card-head">
-            <h2 class="card-title">Sotuv va xarajat dinamikasi</h2>
-            <div class="flex items-center gap-4 text-xs font-medium text-ink-500">
-                <span class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-full bg-brand-500"></span> Sotuv
-                </span>
-                <span class="flex items-center gap-1.5">
-                    <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span> Xarajat
-                </span>
-            </div>
-        </div>
-        <div class="card-body">
-            @if(empty($chartData))
-                <x-ui.empty icon="chart" title="Ma'lumot yo'q"/>
-            @else
-                @php
-                    $peak = max(1, max(array_merge(
-                        array_column($chartData, 'sales'),
-                        array_column($chartData, 'expenses')
-                    )));
-                @endphp
-                {{-- CSS ustunli diagramma: chart kutubxonasi yuklanmaydi. --}}
-                <div class="flex h-56 items-stretch gap-1 overflow-x-auto pb-1">
-                    @foreach($chartData as $point)
-                        <div class="group flex min-w-[1.75rem] flex-1 flex-col items-center gap-1">
-                            <div class="relative flex min-h-0 flex-1 w-full items-end justify-center gap-0.5">
-                                <div class="w-1/2 rounded-t bg-brand-500 transition-all group-hover:bg-brand-600"
-                                     style="height: {{ max(1, round($point['sales'] / $peak * 100)) }}%"></div>
-                                <div class="w-1/2 rounded-t bg-amber-400 transition-all group-hover:bg-amber-500"
-                                     style="height: {{ max(1, round($point['expenses'] / $peak * 100)) }}%"></div>
-
-                                <div class="pointer-events-none absolute -top-1 left-1/2 z-10 hidden -translate-x-1/2
-                                            -translate-y-full whitespace-nowrap rounded-lg bg-ink-950 px-2.5 py-1.5
-                                            text-xs text-white shadow-pop group-hover:block">
-                                    <span class="block font-semibold">{{ $point['label'] }}</span>
-                                    <span class="tabular block">Sotuv: {{ number_format($point['sales'], 0, ',', ' ') }}</span>
-                                    <span class="tabular block">Xarajat: {{ number_format($point['expenses'], 0, ',', ' ') }}</span>
-                                </div>
-                            </div>
-                            <span class="whitespace-nowrap text-[10px] text-ink-400">{{ $point['label'] }}</span>
+    <div class="row">
+        <div class="col-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                        <h4 class="card-title mb-0">Sotuv va xarajat dinamikasi</h4>
+                        <div class="d-flex align-items-center gap-3 small text-muted">
+                            <span><span class="d-inline-block rounded-circle me-1"
+                                        style="width:10px;height:10px;background:#7DA0FA"></span>Sotuv</span>
+                            <span><span class="d-inline-block rounded-circle me-1"
+                                        style="width:10px;height:10px;background:#E29E09"></span>Xarajat</span>
                         </div>
-                    @endforeach
+                    </div>
+
+                    @if(empty($chartData))
+                        <div class="empty-state">
+                            <i class="mdi mdi-chart-bar"></i>
+                            <h6>Ma'lumot yo'q</h6>
+                        </div>
+                    @else
+                        @php
+                            $peak = max(1, max(array_merge(
+                                array_column($chartData, 'sales'),
+                                array_column($chartData, 'expenses')
+                            )));
+                        @endphp
+                        <div class="mini-chart">
+                            @foreach($chartData as $point)
+                                <div class="chart-col">
+                                    <div class="chart-bars">
+                                        <span class="bar-sales"
+                                              style="height: {{ max(1, round($point['sales'] / $peak * 100)) }}%"></span>
+                                        <span class="bar-expenses"
+                                              style="height: {{ max(1, round($point['expenses'] / $peak * 100)) }}%"></span>
+                                    </div>
+                                    <div class="chart-tip">
+                                        <strong>{{ $point['label'] }}</strong><br>
+                                        Sotuv: {{ number_format($point['sales'], 0, ',', ' ') }}<br>
+                                        Xarajat: {{ number_format($point['expenses'], 0, ',', ' ') }}
+                                    </div>
+                                    <span class="chart-label">{{ $point['label'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
     </div>
 
     {{-- ---------------------------------------------------------------- top --}}
-    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+    <div class="row">
         @foreach([
-            ['Eng ko\'p sotilgan mahsulotlar', $topProducts, 'box'],
-            ['Eng daromadli kategoriyalar', $topCategories, 'tag'],
+            ['Eng ko\'p sotilgan mahsulotlar', $topProducts, 'mdi-food-variant'],
+            ['Eng daromadli kategoriyalar', $topCategories, 'mdi-tag-multiple-outline'],
         ] as [$cardTitle, $rows, $cardIcon])
-            <div class="card">
-                <div class="card-head">
-                    <h2 class="card-title flex items-center gap-2">
-                        <x-icon :name="$cardIcon" class="h-4 w-4 text-ink-400"/>
-                        {{ $cardTitle }}
-                    </h2>
-                </div>
-                @if(empty($rows))
-                    <x-ui.empty :icon="$cardIcon" title="Ma'lumot yo'q"/>
-                @else
-                    @php $best = max(1, (float) $rows[0]->revenue); @endphp
-                    <div class="divide-y divide-ink-100">
-                        @foreach($rows as $index => $row)
-                            <div class="px-5 py-3">
-                                <div class="flex items-baseline justify-between gap-3">
-                                    <span class="flex min-w-0 items-baseline gap-2">
-                                        <span class="tabular text-xs font-bold text-ink-400">{{ $index + 1 }}</span>
-                                        <span class="truncate text-sm font-semibold text-ink-900">{{ $row->name }}</span>
-                                    </span>
-                                    <span class="tabular shrink-0 text-sm font-bold text-ink-900">
-                                        {{ number_format((float) $row->revenue, 0, ',', ' ') }}
-                                    </span>
-                                </div>
-                                <div class="mt-1.5 flex items-center gap-2">
-                                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100">
-                                        <div class="h-full rounded-full bg-brand-500"
-                                             style="width: {{ round((float) $row->revenue / $best * 100) }}%"></div>
-                                    </div>
-                                    <span class="tabular w-16 text-right text-xs text-ink-500">
-                                        {{ (int) $row->quantity }} dona
-                                    </span>
-                                </div>
+            <div class="col-lg-6 grid-margin">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="mdi {{ $cardIcon }} text-primary me-1"></i> {{ $cardTitle }}
+                        </h4>
+
+                        @if(empty($rows))
+                            <div class="empty-state">
+                                <i class="mdi {{ $cardIcon }}"></i>
+                                <h6>Ma'lumot yo'q</h6>
                             </div>
-                        @endforeach
+                        @else
+                            @php $best = max(1, (float) $rows[0]->revenue); @endphp
+                            @foreach($rows as $index => $row)
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <span class="text-truncate">
+                                            <span class="text-muted fw-bold me-2 tabular">{{ $index + 1 }}</span>
+                                            <span class="fw-semibold">{{ $row->name }}</span>
+                                        </span>
+                                        <span class="fw-bold tabular ms-2 text-nowrap">
+                                            {{ number_format((float) $row->revenue, 0, ',', ' ') }}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                        <div class="rank-bar flex-grow-1">
+                                            <span style="width: {{ round((float) $row->revenue / $best * 100) }}%"></span>
+                                        </div>
+                                        <small class="text-muted tabular text-nowrap" style="width:70px;text-align:right">
+                                            {{ (int) $row->quantity }} dona
+                                        </small>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
-                @endif
+                </div>
             </div>
         @endforeach
     </div>

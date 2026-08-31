@@ -1,40 +1,38 @@
 {{-- Ochilgan buyurtmaning tarkibi. Faqat shu qator uchun yuklanadi. --}}
-<div class="rounded-lg border border-ink-200 bg-ink-50/60 p-3">
-    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-500">Tarkibi</p>
-    <div class="table-wrap rounded-lg border border-ink-200 bg-white">
-        <table class="table">
+<div class="p-3 bg-light rounded">
+    <h6 class="fw-bold text-muted mb-3" style="font-size:.75rem;letter-spacing:.05em;text-transform:uppercase">
+        Buyurtma tarkibi
+    </h6>
+    <div class="table-responsive bg-white rounded">
+        <table class="table table-sm mb-0">
             <thead>
             <tr>
                 <th>Mahsulot</th>
-                <th class="text-right">Narxi</th>
+                <th class="text-end">Narxi</th>
                 <th class="text-center">Soni</th>
                 <th class="text-center">Chegirma</th>
-                <th class="text-right">Jami</th>
+                <th class="text-end">Jami</th>
                 <th>Xodim</th>
             </tr>
             </thead>
             <tbody>
             @forelse($details as $detail)
                 <tr wire:key="detail-{{ $detail->id }}">
-                    <td class="font-medium text-ink-900">{{ $detail->product?->name ?? 'O\'chirilgan mahsulot' }}</td>
-                    <td class="tabular text-right">{{ number_format($detail->price, 0, ',', ' ') }}</td>
-                    <td class="tabular text-center">{{ $detail->quantity }}</td>
+                    <td class="fw-semibold">{{ $detail->product?->name ?? 'O\'chirilgan mahsulot' }}</td>
+                    <td class="text-end tabular">{{ number_format($detail->price, 0, ',', ' ') }}</td>
+                    <td class="text-center tabular">{{ $detail->quantity }}</td>
                     <td class="text-center">
                         @if($detail->discount > 0)
-                            <span class="badge badge-red">-{{ $detail->discount }}%</span>
+                            <span class="badge badge-danger">-{{ $detail->discount }}%</span>
                         @else
-                            <span class="text-ink-300">—</span>
+                            <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td class="tabular text-right font-semibold text-ink-900">
-                        {{ number_format($detail->total_amount, 0, ',', ' ') }}
-                    </td>
-                    <td class="text-ink-500">{{ $detail->worker?->name ?? '—' }}</td>
+                    <td class="text-end fw-bold tabular">{{ number_format($detail->total_amount, 0, ',', ' ') }}</td>
+                    <td class="text-muted">{{ $detail->worker?->name ?? '—' }}</td>
                 </tr>
             @empty
-                <tr>
-                    <td colspan="6" class="py-6 text-center text-ink-500">Tarkib topilmadi.</td>
-                </tr>
+                <tr><td colspan="6" class="text-center text-muted py-3">Tarkib topilmadi.</td></tr>
             @endforelse
             </tbody>
         </table>
