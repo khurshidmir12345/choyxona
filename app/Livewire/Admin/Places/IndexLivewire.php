@@ -25,6 +25,9 @@ class IndexLivewire extends Component
 
     public $capacity = 4;
 
+    /** Modalda tez tanlash uchun sig'imlar. */
+    public const CAPACITY_PRESETS = [2, 4, 6, 8, 10, 12];
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -122,7 +125,7 @@ class IndexLivewire extends Component
             ->forCompany($this->companyId())
             ->when($this->search, fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(24);
 
         return view('livewire.admin.places.index-livewire', compact('places'));
     }

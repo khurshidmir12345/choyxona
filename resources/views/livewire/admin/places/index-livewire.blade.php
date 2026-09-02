@@ -14,82 +14,105 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="input-group" style="max-width: 420px;">
-                <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
-                <input type="search" wire:model.live.debounce.300ms="search"
-                       class="form-control border-start-0 ps-0" placeholder="Joy nomi bo'yicha qidirish...">
+    @php
+        $total = $places->total();
+        $busyCount = $places->getCollection()->filter->isBusy()->count();
+    @endphp
+
+    <div class="place-toolbar">
+        <div class="place-search">
+            <i class="mdi mdi-magnify"></i>
+            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Joy nomi...">
+        </div>
+        @if($total > 0)
+            <div class="place-legend">
+                <span><i class="dot dot-free"></i> Bo'sh</span>
+                <span><i class="dot dot-busy"></i> Band</span>
+                <span class="text-muted">Jami {{ $total }} ta</span>
             </div>
-        </div>
+        @endif
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            @if($places->isEmpty())
-                <div class="empty-state">
-                    <i class="mdi mdi-table-furniture"></i>
-                    <h6>Joy yo'q</h6>
-                    <p>Zalda buyurtma qabul qilish uchun stol qo'shing.</p>
-                </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                        <tr>
-                            <th style="width:60px">#</th>
-                            <th>Nomi</th>
-                            <th>Holati</th>
-                            <th class="text-center">Sig'imi</th>
-                            <th class="text-end">Amallar</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($places as $place)
-                            <tr wire:key="place-row-{{ $place->id }}">
-                                <td class="text-muted tabular">{{ $loop->iteration }}</td>
-                                <td class="fw-semibold">{{ $place->name }}</td>
-                                <td>
-                                    @if($place->isBusy())
-                                        <span class="badge badge-danger">Band</span>
-                                    @else
-                                        <span class="badge badge-success">Bo'sh</span>
-                                    @endif
-                                </td>
-                                <td class="text-center tabular">{{ $place->capacity }}</td>
-                                <td class="text-end text-nowrap">
-                                    <button type="button" class="btn btn-inverse-primary btn-sm"
-                                            wire:click="edit({{ $place->id }})" title="Tahrirlash">
-                                        <i class="mdi mdi-pencil-outline"></i>
-                                    </button>
-                                    <x-confirm-button :call="'delete('.$place->id.')'"
-                                                      title="Joy o'chirilsinmi?"/>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-3">{{ $places->links() }}</div>
-            @endif
+    @if($places->isEmpty())
+        <div class="place-empty">
+            <i class="mdi mdi-tea-outline"></i>
+            <h6>{{ $search ? 'Hech narsa topilmadi' : 'Hali joy yo\'q' }}</h6>
+            <p>{{ $search ? 'Boshqa nom bilan qidirib ko\'ring.' : 'Zalda buyurtma qabul qilish uchun stol yoki so\'ri qo\'shing.' }}</p>
+            @unless($search)
+                <button type="button" class="btn btn-primary btn-sm mt-2" wire:click="createPlace">
+                    <i class="mdi mdi-plus me-1"></i> Birinchi joyni qo'shish
+                </button>
+            @endunless
         </div>
-    </div>
+    @else
+        <div class="place-grid">
+            @foreach($places as $place)
+                @php
+                    $isBusy = $place->isBusy();
+                    $lower = mb_strtolower($place->name);
+                    $icon = match (true) {
+                        str_contains($lower, "so'r") || str_contains($lower, 'sori') || str_contains($lower, 'suri') => 'mdi-sofa',
+                        str_contains($lower, 'xona') || str_contains($lower, 'kabin') || str_contains($lower, 'vip') => 'mdi-door-closed',
+                        default => 'mdi-table-chair',
+                    };
+                @endphp
+                <div class="place-card {{ $isBusy ? 'is-busy' : 'is-free' }}" wire:key="place-card-{{ $place->id }}">
+                    <span class="place-status">{{ $isBusy ? 'Band' : "Bo'sh" }}</span>
+
+                    <div class="place-actions">
+                        <button type="button" class="place-action" wire:click="edit({{ $place->id }})" title="Tahrirlash">
+                            <i class="mdi mdi-pencil-outline"></i>
+                        </button>
+                        <x-confirm-button :call="'delete('.$place->id.')'" title="Joy o'chirilsinmi?"
+                                          text="{{ $place->name }} ro'yxatdan olib tashlanadi."
+                                          class="place-action is-danger"/>
+                    </div>
+
+                    <div class="place-emblem"><i class="mdi {{ $icon }}"></i></div>
+
+                    <p class="place-name" title="{{ $place->name }}">{{ $place->name }}</p>
+                    <p class="place-cap">
+                        <i class="mdi mdi-account-multiple-outline"></i>
+                        {{ $place->capacity }} kishilik
+                    </p>
+
+                    @if($isBusy)
+                        <a href="{{ route('admin.orders.place', $place->id) }}" class="place-link">
+                            Hisobni ochish <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+
+        @if($places->hasPages())
+            <div class="mt-3">{{ $places->links() }}</div>
+        @endif
+    @endif
 
     @if($showForm)
-        <x-modal :title="$placeId ? 'Joyni tahrirlash' : 'Yangi joy'" close="closeForm">
+        <x-modal :title="$placeId ? 'Joyni tahrirlash' : 'Yangi joy'" icon="mdi-sofa-outline"
+                 subtitle="Stol, so'ri yoki xona" size="modal-sm" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Nomi</label>
+                        <label class="form-label">Nomi</label>
                         <input type="text" wire:model="name" autofocus
                                class="form-control @error('name') is-invalid @enderror" placeholder="Masalan: 1-so'ri">
                         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
+
                     <div>
-                        <label class="form-label fw-semibold">Sig'imi (necha kishilik)</label>
-                        <input type="number" wire:model="capacity" min="1" inputmode="numeric"
-                               class="form-control tabular @error('capacity') is-invalid @enderror">
+                        <label class="form-label">Sig'imi <span class="form-label-note">necha kishilik</span></label>
+                        <div class="chip-group mb-2">
+                            @foreach(\App\Livewire\Admin\Places\IndexLivewire::CAPACITY_PRESETS as $n)
+                                <button type="button" wire:click="$set('capacity', {{ $n }})"
+                                        class="chip chip-num {{ (int) $capacity === $n ? 'active' : '' }}">{{ $n }}</button>
+                            @endforeach
+                        </div>
+                        <input type="number" wire:model="capacity" min="1" max="500" inputmode="numeric"
+                               class="form-control tabular @error('capacity') is-invalid @enderror"
+                               placeholder="Boshqa son">
                         @error('capacity') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>

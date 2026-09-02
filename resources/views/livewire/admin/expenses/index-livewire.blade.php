@@ -188,12 +188,13 @@
     </div>
 
     @if($showForm)
-        <x-modal :title="$expenseId ? 'Xarajatni tahrirlash' : 'Yangi xarajat'" size="modal-lg" close="closeForm">
+        <x-modal :title="$expenseId ? 'Xarajatni tahrirlash' : 'Yangi xarajat'" icon="mdi-wallet-outline"
+                 subtitle="Summa so'mda" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Nomi</label>
+                            <label class="form-label">Nomi</label>
                             <input type="text" wire:model="title" autofocus
                                    class="form-control @error('title') is-invalid @enderror"
                                    placeholder="Masalan: Ijara to'lovi">
@@ -201,7 +202,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Kategoriya</label>
+                            <label class="form-label">Kategoriya</label>
                             <select wire:model="expense_category_id"
                                     class="form-select @error('expense_category_id') is-invalid @enderror">
                                 <option value="">Tanlang...</option>
@@ -213,21 +214,21 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Summa</label>
+                            <label class="form-label">Summa</label>
                             <input type="number" wire:model="amount" min="0" step="0.01" inputmode="decimal"
                                    class="form-control tabular @error('amount') is-invalid @enderror" placeholder="0">
                             @error('amount') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Sana</label>
+                            <label class="form-label">Sana</label>
                             <input type="date" wire:model="expense_date" value="{{ $expense_date }}"
                                    class="form-control @error('expense_date') is-invalid @enderror">
                             @error('expense_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">To'lov turi</label>
+                            <label class="form-label">To'lov turi</label>
                             <select wire:model="payment_method" class="form-select">
                                 @foreach(\App\Livewire\Admin\Expenses\IndexLivewire::PAYMENT_METHODS as $method)
                                     <option value="{{ $method }}">{{ $method }}</option>
@@ -236,13 +237,13 @@
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Izoh</label>
+                            <label class="form-label">Izoh</label>
                             <textarea wire:model="description" rows="3" class="form-control"
                                       placeholder="Ixtiyoriy"></textarea>
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Holati</label>
+                            <label class="form-label">Holati</label>
                             <div class="row g-2">
                                 @foreach(['pending' => 'Kutilmoqda', 'approved' => 'Tasdiqlangan', 'rejected' => 'Rad etilgan'] as $value => $label)
                                     <div class="col-4">

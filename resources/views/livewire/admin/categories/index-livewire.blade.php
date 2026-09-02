@@ -70,10 +70,11 @@
     </div>
 
     @if($showForm)
-        <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" close="closeForm">
+        <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" icon="mdi-tag-outline"
+                 subtitle="Menyu bo'limi" size="modal-sm" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
-                    <label class="form-label fw-semibold">Nomi</label>
+                    <label class="form-label">Nomi</label>
                     <input type="text" wire:model="name" autofocus
                            class="form-control @error('name') is-invalid @enderror"
                            placeholder="Masalan: Issiq ichimliklar">

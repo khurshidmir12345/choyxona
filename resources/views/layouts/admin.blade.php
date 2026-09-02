@@ -51,6 +51,8 @@
 <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
 <script src="{{ asset('assets/js/template.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{{-- Rasm yuklash: brauzerda kichraytirish + Livewire upload (Alpine ishga tushishidan oldin yuklanadi) --}}
+<script src="{{ asset('js/image-upload.js') }}?v={{ filemtime(public_path('js/image-upload.js')) }}"></script>
 
 @livewireScripts
 

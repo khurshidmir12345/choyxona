@@ -104,12 +104,12 @@
     </div>
 
     @if($showForm)
-        <x-modal :title="$stockId ? 'Harakatni tahrirlash' : 'Yangi harakat'"
+        <x-modal :title="$stockId ? 'Harakatni tahrirlash' : 'Yangi harakat'" icon="mdi-swap-vertical"
                  subtitle="Zaxira avtomatik yangilanadi" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Mahsulot</label>
+                        <label class="form-label">Mahsulot</label>
                         <select wire:model="product_id" class="form-select @error('product_id') is-invalid @enderror">
                             <option value="">Tanlang...</option>
                             @foreach($this->products as $product)
@@ -122,7 +122,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Turi</label>
+                        <label class="form-label">Turi</label>
                         <div class="row g-2">
                             @foreach($stockTypes as $case)
                                 <div class="col-4">
@@ -138,7 +138,7 @@
                     </div>
 
                     <div>
-                        <label class="form-label fw-semibold">Miqdor</label>
+                        <label class="form-label">Miqdor</label>
                         <input type="number" wire:model="quantity" min="1" inputmode="numeric"
                                class="form-control tabular @error('quantity') is-invalid @enderror" placeholder="0">
                         @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror

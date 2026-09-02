@@ -39,6 +39,11 @@ class FormLivewire extends Component
 
     public ?string $currentImage = null;
 
+    /** Modal ichidan yangi kategoriya yaratish. */
+    public bool $showNewCategory = false;
+
+    public string $newCategoryName = '';
+
     public function mount(?int $productId = null): void
     {
         $this->productId = $productId;
@@ -101,6 +106,7 @@ class FormLivewire extends Component
     protected function messages(): array
     {
         return [
+            'image.uploaded' => 'Rasm yuklanmadi. Kichikroq rasm tanlab qayta urinib ko\'ring.',
             'name.required' => 'Nomni kiriting.',
             'name.max' => 'Nom 255 ta belgidan oshmasin.',
             'price.required' => 'Tannarxni kiriting.',
@@ -115,6 +121,67 @@ class FormLivewire extends Component
             'image.image' => 'Fayl rasm bo\'lishi kerak.',
             'image.max' => 'Rasm 4 MB dan katta bo\'lmasin.',
         ];
+    }
+
+    // ------------------------------------------------------- kategoriya
+
+    public function startNewCategory(): void
+    {
+        $this->newCategoryName = '';
+        $this->resetErrorBag('newCategoryName');
+        $this->showNewCategory = true;
+    }
+
+    public function cancelNewCategory(): void
+    {
+        $this->newCategoryName = '';
+        $this->resetErrorBag('newCategoryName');
+        $this->showNewCategory = false;
+    }
+
+    /**
+     * Kategoriya esdan chiqqan bo'lsa, modal yopilmasdan shu yerda yaratiladi.
+     * Shunday nomli kategoriya bor bo'lsa, yangisi yaratilmaydi — o'sha tanlanadi.
+     */
+    public function createCategory(): void
+    {
+        $name = trim(preg_replace('/\s+/', ' ', $this->newCategoryName));
+
+        if ($name === '') {
+            $this->addError('newCategoryName', 'Kategoriya nomini yozing.');
+
+            return;
+        }
+
+        if (mb_strlen($name) > 255) {
+            $this->addError('newCategoryName', 'Nom juda uzun.');
+
+            return;
+        }
+
+        $existing = ProductCategory::query()
+            ->select(['id'])
+            ->forCompany($this->companyId())
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
+            ->first();
+
+        $category = $existing ?? ProductCategory::create([
+            'name' => $name,
+            'company_id' => $this->companyId(),
+        ]);
+
+        $this->category_id = $category->id;
+        $this->resetErrorBag(['category_id', 'newCategoryName']);
+        $this->cancelNewCategory();
+
+        unset($this->categories);
+
+        $this->dispatch('categorySaved');
+        $this->dispatch(
+            'toast',
+            type: 'success',
+            message: $existing ? "\"{$name}\" kategoriyasi allaqachon bor edi, u tanlandi." : "\"{$name}\" kategoriyasi qo'shildi.",
+        );
     }
 
     /** Foydalanuvchi "1 200 000" deb yozsa ham to'g'ri tushunamiz. */

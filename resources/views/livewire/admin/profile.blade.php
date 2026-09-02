@@ -82,25 +82,10 @@
                         </div>
                     @else
                         <form wire:submit="updateCompany">
-                            <div class="d-flex align-items-center gap-3 mb-4">
-                                <span class="d-inline-flex align-items-center justify-content-center rounded flex-shrink-0"
-                                      style="width:72px;height:72px;background:#f4f6fb;overflow:hidden">
-                                    @if($logo)
-                                        <img src="{{ $logo->temporaryUrl() }}" alt=""
-                                             style="width:100%;height:100%;object-fit:cover">
-                                    @elseif($company->logoUrl())
-                                        <img src="{{ $company->logoUrl() }}" alt="" onerror="this.remove()"
-                                             style="width:100%;height:100%;object-fit:cover">
-                                    @else
-                                        <i class="mdi mdi-store-outline text-muted" style="font-size:1.6rem"></i>
-                                    @endif
-                                </span>
-                                <div class="flex-grow-1" style="max-width: 420px">
-                                    <label class="form-label fw-semibold">Logotip</label>
-                                    <input type="file" wire:model="logo" accept="image/*"
-                                           class="form-control @error('logo') is-invalid @enderror">
-                                    @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
+                            <div class="mb-4" style="max-width: 560px">
+                                <x-image-upload model="logo" :preview="$company->logoUrl()" label="Logotip"
+                                                hint="Kvadrat rasm yaxshi ko'rinadi. Avtomatik kichraytiriladi."
+                                                size="88" shape="circle"/>
                             </div>
 
                             <div class="row g-3" style="max-width: 780px">

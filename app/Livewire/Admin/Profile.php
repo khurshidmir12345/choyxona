@@ -146,6 +146,7 @@ class Profile extends Component
         ], [
             'company_name.required' => 'Kompaniya nomini kiriting.',
             'company_email.email' => 'Email to\'g\'ri emas.',
+            'logo.uploaded' => 'Logotip yuklanmadi. Kichikroq rasm tanlab qayta urinib ko\'ring.',
             'logo.image' => 'Logotip rasm bo\'lishi kerak.',
             'logo.max' => 'Logotip 2 MB dan katta bo\'lmasin.',
         ]);

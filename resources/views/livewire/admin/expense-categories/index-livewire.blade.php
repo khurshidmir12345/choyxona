@@ -85,11 +85,12 @@
     </div>
 
     @if($showForm)
-        <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" close="closeForm">
+        <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" icon="mdi-folder-outline"
+                 subtitle="Xarajat turi" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Nomi</label>
+                        <label class="form-label">Nomi</label>
                         <input type="text" wire:model="name" autofocus
                                class="form-control @error('name') is-invalid @enderror"
                                placeholder="Masalan: Kommunal to'lovlar">
@@ -97,13 +98,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Izoh</label>
+                        <label class="form-label">Izoh</label>
                         <textarea wire:model="description" rows="3" class="form-control"
                                   placeholder="Ixtiyoriy"></textarea>
                     </div>
 
                     <div>
-                        <label class="form-label fw-semibold">Rang</label>
+                        <label class="form-label">Rang</label>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             @foreach(['#1F3BB3', '#7DA0FA', '#4DA761', '#E29E09', '#F3797E', '#7978E9', '#00AAB7'] as $swatch)
                                 <button type="button" wire:click="$set('color', '{{ $swatch }}')"
