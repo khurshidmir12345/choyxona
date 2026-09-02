@@ -54,6 +54,7 @@
                             <th>Mahsulot</th>
                             <th>Turi</th>
                             <th class="text-center">Miqdor</th>
+                            <th>Kim</th>
                             <th>Sana</th>
                             <th class="text-end">Amallar</th>
                         </tr>
@@ -78,10 +79,16 @@
                                         </small>
                                     @endif
                                 </td>
-                                <td><span class="badge {{ $tone }}">{{ $movement->type->label() }}</span></td>
+                                <td>
+                                    <span class="badge {{ $tone }}">{{ $movement->type->label() }}</span>
+                                    @if($movement->note)
+                                        <small class="d-block text-muted mt-1" style="max-width:280px">{{ $movement->note }}</small>
+                                    @endif
+                                </td>
                                 <td class="text-center tabular fw-bold {{ $isIncome ? 'text-success' : 'text-danger' }}">
                                     {{ $isIncome ? '+' : '−' }}{{ $movement->quantity }}
                                 </td>
+                                <td class="text-muted">{{ $movement->user?->name ?? '—' }}</td>
                                 <td class="text-muted tabular">{{ $movement->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                 <td class="text-end text-nowrap">
                                     <button type="button" class="btn btn-inverse-primary btn-sm"
@@ -137,11 +144,19 @@
                         @error('type') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
 
-                    <div>
+                    <div class="mb-3">
                         <label class="form-label">Miqdor</label>
                         <input type="number" wire:model="quantity" min="1" inputmode="numeric"
                                class="form-control tabular @error('quantity') is-invalid @enderror" placeholder="0">
                         @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div>
+                        <label class="form-label">Izoh <span class="form-label-note">nima uchun</span></label>
+                        <input type="text" wire:model="note" maxlength="255"
+                               class="form-control @error('note') is-invalid @enderror"
+                               placeholder="Masalan: yetkazib beruvchidan keldi">
+                        @error('note') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
                 <div class="modal-footer">

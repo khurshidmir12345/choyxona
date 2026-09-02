@@ -63,7 +63,7 @@
                         <tbody>
                         @foreach($products as $product)
                             <tr wire:key="product-{{ $product->id }}">
-                                <td class="text-muted tabular small">{{ $product->formattedCode() }}</td>
+                                <td><span class="code-chip">{{ $product->formattedCode() }}</span></td>
                                 <td>
                                     @if($product->imageUrl())
                                         <img src="{{ $product->imageUrl() }}" alt="" loading="lazy"

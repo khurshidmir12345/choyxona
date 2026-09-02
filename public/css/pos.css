@@ -685,9 +685,18 @@ select.form-select option { color: #1e283d; }
 }
 
 .navbar .navbar-brand.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin: 0;
     padding: 0;
     text-decoration: none;
+}
+
+.navbar .navbar-brand-wrapper .brand-logo-mini {
+    display: none;
+    margin: 0;
+    padding: 0;
 }
 
 .brand-mark {
@@ -802,10 +811,10 @@ select.form-select option { color: #1e283d; }
     gap: 10px;
     margin: 20px 18px 8px;
     padding: 0;
-    color: #b4bacb;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .14em;
+    color: #9aa1b5;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
     text-transform: uppercase;
     border-bottom: 0;
 }
@@ -827,11 +836,11 @@ select.form-select option { color: #1e283d; }
     display: flex;
     align-items: center;
     gap: 11px;
-    padding: 9px 12px;
+    padding: 10px 12px;
     border-radius: 10px;
-    color: #5c6478;
-    font-size: .875rem;
-    font-weight: 500;
+    color: #3f475a;
+    font-size: .95rem;
+    font-weight: 600;
     transition: background .15s ease, color .15s ease;
 }
 
@@ -841,9 +850,9 @@ select.form-select option { color: #1e283d; }
 }
 
 .sidebar .nav .nav-item .nav-link i.menu-icon {
-    font-size: 19px;
+    font-size: 21px;
     margin: 0;
-    color: #99a0b3;
+    color: #8a91a6;
     width: 20px;
     text-align: center;
     transition: color .15s ease;
@@ -852,8 +861,9 @@ select.form-select option { color: #1e283d; }
 .sidebar .nav .nav-item .nav-link:hover i.menu-icon { color: #5c6478; }
 
 .sidebar .nav .nav-item .nav-link .menu-title {
-    font-size: .875rem;
-    line-height: 1.2;
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.25;
 }
 
 .sidebar .nav .nav-item .nav-link i.menu-arrow {
@@ -867,12 +877,11 @@ select.form-select option { color: #1e283d; }
 .sidebar .nav .nav-item.active > .nav-link[aria-expanded="true"],
 .sidebar .nav .nav-item.active > .nav-link[aria-expanded="false"],
 .sidebar .nav .nav-item.active > .nav-link.collapsed {
-    background: rgba(31, 59, 179, .07) !important;
+    background: rgba(31, 59, 179, .08) !important;
     border-radius: 10px !important;
     color: var(--pos-primary);
-    font-weight: 600;
-    font-size: .875rem;
-    position: relative;
+    font-weight: 700;
+    font-size: .95rem;
 }
 
 .sidebar .nav .nav-item.active > .nav-link i.menu-icon,
@@ -881,7 +890,7 @@ select.form-select option { color: #1e283d; }
     color: var(--pos-primary);
 }
 
-.sidebar .nav .nav-item.active > .nav-link .menu-title { font-size: .875rem; }
+.sidebar .nav .nav-item.active > .nav-link .menu-title { font-size: .95rem; font-weight: 700; }
 
 /* Ichki menyu: nuqtalar o'rniga ikonkalar */
 .sidebar .nav.sub-menu {
@@ -913,18 +922,18 @@ select.form-select option { color: #1e283d; }
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 7px 10px 7px 14px;
+    padding: 8px 10px 8px 14px;
     margin-left: 12px;
     border-radius: 8px;
-    font-size: .82rem;
-    font-weight: 500;
-    color: #6f7789;
+    font-size: .875rem;
+    font-weight: 600;
+    color: #5c6478;
 }
 
 .sidebar .nav.sub-menu .nav-item .nav-link i {
-    font-size: 15px;
-    color: #a9b0c0;
-    width: 17px;
+    font-size: 17px;
+    color: #a0a7b8;
+    width: 18px;
     text-align: center;
 }
 
@@ -938,7 +947,7 @@ select.form-select option { color: #1e283d; }
 .sidebar .nav.sub-menu .nav-item .nav-link.active {
     background: transparent;
     color: var(--pos-primary);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .sidebar .nav.sub-menu .nav-item .nav-link.active i { color: var(--pos-primary); }
@@ -1562,3 +1571,437 @@ select.form-select option { color: #1e283d; }
     .place-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .place-card { padding: 16px 10px 12px; }
 }
+
+
+/* ============================================================================
+   Yig'ilgan yon menyu (sidebar-icon-only).
+   Shablon qoidalari bizning ustma-ust yozganlarimiz bilan to'qnashardi:
+   "Choyxona" yozuvi va bo'lim sarlavhalari yashirilmasdi, ochiluvchi
+   bo'limlar noto'g'ri joyda chiqardi.
+   ========================================================================= */
+
+@media (min-width: 992px) {
+    .sidebar-icon-only .navbar .navbar-brand-wrapper {
+        width: 70px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .sidebar-icon-only .navbar .navbar-brand-wrapper .brand-logo { display: none !important; }
+    .sidebar-icon-only .navbar .navbar-brand-wrapper .brand-logo-mini { display: inline-flex !important; }
+
+    .sidebar-icon-only .navbar .navbar-menu-wrapper { width: calc(100% - 70px); }
+
+    .sidebar-icon-only .sidebar { width: 70px; }
+    .sidebar-icon-only .main-panel { width: calc(100% - 70px); }
+
+    .sidebar-icon-only .sidebar .nav .nav-item.nav-section { display: none; }
+
+    .sidebar-icon-only .sidebar .nav .nav-item { margin: 2px 9px; }
+
+    .sidebar-icon-only .sidebar .nav .nav-item .nav-link,
+    .sidebar-icon-only .sidebar .nav .nav-item.active > .nav-link {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        padding: 11px 0;
+        position: static;
+    }
+
+    .sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-title,
+    .sidebar-icon-only .sidebar .nav .nav-item .nav-link i.menu-arrow { display: none; }
+
+    .sidebar-icon-only .sidebar .nav .nav-item .nav-link i.menu-icon {
+        font-size: 22px;
+        width: auto;
+    }
+
+    /* Sichqoncha ustiga kelganda: nom o'ng tomonda suzib chiqadi */
+    .sidebar-icon-only .sidebar .nav .nav-item.hover-open .nav-link .menu-title {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        left: 70px;
+        top: 0;
+        bottom: 0;
+        width: 210px;
+        padding: 0 16px;
+        background: #fff;
+        color: #1e283d;
+        font-size: .95rem;
+        font-weight: 700;
+        border-radius: 0 12px 12px 0;
+        box-shadow: 8px 8px 24px -12px rgba(30, 40, 61, .35);
+        z-index: 1001;
+    }
+
+    .sidebar-icon-only .sidebar .nav .nav-item.hover-open .nav-link[aria-expanded] .menu-title {
+        border-radius: 0 12px 0 0;
+    }
+
+    .sidebar-icon-only .sidebar .nav .nav-item.hover-open .collapse,
+    .sidebar-icon-only .sidebar .nav .nav-item.hover-open .collapsing {
+        display: block;
+        position: absolute;
+        left: 70px;
+        width: 210px;
+        padding: 6px 8px 8px;
+        background: #fff;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 8px 8px 24px -12px rgba(30, 40, 61, .35);
+        z-index: 1000;
+    }
+
+    .sidebar-icon-only .sidebar .nav.sub-menu { padding: 0; }
+    .sidebar-icon-only .sidebar .nav.sub-menu::before { display: none; }
+
+    .sidebar-icon-only .sidebar .nav.sub-menu .nav-item { margin: 0; }
+
+    .sidebar-icon-only .sidebar .nav.sub-menu .nav-item .nav-link {
+        justify-content: flex-start;
+        gap: 9px;
+        margin-left: 0;
+        padding: 8px 10px;
+        position: static;
+    }
+}
+
+/* ============================================================================
+   Mahsulot kodi (MXS-10001) va qoldiq tuzatish bloki
+   ========================================================================= */
+
+.code-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: #f4f6fb;
+    border: 1px dashed #d7dbe8;
+    color: #1e283d;
+}
+
+.code-box i { font-size: 1.15rem; color: var(--pos-primary); }
+
+.code-box .code-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 700;
+    letter-spacing: .04em;
+    font-size: .95rem;
+}
+
+.code-box.is-pending { color: #9aa1b5; }
+.code-box.is-pending i { color: #b3b9cb; }
+
+.code-chip {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 7px;
+    background: #f1f3f9;
+    color: #3f475a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    white-space: nowrap;
+}
+
+.stock-adjust {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff8e8;
+    border: 1px solid #f3e2b3;
+}
+
+.stock-adjust-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: .78rem;
+    color: #7a5b12;
+    margin-bottom: 8px;
+}
+
+.stock-adjust-head i { font-size: 1.1rem; line-height: 1; color: #c98a04; }
+
+/* ============================================================================
+   Tez sotuv: buyurtma turi kartalari (gorizontal aylanadi)
+   ========================================================================= */
+
+.type-cards {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2px 2px 8px;
+    margin-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.type-cards::-webkit-scrollbar { height: 5px; }
+.type-cards::-webkit-scrollbar-thumb { background: #dfe3ee; border-radius: 3px; }
+
+.type-card {
+    position: relative;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+    padding: 9px 36px 9px 10px;
+    border: 1.5px solid #e3e6f0;
+    border-radius: 14px;
+    background: #fff;
+    text-align: left;
+    color: #1e283d;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.type-card:hover { border-color: var(--pos-tale); transform: translateY(-1px); }
+
+.type-card.active {
+    border-color: var(--pos-primary);
+    background: linear-gradient(135deg, #f4f6ff 0%, #eaefff 100%);
+    box-shadow: 0 8px 18px -12px rgba(31, 59, 179, .6);
+}
+
+.type-card .type-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: #f1f3f9;
+    color: #5c6478;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+    transition: all .15s ease;
+}
+
+.type-card.active .type-icon { background: var(--pos-primary); color: #fff; }
+
+.type-card .type-text { display: flex; flex-direction: column; line-height: 1.2; }
+.type-card .type-text strong { font-size: .875rem; font-weight: 700; }
+.type-card .type-text small { font-size: .72rem; color: #8e94a9; margin-top: 2px; }
+
+.type-card .type-check {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.15rem;
+    color: var(--pos-primary);
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.type-card.active .type-check { opacity: 1; }
+
+/* ============================================================================
+   Mijoz tanlash (savat tepasida) va mijozlar sahifasi
+   ========================================================================= */
+
+.cart-customer {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--pos-border);
+    background: #fbfbfe;
+}
+
+.cust-picker { position: relative; }
+
+.cust-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #7DA0FA, #1F3BB3);
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cust-avatar-lg { width: 46px; height: 46px; font-size: 1.15rem; }
+
+.cust-selected {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px 7px 8px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #dfe5fb;
+}
+
+.cust-name { margin: 0; font-size: .85rem; font-weight: 700; color: #1e283d; }
+.cust-phone { margin: 0; font-size: .74rem; color: #8e94a9; font-variant-numeric: tabular-nums; }
+
+.cust-icon-btn {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #8e94a9;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.cust-icon-btn:hover { background: #f1f3f9; color: #1e283d; }
+
+.cust-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cust-search > i {
+    position: absolute;
+    left: 11px;
+    color: #a0a6b8;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.cust-search input {
+    flex: 1 1 auto;
+    height: 38px;
+    border: 1px solid #e3e6f0;
+    border-radius: 11px;
+    background: #fff;
+    padding: 0 44px 0 34px;
+    font-size: .85rem;
+    outline: 0;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.cust-search input:focus {
+    border-color: var(--pos-primary);
+    box-shadow: 0 0 0 3px rgba(31, 59, 179, .12);
+}
+
+.cust-add {
+    position: absolute;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 9px;
+    background: rgba(31, 59, 179, .08);
+    color: var(--pos-primary);
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s ease;
+}
+
+.cust-add:hover { background: var(--pos-primary); color: #fff; }
+
+.cust-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    background: #fff;
+    border: 1px solid #e3e6f0;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px -18px rgba(30, 40, 61, .45);
+    padding: 6px;
+    z-index: 30;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.cust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 7px 8px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    text-align: left;
+    transition: background .12s ease;
+}
+
+.cust-item:hover { background: #f1f3f9; }
+
+.cust-empty {
+    padding: 10px 8px;
+    font-size: .8rem;
+    color: #8e94a9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.cust-form {
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #dfe5fb;
+}
+
+.cust-form-title {
+    margin: 0 0 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--pos-primary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cust-form .form-control-sm { height: 34px; border-radius: 9px; font-size: .82rem; }
+
+.cust-address { margin-top: 10px; }
+.cust-address .form-control-sm { height: 34px; border-radius: 9px; font-size: .82rem; }
+
+.cust-address-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.cust-address-chips .chip { padding: 4px 9px; font-size: .72rem; }
+
+.cust-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #1e283d;
+    text-decoration: none;
+}
+
+.cust-row:hover { color: var(--pos-primary); }
+
+.addr-list { list-style: none; margin: 0; padding: 0; }
+
+.addr-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f7f8fc;
+    font-size: .82rem;
+    color: #3f475a;
+    margin-bottom: 6px;
+}
+
+.addr-list li i { color: var(--pos-primary); font-size: 1rem; flex-shrink: 0; }

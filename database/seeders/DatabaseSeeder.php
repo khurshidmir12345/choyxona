@@ -69,8 +69,6 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
-        $code = 10_001;
-
         foreach ($menu as $categoryName => $products) {
             $category = ProductCategory::firstOrCreate([
                 'company_id' => $company->id,
@@ -87,7 +85,6 @@ class DatabaseSeeder extends Seeder
                         'extra_price' => $price - $cost,
                         'discount' => 0,
                         'current_stock' => 100,
-                        'code' => $code++,
                     ],
                 );
             }

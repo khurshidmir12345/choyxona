@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Admin\Products;
 
+use App\Casts\ProductStockType;
 use App\Livewire\Concerns\WithCompany;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductStock;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -13,7 +16,10 @@ use Livewire\WithFileUploads;
 
 /**
  * Mahsulot qo'shish va tahrirlash uchun bitta forma.
- * Ilgari bu ikkita deyarli bir xil komponent edi.
+ *
+ * Qoldiq bu yerda "shunchaki" o'zgartirilmaydi: boshlang'ich qoldiq ham,
+ * tahrirlashdagi tuzatish ham kirim/chiqim jurnaliga kim va nima uchun
+ * qilgani bilan yoziladi. Skaner kodi (MXS-10001) id dan avtomatik beriladi.
  */
 class FormLivewire extends Component
 {
@@ -29,11 +35,20 @@ class FormLivewire extends Component
 
     public $discount = 0;
 
-    public $code = '';
+    /** Faqat ko'rsatish uchun — qo'lda o'zgartirilmaydi. */
+    public ?string $code = null;
 
     public $category_id = '';
 
+    /** Yangi mahsulot uchun boshlang'ich qoldiq. */
+    public $initial_stock = 0;
+
+    /** Tahrirlashda: joriy qoldiq va uni o'zgartirish sababi. */
     public $current_stock = 0;
+
+    public int $originalStock = 0;
+
+    public string $stock_note = '';
 
     public $image = null;
 
@@ -49,8 +64,6 @@ class FormLivewire extends Component
         $this->productId = $productId;
 
         if (! $productId) {
-            $this->code = $this->nextCode();
-
             return;
         }
 
@@ -63,9 +76,10 @@ class FormLivewire extends Component
         $this->price = $product->price;
         $this->sell_price = $product->sell_price;
         $this->discount = $product->discount ?? 0;
-        $this->code = $product->code;
+        $this->code = $product->formattedCode();
         $this->category_id = $product->category_id;
-        $this->current_stock = $product->current_stock ?? 0;
+        $this->current_stock = (int) ($product->current_stock ?? 0);
+        $this->originalStock = (int) ($product->current_stock ?? 0);
         $this->currentImage = $product->imageUrl();
     }
 
@@ -79,6 +93,13 @@ class FormLivewire extends Component
             ->get();
     }
 
+    /** Tahrirlashda qoldiq o'zgartirilganmi. */
+    #[Computed]
+    public function stockChanged(): bool
+    {
+        return $this->productId !== null && (int) $this->current_stock !== $this->originalStock;
+    }
+
     protected function rules(): array
     {
         return [
@@ -86,20 +107,14 @@ class FormLivewire extends Component
             'price' => ['required', 'integer', 'min:0'],
             'sell_price' => ['required', 'integer', 'min:0'],
             'discount' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'code' => [
-                'required', 'integer', 'min:1',
-                // Kod kompaniya ichida takrorlanmasligi kerak.
-                Rule::unique('products', 'code')
-                    ->where('company_id', $this->companyId())
-                    ->whereNull('deleted_at')
-                    ->ignore($this->productId),
-            ],
             'category_id' => [
                 'required',
                 Rule::exists('product_categories', 'id')->where('company_id', $this->companyId()),
             ],
-            'current_stock' => ['nullable', 'integer'],
-            'image' => ['nullable', 'image', 'max:4096'],
+            'initial_stock' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'current_stock' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'stock_note' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'max:10240'],
         ];
     }
 
@@ -114,12 +129,14 @@ class FormLivewire extends Component
             'sell_price.required' => 'Sotuv narxini kiriting.',
             'sell_price.integer' => 'Sotuv narxi raqam bo\'lishi kerak.',
             'discount.max' => 'Chegirma 100 dan oshmasin.',
-            'code.required' => 'Kodni kiriting.',
-            'code.unique' => 'Bu kod boshqa mahsulotda ishlatilgan.',
             'category_id.required' => 'Kategoriyani tanlang.',
             'category_id.exists' => 'Bunday kategoriya yo\'q.',
+            'initial_stock.integer' => 'Qoldiq butun son bo\'lishi kerak.',
+            'initial_stock.min' => 'Qoldiq manfiy bo\'lmaydi.',
+            'current_stock.integer' => 'Qoldiq butun son bo\'lishi kerak.',
+            'current_stock.min' => 'Qoldiq manfiy bo\'lmaydi.',
             'image.image' => 'Fayl rasm bo\'lishi kerak.',
-            'image.max' => 'Rasm 4 MB dan katta bo\'lmasin.',
+            'image.max' => 'Rasm 10 MB dan katta bo\'lmasin.',
         ];
     }
 
@@ -208,7 +225,6 @@ class FormLivewire extends Component
             'sell_price' => (int) $data['sell_price'],
             'extra_price' => (int) $data['sell_price'] - (int) $data['price'],
             'discount' => (int) ($data['discount'] ?? 0),
-            'code' => (int) $data['code'],
             'category_id' => (int) $data['category_id'],
             'company_id' => $this->companyId(),
         ];
@@ -216,10 +232,6 @@ class FormLivewire extends Component
         $product = $this->productId
             ? Product::query()->forCompany($this->companyId())->findOrFail($this->productId)
             : new Product(['current_stock' => 0]);
-
-        if ($this->productId) {
-            $attributes['current_stock'] = (int) $this->current_stock;
-        }
 
         if ($this->image) {
             // Bazada nisbiy yo'l saqlanadi, shunda domen o'zgarsa ham rasm ishlaydi.
@@ -232,25 +244,60 @@ class FormLivewire extends Component
             $attributes['image'] = $path;
         }
 
-        $product->fill($attributes)->save();
+        DB::transaction(function () use ($product, $attributes, $data) {
+            if (! $product->exists) {
+                $initial = (int) ($data['initial_stock'] ?? 0);
+                $attributes['current_stock'] = $initial;
+
+                $product->fill($attributes)->save();
+
+                if ($initial > 0) {
+                    $this->logMovement($product, ProductStockType::Add, $initial, 'Mahsulot yaratilganda boshlang\'ich qoldiq');
+                }
+
+                return;
+            }
+
+            $before = (int) $product->current_stock;
+            $after = (int) ($data['current_stock'] ?? $before);
+            $delta = $after - $before;
+
+            if ($delta !== 0) {
+                $attributes['current_stock'] = $after;
+
+                $reason = trim((string) ($data['stock_note'] ?? ''));
+                $note = "Tahrirlashda qo'lda o'zgartirildi: {$before} → {$after}".($reason !== '' ? " ({$reason})" : '');
+
+                $this->logMovement(
+                    $product,
+                    $delta > 0 ? ProductStockType::Add : ProductStockType::Waste,
+                    abs($delta),
+                    $note,
+                );
+            }
+
+            $product->fill($attributes)->save();
+        });
 
         $this->dispatch('productSaved');
         $this->dispatch('closeProductForm');
     }
 
+    private function logMovement(Product $product, ProductStockType $type, int $quantity, string $note): void
+    {
+        ProductStock::create([
+            'company_id' => $this->companyId(),
+            'product_id' => $product->id,
+            'user_id' => auth()->id(),
+            'quantity' => $quantity,
+            'type' => $type,
+            'note' => mb_substr($note, 0, 255),
+        ]);
+    }
+
     private function digits($value): string
     {
         return (string) preg_replace('/\D/', '', (string) $value);
-    }
-
-    private function nextCode(): int
-    {
-        $last = Product::query()
-            ->withTrashed()
-            ->forCompany($this->companyId())
-            ->max('code');
-
-        return $last ? ((int) $last) + 1 : 10001;
     }
 
     private function deleteStoredImage(string $stored): void

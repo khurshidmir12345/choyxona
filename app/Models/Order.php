@@ -22,6 +22,8 @@ class Order extends Model
         'company_id',
         'place_id',
         'user_id',
+        'customer_id',
+        'delivery_address',
         'amount',
         'total_amount',
         'discount',
@@ -58,6 +60,12 @@ class Order extends Model
     public function place(): BelongsTo
     {
         return $this->belongsTo(Place::class, 'place_id');
+    }
+
+    /** O'chirilgan mijoz ham tarixda ko'rinaveradi. */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id')->withTrashed();
     }
 
     public function orderDetails(): HasMany

@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\Admin\Categories\IndexLivewire as CategoryIndex;
+use App\Livewire\Admin\Customers\IndexLivewire as CustomerIndex;
+use App\Livewire\Admin\Customers\ShowLivewire as CustomerShow;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
 use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
@@ -38,6 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/buyurtmalar', OrderIndex::class)->name('orders.index');
     Route::get('/buyurtmalar/arxiv', DeletedOrders::class)->name('orders.deleted');
     Route::get('/buyurtmalar/{id}/chek', OrderCompleted::class)->name('admin.orders.print');
+    Route::get('/mijozlar', CustomerIndex::class)->name('customers.index');
+    Route::get('/mijozlar/{id}', CustomerShow::class)->name('customers.show');
 
     // Katalog
     Route::get('/mahsulotlar', ProductIndex::class)->name('products.index');

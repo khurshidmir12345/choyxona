@@ -25,11 +25,12 @@ class OrderCompleted extends Component
     public function render()
     {
         $order = Order::query()
-            ->select(['id', 'company_id', 'user_id', 'place_id', 'amount', 'total_amount', 'discount', 'type', 'status', 'created_at'])
+            ->select(['id', 'company_id', 'user_id', 'place_id', 'customer_id', 'amount', 'total_amount', 'discount', 'type', 'status', 'delivery_address', 'created_at'])
             ->forCompany($this->companyId())
             ->with([
                 'user:id,name',
                 'place:id,name',
+                'customer:id,name,phone',
                 'orderDetails:id,order_id,product_id,quantity,price,discount,total_amount',
                 'orderDetails.product:id,name',
             ])

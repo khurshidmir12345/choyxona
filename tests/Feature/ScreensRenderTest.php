@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Admin\Categories\IndexLivewire as CategoryIndex;
+use App\Livewire\Admin\Customers\IndexLivewire as CustomerIndex;
+use App\Livewire\Admin\Customers\ShowLivewire as CustomerShow;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
 use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
@@ -15,6 +17,7 @@ use App\Livewire\Admin\ProductStock\IndexLivewire as StockIndex;
 use App\Livewire\Admin\Products\IndexLivewire as ProductIndex;
 use App\Livewire\Admin\Profile;
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Place;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,9 +52,13 @@ class ScreensRenderTest extends TestCase
             Dashboard::class, HallPos::class, QuickSale::class, OrderIndex::class,
             Archive::class, ProductIndex::class, CategoryIndex::class, StockIndex::class,
             PlaceIndex::class, ExpenseIndex::class, ExpenseCategoryIndex::class, Profile::class,
+            CustomerIndex::class,
         ] as $component) {
             Livewire::test($component)->assertOk();
         }
+
+        $customer = Customer::factory()->create(['company_id' => Company::first()->id]);
+        Livewire::test(CustomerShow::class, ['id' => $customer->id])->assertSee($customer->name)->assertOk();
     }
 
     public function test_modal_oynalari_ochiladi(): void
@@ -64,6 +71,7 @@ class ScreensRenderTest extends TestCase
         Livewire::test(StockIndex::class)->call('createMovement')->assertSee('Yangi harakat');
         Livewire::test(ExpenseIndex::class)->call('createExpense')->assertSee('Yangi xarajat');
         Livewire::test(ExpenseCategoryIndex::class)->call('createCategory')->assertSee('Yangi kategoriya');
+        Livewire::test(CustomerIndex::class)->call('createCustomer')->assertSee('Yangi mijoz');
     }
 
     public function test_zal_buyurtma_ekrani_chiziladi(): void

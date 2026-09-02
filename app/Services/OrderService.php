@@ -100,9 +100,11 @@ class OrderService
         int $userId,
         OrderTypeEnum $type,
         array $items,
-        int $orderDiscount
+        int $orderDiscount,
+        ?int $customerId = null,
+        ?string $deliveryAddress = null
     ): Order {
-        return DB::transaction(function () use ($companyId, $userId, $type, $items, $orderDiscount) {
+        return DB::transaction(function () use ($companyId, $userId, $type, $items, $orderDiscount, $customerId, $deliveryAddress) {
             $amount = 0;
             foreach ($items as $item) {
                 $amount += $this->lineTotal($item);
@@ -114,6 +116,8 @@ class OrderService
                 'company_id' => $companyId,
                 'place_id' => null,
                 'user_id' => $userId,
+                'customer_id' => $customerId,
+                'delivery_address' => $type === OrderTypeEnum::Delivery ? ($deliveryAddress ?: null) : null,
                 'amount' => $amount,
                 'total_amount' => $this->applyDiscount($amount, $orderDiscount),
                 'discount' => $orderDiscount,
@@ -143,6 +147,14 @@ class OrderService
 
             return $order->refresh();
         });
+    }
+
+    /** Buyurtmaga mijozni biriktiradi (yoki olib tashlaydi). */
+    public function attachCustomer(Order $order, ?int $customerId): void
+    {
+        if ((int) $order->customer_id !== (int) $customerId) {
+            $order->update(['customer_id' => $customerId]);
+        }
     }
 
     /** Ochiq buyurtmani bekor qiladi va stolni bo'shatadi. */
@@ -244,8 +256,10 @@ class OrderService
             $movements[] = [
                 'company_id' => $companyId,
                 'product_id' => $productId,
+                'user_id' => auth()->id() ?? $order->user_id,
                 'quantity' => $quantity,
                 'type' => $type->value,
+                'note' => ($type === ProductStockType::Sell ? 'Sotuv' : 'Qaytarish').', buyurtma #'.$order->id,
                 'created_at' => $now,
                 'updated_at' => $now,
             ];

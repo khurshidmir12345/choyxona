@@ -58,21 +58,25 @@ class CatalogTest extends TestCase
         $this->assertSoftDeleted($product);
     }
 
-    public function test_kod_kompaniya_ichida_takrorlanmaydi(): void
+    public function test_skaner_kodi_avtomatik_beriladi(): void
     {
         $user = $this->actingAsOwner();
         $company = Company::where('user_id', $user->id)->first();
         $category = ProductCategory::factory()->for($company)->create();
-        Product::factory()->forCompany($company)->create(['code' => 10500]);
 
         Livewire::test(ProductForm::class)
             ->set('name', 'Yangi')
             ->set('price', '1000')
             ->set('sell_price', '2000')
-            ->set('code', 10500)
             ->set('category_id', $category->id)
             ->call('save')
-            ->assertHasErrors(['code' => 'unique']);
+            ->assertHasNoErrors();
+
+        $product = Product::sole();
+
+        // MXS- + (10000 + id): noyob, qo'lda kiritilmaydi.
+        $this->assertSame('MXS-'.(10_000 + $product->id), $product->code);
+        $this->assertSame($product->code, $product->formattedCode());
     }
 
     public function test_yangi_mahsulot_saqlanadi(): void

@@ -12,7 +12,7 @@
 --}}
 <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-stretch flex-row">
     <div class="navbar-brand-wrapper d-flex align-items-center">
-        <a class="navbar-brand brand-logo d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
+        <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
             <span class="brand-mark"><i class="mdi mdi-storefront-outline"></i></span>
             <span class="brand-text">Choyxona</span>
         </a>

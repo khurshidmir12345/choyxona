@@ -102,19 +102,60 @@
                     @endif
                 </div>
 
-                {{-- ------------------------------------------- kod va zaxira --}}
+                {{-- ------------------------------------------- kod va qoldiq --}}
                 <div class="row g-2 mb-3">
-                    <div class="{{ $productId ? 'col-6' : 'col-12' }}">
-                        <label class="form-label">Kod <span class="form-label-note">skaner uchun</span></label>
-                        <input type="number" wire:model="code" inputmode="numeric"
-                               class="form-control tabular @error('code') is-invalid @enderror">
-                        @error('code') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="col-6">
+                        <label class="form-label">Skaner kodi</label>
+                        @if($productId)
+                            <div class="code-box">
+                                <i class="mdi mdi-barcode-scan"></i>
+                                <span class="code-value">{{ $code }}</span>
+                            </div>
+                            <div class="form-text">Avtomatik berilgan, o'zgarmaydi.</div>
+                        @else
+                            <div class="code-box is-pending">
+                                <i class="mdi mdi-barcode-scan"></i>
+                                <span class="code-value">{{ \App\Models\Product::CODE_PREFIX }}•••••</span>
+                            </div>
+                            <div class="form-text">Saqlanganda avtomatik beriladi.</div>
+                        @endif
                     </div>
-                    @if($productId)
-                        <div class="col-6">
-                            <label class="form-label">Zaxira <span class="form-label-note">dona</span></label>
-                            <input type="number" wire:model="current_stock" inputmode="numeric"
-                                   class="form-control tabular">
+
+                    <div class="col-6">
+                        @if($productId)
+                            <label class="form-label">Qoldiq <span class="form-label-note">dona</span></label>
+                            <input type="number" wire:model.live.debounce.400ms="current_stock" min="0" inputmode="numeric"
+                                   class="form-control tabular @error('current_stock') is-invalid @enderror">
+                            @error('current_stock') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @unless($this->stockChanged)
+                                <div class="form-text">O'zgartirsangiz jurnalga yoziladi.</div>
+                            @endunless
+                        @else
+                            <label class="form-label">Boshlang'ich qoldiq <span class="form-label-note">dona</span></label>
+                            <input type="number" wire:model="initial_stock" min="0" inputmode="numeric"
+                                   class="form-control tabular @error('initial_stock') is-invalid @enderror" placeholder="0">
+                            @error('initial_stock') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="form-text">Kirim sifatida jurnalga yoziladi.</div>
+                        @endif
+                    </div>
+
+                    @if($this->stockChanged)
+                        @php $delta = (int) $current_stock - $originalStock; @endphp
+                        <div class="col-12">
+                            <div class="stock-adjust">
+                                <div class="stock-adjust-head">
+                                    <i class="mdi {{ $delta > 0 ? 'mdi-arrow-up-bold-circle-outline' : 'mdi-arrow-down-bold-circle-outline' }}"></i>
+                                    <span>
+                                        Qoldiq {{ $originalStock }} → {{ (int) $current_stock }}
+                                        (<strong>{{ $delta > 0 ? '+' : '' }}{{ $delta }}</strong>).
+                                        Jurnalga {{ $delta > 0 ? 'kirim' : 'chiqim' }} sifatida yoziladi.
+                                    </span>
+                                </div>
+                                <input type="text" wire:model="stock_note" maxlength="255"
+                                       class="form-control @error('stock_note') is-invalid @enderror"
+                                       placeholder="Sababi (ixtiyoriy): masalan, inventarizatsiya">
+                                @error('stock_note') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
                         </div>
                     @endif
                 </div>

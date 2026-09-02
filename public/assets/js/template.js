@@ -35,16 +35,10 @@
       }
     }
 
-    var current = location.pathname.split("/").slice(-1)[0].replace(/^\/|\/$/g, '');
-    $('.nav li a', sidebar).each(function () {
-      var $this = $(this);
-      addActiveClass($this);
-    })
-
-    $('.horizontal-menu .nav li a').each(function () {
-      var $this = $(this);
-      addActiveClass($this);
-    })
+    // Faol band Blade'da (sidebar.blade.php) belgilanadi. Shablonning
+    // o'z usuli manzil oxiri raqam bo'lsa (/mijozlar/1) hamma havolani
+    // "active" qilib, barcha bo'limlarni ochib yuborardi.
+    var current = '';
 
     //Close other submenu in sidebar on opening any
 

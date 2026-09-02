@@ -29,16 +29,25 @@
                 </div>
             </div>
 
-            @if($mode === 'quick')
-                <div class="pos-head-actions">
-                    <select wire:model.live="orderType" class="form-select fw-semibold" style="min-width: 200px;">
-                        @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPES as $value => $label)
-                            <option value="{{ $value }}" @selected($orderType === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
         </div>
+
+        @if($mode === 'quick')
+            {{-- Buyurtma turi: kichik kartalar, gorizontal aylanadi --}}
+            <div class="type-cards" role="radiogroup" aria-label="Buyurtma turi">
+                @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPE_META as $value => [$label, $hint, $icon])
+                    <button type="button" wire:key="type-{{ $value }}" wire:click="setOrderType('{{ $value }}')"
+                            role="radio" aria-checked="{{ $orderType === $value ? 'true' : 'false' }}"
+                            class="type-card {{ $orderType === $value ? 'active' : '' }}">
+                        <span class="type-icon"><i class="mdi {{ $icon }}"></i></span>
+                        <span class="type-text">
+                            <strong>{{ $label }}</strong>
+                            <small>{{ $hint }}</small>
+                        </span>
+                        <i class="mdi mdi-check-circle type-check"></i>
+                    </button>
+                @endforeach
+            </div>
+        @endif
 
         <div class="input-group mb-3">
             <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
@@ -123,6 +132,13 @@
                 @if(count($cart))
                     <span class="fw-bold tabular">{{ number_format($total, 0, ',', ' ') }} so'm</span>
                 @endif
+            </div>
+
+            {{-- Mijoz: doimiy xaridorlarga alohida e'tibor --}}
+            <div class="cart-customer">
+                @include('livewire.admin.orders.partials.customer-picker', [
+                    'showDelivery' => $mode === 'quick' && ($orderType ?? null) === 'delivery',
+                ])
             </div>
 
             @if(empty($cart))

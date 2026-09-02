@@ -95,9 +95,9 @@ class IndexLivewire extends Component
     public function render()
     {
         $orders = Order::query()
-            ->select(['id', 'user_id', 'place_id', 'amount', 'total_amount', 'discount', 'type', 'status', 'created_at'])
+            ->select(['id', 'user_id', 'place_id', 'customer_id', 'amount', 'total_amount', 'discount', 'type', 'status', 'delivery_address', 'created_at'])
             ->forCompany($this->companyId())
-            ->with(['user:id,name', 'place:id,name'])
+            ->with(['user:id,name', 'place:id,name', 'customer:id,name,phone'])
             ->when($this->fromDate, fn ($q) => $q->whereDate('created_at', '>=', $this->fromDate))
             ->when($this->toDate, fn ($q) => $q->whereDate('created_at', '<=', $this->toDate))
             ->when($this->type, fn ($q) => $q->where('type', $this->type))

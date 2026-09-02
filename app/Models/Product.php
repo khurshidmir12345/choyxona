@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -47,6 +48,36 @@ class Product extends Model
         'id', 'name', 'sell_price', 'discount', 'current_stock', 'image', 'code', 'category_id',
     ];
 
+    /** Skaner kodi prefiksi: MXS-10001, MXS-10002, ... */
+    public const CODE_PREFIX = 'MXS-';
+
+    protected static function booted(): void
+    {
+        // Kod id dan hosil qilinadi, shuning uchun har doim noyob va qo'lda kiritilmaydi.
+        static::created(function (Product $product) {
+            if (blank($product->code)) {
+                $product->forceFill(['code' => self::codeFor((int) $product->id)])->saveQuietly();
+            }
+        });
+    }
+
+    public static function codeFor(int $id): string
+    {
+        return self::CODE_PREFIX.(10_000 + $id);
+    }
+
+    /** "mxs-10001", "10001", "MXS10001" — hammasi bitta kodga olib keladi. */
+    public static function normalizeCode(?string $raw): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $raw);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        return self::CODE_PREFIX.$digits;
+    }
+
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         if (blank($term)) {
@@ -57,6 +88,11 @@ class Product extends Model
         return $query->where(function (Builder $q) use ($term) {
             $q->where('name', 'like', '%'.$term.'%')
                 ->orWhere('code', 'like', '%'.$term.'%');
+
+            // "10001" deb yozilsa ham MXS-10001 topilsin.
+            if ($normalized = self::normalizeCode($term)) {
+                $q->orWhere('code', 'like', '%'.$normalized.'%');
+            }
         });
     }
 
@@ -81,6 +117,11 @@ class Product extends Model
 
     public function formattedCode(): string
     {
-        return str_pad((string) $this->code, 5, '0', STR_PAD_LEFT);
+        return (string) ($this->code ?: self::codeFor((int) $this->id));
+    }
+
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(ProductStock::class, 'product_id');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Orders;
 use App\Casts\OrderStatusEnum;
 use App\Casts\PlaceStatusEnum;
 use App\Livewire\Concerns\WithCompany;
+use App\Livewire\Concerns\WithCustomerPicker;
 use App\Models\Order;
 use App\Models\Place;
 use App\Models\Product;
@@ -24,7 +25,7 @@ use Livewire\Component;
  */
 class OrderInCafeLivewire extends Component
 {
-    use WithCompany;
+    use WithCompany, WithCustomerPicker;
 
     public ?int $placeId = null;
 
@@ -135,7 +136,7 @@ class OrderInCafeLivewire extends Component
         $this->placeId = $place->id;
 
         $order = Order::query()
-            ->select(['id', 'discount'])
+            ->select(['id', 'discount', 'customer_id'])
             ->forCompany($this->companyId())
             ->where('place_id', $place->id)
             ->opened()
@@ -145,6 +146,7 @@ class OrderInCafeLivewire extends Component
         if ($order) {
             $this->activeOrderId = $order->id;
             $this->discount = (int) $order->discount;
+            $this->customerId = $order->customer_id;
             $this->cart = $this->loadCart($order->id);
         }
     }
@@ -206,6 +208,31 @@ class OrderInCafeLivewire extends Component
         $this->discount = max(0, min(100, (int) $this->discount));
     }
 
+    /** Skaner to'liq kodni (MXS-10001) yozsa, mahsulot darhol savatga tushadi. */
+    public function updatedSearch(): void
+    {
+        $term = trim($this->search);
+        $code = Product::normalizeCode($term);
+
+        if (! $code || strlen(preg_replace('/\D/', '', $term)) < 5) {
+            return;
+        }
+
+        $product = Product::query()
+            ->select(['id', 'name'])
+            ->forCompany($this->companyId())
+            ->where('code', $code)
+            ->first();
+
+        if (! $product) {
+            return;
+        }
+
+        $this->addProduct($product->id);
+        $this->search = '';
+        $this->dispatch('toast', type: 'success', message: "{$product->name} savatga qo'shildi.");
+    }
+
     public function saveOrder(OrderService $orders): void
     {
         $order = $this->ensureOrder($orders);
@@ -215,6 +242,7 @@ class OrderInCafeLivewire extends Component
         }
 
         $orders->syncItems($order, array_values($this->cart), $this->discount, (int) auth()->id());
+        $orders->attachCustomer($order, $this->customerId);
         $this->dispatch('toast', type: 'success', message: 'Buyurtma saqlandi.');
     }
 
@@ -226,6 +254,7 @@ class OrderInCafeLivewire extends Component
             return null;
         }
 
+        $orders->attachCustomer($order, $this->customerId);
         $orders->closeTableOrder($order, array_values($this->cart), $this->discount, (int) auth()->id());
 
         $this->resetOrderState();
@@ -344,6 +373,7 @@ class OrderInCafeLivewire extends Component
         $this->givenAmount = null;
         $this->search = '';
         $this->selectedCategory = null;
+        $this->resetCustomerPicker();
     }
 
     public function render()

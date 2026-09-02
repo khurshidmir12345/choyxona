@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Orders;
 
 use App\Casts\OrderTypeEnum;
 use App\Livewire\Concerns\WithCompany;
+use App\Livewire\Concerns\WithCustomerPicker;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\OrderService;
@@ -17,11 +18,17 @@ use Livewire\Component;
  */
 class CreateLivewire extends Component
 {
-    use WithCompany;
+    use WithCompany, WithCustomerPicker;
 
     public const TYPES = [
-        'delivery' => 'Yetkazib berish',
         'takeaway' => 'Olib ketish',
+        'delivery' => 'Yetkazib berish',
+    ];
+
+    /** Buyurtma turi kartalari: nom, izoh, ikonka. */
+    public const TYPE_META = [
+        'takeaway' => ['Olib ketish', 'Mijoz o\'zi keladi', 'mdi-shopping-outline'],
+        'delivery' => ['Yetkazib berish', 'Manzilga yetkaziladi', 'mdi-moped-outline'],
     ];
 
     public string $orderType = 'takeaway';
@@ -63,6 +70,43 @@ class CreateLivewire extends Component
     public function selectCategory(?int $categoryId = null): void
     {
         $this->selectedCategory = $categoryId;
+    }
+
+    public function setOrderType(string $type): void
+    {
+        if (array_key_exists($type, self::TYPES)) {
+            $this->orderType = $type;
+        }
+    }
+
+    /** Skaner to'liq kodni (MXS-10001) yozsa, mahsulot darhol savatga tushadi. */
+    public function updatedSearch(): void
+    {
+        $this->addByScannedCode();
+    }
+
+    private function addByScannedCode(): void
+    {
+        $term = trim($this->search);
+        $code = Product::normalizeCode($term);
+
+        if (! $code || strlen(preg_replace('/\D/', '', $term)) < 5) {
+            return;
+        }
+
+        $product = Product::query()
+            ->select(['id', 'name'])
+            ->forCompany($this->companyId())
+            ->where('code', $code)
+            ->first();
+
+        if (! $product) {
+            return;
+        }
+
+        $this->addProduct($product->id);
+        $this->search = '';
+        $this->dispatch('toast', type: 'success', message: "{$product->name} savatga qo'shildi.");
     }
 
     public function addProduct(int $productId): void
@@ -154,9 +198,12 @@ class CreateLivewire extends Component
             OrderTypeEnum::from($this->orderType),
             array_values($this->cart),
             $this->orderDiscount,
+            $this->customerId,
+            trim($this->deliveryAddress) ?: null,
         );
 
         $this->reset(['cart', 'orderDiscount', 'givenAmount', 'search', 'selectedCategory']);
+        $this->resetCustomerPicker();
 
         return redirect()->route('admin.orders.print', $order->id);
     }

@@ -19,8 +19,10 @@ class ProductStock extends Model
     protected $fillable = [
         'product_id',
         'company_id',
+        'user_id',   // kim qildi
         'quantity',
         'type',
+        'note',      // nima uchun (buyurtma raqami, "yaratilganda kiritildi", izoh)
     ];
 
     protected function casts(): array
@@ -42,5 +44,10 @@ class ProductStock extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

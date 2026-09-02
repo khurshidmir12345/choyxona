@@ -93,6 +93,7 @@
                             <th>#</th>
                             <th>Sana</th>
                             <th>Joy</th>
+                            <th>Mijoz</th>
                             <th>Turi</th>
                             <th>Holati</th>
                             <th class="text-end">Summa</th>
@@ -108,7 +109,24 @@
                                     {{ $order->created_at?->format('d.m.Y H:i') ?? '—' }}
                                 </td>
                                 <td>{{ $order->place?->name ?? '—' }}</td>
-                                <td>@include('livewire.admin.orders.partials.order-type', ['type' => $order->type])</td>
+                                <td>
+                                    @if($order->customer)
+                                        <a href="{{ route('customers.show', $order->customer->id) }}" class="fw-semibold text-dark">{{ $order->customer->name }}</a>
+                                        @if($order->customer->phone)
+                                            <small class="d-block text-muted tabular">{{ $order->customer->formattedPhone() }}</small>
+                                        @endif
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @include('livewire.admin.orders.partials.order-type', ['type' => $order->type])
+                                    @if($order->delivery_address)
+                                        <small class="d-block text-muted text-truncate" style="max-width:200px" title="{{ $order->delivery_address }}">
+                                            <i class="mdi mdi-map-marker-outline"></i> {{ $order->delivery_address }}
+                                        </small>
+                                    @endif
+                                </td>
                                 <td>@include('livewire.admin.orders.partials.order-status', ['status' => $order->status])</td>
                                 <td class="text-end">
                                     <span class="fw-bold tabular">
@@ -140,7 +158,7 @@
 
                             @if($expandedOrderId === $order->id)
                                 <tr wire:key="details-{{ $order->id }}">
-                                    <td colspan="8" class="p-2">
+                                    <td colspan="9" class="p-2">
                                         @include('livewire.admin.orders.partials.details-table', ['details' => $details])
                                     </td>
                                 </tr>

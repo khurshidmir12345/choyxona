@@ -25,7 +25,6 @@ class ProductFactory extends Factory
             'current_stock' => fake()->numberBetween(10, 100),
             'company_id' => Company::factory(),
             'category_id' => ProductCategory::factory(),
-            'code' => fake()->unique()->numberBetween(10_000, 99_999),
         ];
     }
 

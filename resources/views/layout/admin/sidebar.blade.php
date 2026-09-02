@@ -16,6 +16,7 @@
             ['label' => 'Buyurtmalar tarixi', 'icon' => 'mdi-history', 'route' => 'orders.index'],
             ['label' => 'Arxiv', 'icon' => 'mdi-archive-outline', 'route' => 'orders.deleted'],
         ]],
+        ['type' => 'link', 'label' => 'Mijozlar', 'icon' => 'mdi-account-group-outline', 'route' => 'customers.index', 'routes' => ['customers.index', 'customers.show']],
 
         ['type' => 'section', 'label' => 'Katalog'],
         ['type' => 'group', 'label' => 'Mahsulotlar', 'icon' => 'mdi-food-outline', 'id' => 'menu-catalog', 'children' => [
@@ -43,7 +44,7 @@
                 <li class="nav-item nav-section"><span>{{ $item['label'] }}</span></li>
 
             @elseif($item['type'] === 'link')
-                <li class="nav-item {{ $is($item['route']) ? 'active' : '' }}">
+                <li class="nav-item {{ $is(...($item['routes'] ?? [$item['route']])) ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route($item['route']) }}">
                         <i class="mdi {{ $item['icon'] }} menu-icon"></i>
                         <span class="menu-title">{{ $item['label'] }}</span>

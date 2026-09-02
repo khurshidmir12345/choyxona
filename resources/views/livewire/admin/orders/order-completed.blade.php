@@ -27,6 +27,15 @@
             </span>
             <span>{{ $order->user?->name }}</span>
         </div>
+        @if($order->customer)
+            <div style="display:flex;justify-content:space-between;margin-top:2px">
+                <span>Mijoz: <span class="bold">{{ $order->customer->name }}</span></span>
+                <span>{{ $order->customer->formattedPhone() }}</span>
+            </div>
+        @endif
+        @if($order->delivery_address)
+            <div style="margin-top:2px">Manzil: {{ $order->delivery_address }}</div>
+        @endif
     </div>
 
     <hr class="rule">

@@ -41,6 +41,8 @@ class IndexLivewire extends Component
 
     public string $type = 'add';
 
+    public string $note = '';
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -63,7 +65,7 @@ class IndexLivewire extends Component
 
     public function createMovement(): void
     {
-        $this->reset(['stockId', 'product_id', 'quantity']);
+        $this->reset(['stockId', 'product_id', 'quantity', 'note']);
         $this->type = 'add';
         $this->resetValidation();
         $this->showForm = true;
@@ -72,7 +74,7 @@ class IndexLivewire extends Component
     public function edit(int $id): void
     {
         $stock = ProductStock::query()
-            ->select(['id', 'product_id', 'quantity', 'type'])
+            ->select(['id', 'product_id', 'quantity', 'type', 'note'])
             ->forCompany($this->companyId())
             ->find($id);
 
@@ -84,6 +86,7 @@ class IndexLivewire extends Component
         $this->product_id = $stock->product_id;
         $this->quantity = $stock->quantity;
         $this->type = $stock->type->value;
+        $this->note = (string) $stock->note;
         $this->resetValidation();
         $this->showForm = true;
     }
@@ -97,12 +100,14 @@ class IndexLivewire extends Component
             ],
             'quantity' => ['required', 'integer', 'min:1'],
             'type' => ['required', Rule::in(ProductStockType::values())],
+            'note' => ['nullable', 'string', 'max:255'],
         ], [
             'product_id.required' => 'Mahsulotni tanlang.',
             'product_id.exists' => 'Bunday mahsulot yo\'q.',
             'quantity.required' => 'Miqdorni kiriting.',
             'quantity.min' => 'Miqdor kamida 1 bo\'lishi kerak.',
             'type.required' => 'Turini tanlang.',
+            'note.max' => 'Izoh 255 belgidan oshmasin.',
         ]);
 
         $type = ProductStockType::from($data['type']);
@@ -141,17 +146,24 @@ class IndexLivewire extends Component
             }
 
             if ($existing) {
+                // Tahrirlagan odam ham qayd etiladi — izohga qo'shib qo'yiladi.
+                $editor = auth()->user()?->name;
+                $note = trim((string) ($data['note'] ?? ''));
+
                 $existing->update([
                     'product_id' => (int) $data['product_id'],
                     'quantity' => (int) $data['quantity'],
                     'type' => $type,
+                    'note' => mb_substr(trim($note.($editor ? " [tahrirladi: {$editor}]" : '')), 0, 255) ?: null,
                 ]);
             } else {
                 ProductStock::create([
                     'company_id' => $this->companyId(),
                     'product_id' => (int) $data['product_id'],
+                    'user_id' => auth()->id(),
                     'quantity' => (int) $data['quantity'],
                     'type' => $type,
+                    'note' => trim((string) ($data['note'] ?? '')) ?: null,
                 ]);
             }
 
@@ -166,7 +178,7 @@ class IndexLivewire extends Component
     public function closeForm(): void
     {
         $this->showForm = false;
-        $this->reset(['stockId', 'product_id', 'quantity']);
+        $this->reset(['stockId', 'product_id', 'quantity', 'note']);
         $this->type = 'add';
         $this->resetValidation();
     }
@@ -205,9 +217,9 @@ class IndexLivewire extends Component
     public function render()
     {
         $movements = ProductStock::query()
-            ->select(['id', 'product_id', 'quantity', 'type', 'created_at'])
+            ->select(['id', 'product_id', 'user_id', 'quantity', 'type', 'note', 'created_at'])
             ->forCompany($this->companyId())
-            ->with(['product:id,name,code'])
+            ->with(['product:id,name,code', 'user:id,name'])
             ->when($this->typeFilter, fn ($q) => $q->where('type', $this->typeFilter))
             ->when($this->search, fn ($q) => $q->whereHas(
                 'product',
