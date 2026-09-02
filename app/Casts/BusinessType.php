@@ -6,7 +6,7 @@ namespace App\Casts;
  * Tizim qaysi biznes uchun ishlayotgani. Kafe rejimida zal va joylar bor,
  * do'kon rejimida ular yo'q, so'zlar va ikonkalar universal.
  */
-enum BusinessType: string
+enum BusinessType: string implements \Filament\Support\Contracts\HasLabel
 {
     case Cafe = 'cafe';
     case Retail = 'retail';
@@ -14,6 +14,11 @@ enum BusinessType: string
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label();
     }
 
     public function label(): string

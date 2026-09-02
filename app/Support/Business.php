@@ -14,12 +14,13 @@ class Business
     public static function current(): BusinessType
     {
         return once(function () {
-            $companyId = auth()->user()?->companyId();
+            $companyId = self::companyId();
 
             // value() cast qo'llaydi — enum yoki null qaytadi.
             $value = $companyId
                 ? Company::query()->whereKey($companyId)->value('business_type')
                 : null;
+
 
             if ($value instanceof BusinessType) {
                 return $value;
@@ -32,7 +33,7 @@ class Business
     /** Kompaniya turi tanlanganmi (null bo'lsa — o'rnatish ekrani). */
     public static function isChosen(): bool
     {
-        $companyId = auth()->user()?->companyId();
+        $companyId = self::companyId();
 
         if (! $companyId) {
             return true;
@@ -54,6 +55,14 @@ class Business
     public static function term(string $key): string
     {
         return self::current()->term($key);
+    }
+
+    /** Faqat oddiy foydalanuvchida kompaniya bor; admin panelida (Admin modeli) yo'q. */
+    private static function companyId(): ?int
+    {
+        $user = auth()->user();
+
+        return $user instanceof \App\Models\User ? $user->companyId() : null;
     }
 
     /** Tur o'zgartirilganda keshni tozalash. */

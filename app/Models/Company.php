@@ -56,6 +56,12 @@ class Company extends Model
         return $this->hasMany(Order::class);
     }
 
+    /** Kompaniyaga biriktirilgan xodimlar (egasi bundan tashqari). */
+    public function sellers(): HasMany
+    {
+        return $this->hasMany(User::class, 'company_id');
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

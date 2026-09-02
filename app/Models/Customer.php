@@ -45,17 +45,7 @@ class Customer extends Model
     /** Telefon bazada bir xil ko'rinishda saqlanadi: faqat raqamlar va boshida "+". */
     public static function normalizePhone(?string $phone): ?string
     {
-        $digits = preg_replace('/\D/', '', (string) $phone);
-
-        if ($digits === '') {
-            return null;
-        }
-
-        if (strlen($digits) === 9) {
-            $digits = '998'.$digits;
-        }
-
-        return '+'.$digits;
+        return \App\Support\Phone::normalize($phone);
     }
 
     /** Ko'rsatish uchun: +998 90 123 45 67 */
