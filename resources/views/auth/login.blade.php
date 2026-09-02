@@ -4,7 +4,12 @@
         <span class="fw-bold fs-5">Choyxona POS</span>
     </div>
 
-    <h4 class="fw-bold mb-1">Xush kelibsiz</h4>
+    <div class="d-flex align-items-start justify-content-between">
+        <h4 class="fw-bold mb-1">Xush kelibsiz</h4>
+        <button type="button" class="theme-toggle" data-theme-toggle onclick="toggleTheme()" aria-label="Rejimni almashtirish">
+            <i class="mdi mdi-weather-night"></i>
+        </button>
+    </div>
     <h6 class="fw-light text-muted mb-4">Davom etish uchun tizimga kiring.</h6>
 
     @if (session('status'))

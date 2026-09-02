@@ -1,0 +1,297 @@
+/*
+ * Tungi rejim — html[data-theme="dark"].
+ * Shablon (Corona) ranglarni to'g'ridan-to'g'ri yozgan, shuning uchun
+ * asosiy yuzalar shu yerda qayta bo'yaladi. Palitra:
+ *   fon #0f1420, karta #171c2a, ichki yuza #1e2434, chiziq #2a3145,
+ *   matn #e6e9f2, xira #8f97ab, urg'u #6b85ff.
+ */
+
+[data-theme="dark"] {
+    --dk-bg: #0f1420;
+    --dk-card: #171c2a;
+    --dk-card-2: #1e2434;
+    --dk-line: #2a3145;
+    --dk-text: #e6e9f2;
+    --dk-muted: #8f97ab;
+    --dk-primary: #6b85ff;
+    --dk-primary-soft: rgba(107, 133, 255, .14);
+    --pos-border: #2a3145;
+    --pos-line: #2a3145;
+    --pos-sidebar-bg: #131826;
+    --pos-primary: #6b85ff;
+}
+
+/* ------------------------------------------------------------ asos */
+
+[data-theme="dark"] body,
+[data-theme="dark"] .content-wrapper,
+[data-theme="dark"] .container-scroller,
+[data-theme="dark"] .page-body-wrapper { background: var(--dk-bg); color: var(--dk-text); }
+
+[data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3,
+[data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6,
+[data-theme="dark"] .pos-page-head h3,
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .card .card-title,
+[data-theme="dark"] .modal-title { color: var(--dk-text) !important; }
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .pos-page-head p,
+[data-theme="dark"] .form-text,
+[data-theme="dark"] .form-label-note,
+[data-theme="dark"] .empty-state p { color: var(--dk-muted) !important; }
+
+[data-theme="dark"] a:not(.btn):not(.nav-link):not(.dropdown-item):not(.navbar-brand):not(.place-card) { color: var(--dk-primary); }
+[data-theme="dark"] .btn-primary, [data-theme="dark"] .btn-primary:hover, [data-theme="dark"] a.btn-primary { color: #fff !important; }
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .filter-panel,
+[data-theme="dark"] .stat-mini,
+[data-theme="dark"] .pos-tile,
+[data-theme="dark"] .pos-cart,
+[data-theme="dark"] .type-card,
+[data-theme="dark"] .pos-tab,
+[data-theme="dark"] .chip,
+[data-theme="dark"] .filter-toggle,
+[data-theme="dark"] .cust-selected,
+[data-theme="dark"] .cust-form,
+[data-theme="dark"] .cust-dropdown,
+[data-theme="dark"] .setup-card,
+[data-theme="dark"] .biz-card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu {
+    background: var(--dk-card);
+    border-color: var(--dk-line);
+    color: var(--dk-text);
+}
+
+[data-theme="dark"] .card { box-shadow: none; }
+[data-theme="dark"] .footer { background: var(--dk-bg); border-color: var(--dk-line); }
+
+/* ----------------------------------------------------------- panel/menyu */
+
+[data-theme="dark"] .navbar.default-layout,
+[data-theme="dark"] .navbar .navbar-brand-wrapper,
+[data-theme="dark"] .navbar .navbar-menu-wrapper { background: #131826; border-color: var(--dk-line); }
+
+[data-theme="dark"] .brand-text,
+[data-theme="dark"] .navbar .navbar-toggler { color: var(--dk-text); }
+[data-theme="dark"] .company-chip { background: var(--dk-card-2); border-color: var(--dk-line); }
+[data-theme="dark"] .company-chip-name { color: var(--dk-text); }
+
+[data-theme="dark"] .sidebar { background: #131826; border-color: var(--dk-line); }
+[data-theme="dark"] .sidebar .nav .nav-item .nav-link { color: #b8bfd1; }
+[data-theme="dark"] .sidebar .nav .nav-item .nav-link:hover { background: var(--dk-card-2); color: var(--dk-text); }
+[data-theme="dark"] .sidebar .nav .nav-item .nav-link i.menu-icon { color: #7f879c; }
+[data-theme="dark"] .sidebar .nav .nav-item.active > .nav-link { background: var(--dk-primary-soft) !important; color: var(--dk-primary); }
+[data-theme="dark"] .sidebar .nav .nav-item.nav-section { color: #626a80; }
+[data-theme="dark"] .sidebar .nav .nav-item.nav-section::before,
+[data-theme="dark"] .sidebar .nav .nav-item.nav-section::after,
+[data-theme="dark"] .sidebar .nav.sub-menu::before { background: var(--dk-line); }
+[data-theme="dark"] .sidebar .nav.sub-menu .nav-item .nav-link { color: #a4abbf; }
+[data-theme="dark"] .sidebar .nav.sub-menu .nav-item .nav-link:hover { background: var(--dk-card-2); color: var(--dk-text); }
+[data-theme="dark"] .sidebar .nav.sub-menu .nav-item .nav-link.active { color: var(--dk-primary); }
+
+@media (min-width: 992px) {
+    [data-theme="dark"] .sidebar-icon-only .sidebar .nav .nav-item.hover-open .nav-link .menu-title,
+    [data-theme="dark"] .sidebar-icon-only .sidebar .nav .nav-item.hover-open .collapse,
+    [data-theme="dark"] .sidebar-icon-only .sidebar .nav .nav-item.hover-open .collapsing {
+        background: var(--dk-card-2);
+        color: var(--dk-text);
+        box-shadow: 8px 8px 24px -12px rgba(0, 0, 0, .7);
+    }
+}
+
+[data-theme="dark"] .dropdown-menu .dropdown-item { color: var(--dk-text); }
+[data-theme="dark"] .dropdown-menu .dropdown-item:hover { background: var(--dk-card-2); }
+[data-theme="dark"] .navbar-dropdown .dropdown-header { color: var(--dk-text); }
+
+/* -------------------------------------------------------------- formalar */
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] select.form-select.head-select,
+[data-theme="dark"] .head-search input,
+[data-theme="dark"] .place-search input,
+[data-theme="dark"] .cust-search input,
+[data-theme="dark"] .input-group-text,
+[data-theme="dark"] .chip-new .form-control {
+    background: var(--dk-card-2) !important;
+    border-color: var(--dk-line) !important;
+    color: var(--dk-text) !important;
+}
+
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] .head-search input::placeholder,
+[data-theme="dark"] .cust-search input::placeholder { color: #6f778c; }
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] .head-search input:focus,
+[data-theme="dark"] .cust-search input:focus { border-color: var(--dk-primary) !important; box-shadow: 0 0 0 3px var(--dk-primary-soft); }
+
+[data-theme="dark"] select.form-select,
+[data-theme="dark"] select.form-select option { color: var(--dk-text); background: var(--dk-card-2); }
+
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .pos-modal .form-label,
+[data-theme="dark"] .filter-grid label { color: #b8bfd1; }
+
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
+
+[data-theme="dark"] .btn-inverse-primary { background: var(--dk-primary-soft); color: var(--dk-primary); }
+[data-theme="dark"] .btn-inverse-primary:hover { background: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .btn-inverse-secondary { background: #262d3f; color: #b8bfd1; }
+[data-theme="dark"] .btn-inverse-danger { background: rgba(243, 121, 126, .15); }
+[data-theme="dark"] .btn-primary { background: var(--dk-primary); border-color: var(--dk-primary); }
+
+[data-theme="dark"] .nav-tabs { border-color: var(--dk-line); }
+[data-theme="dark"] .nav-tabs .nav-link { color: var(--dk-muted); }
+[data-theme="dark"] .nav-tabs .nav-link.active { background: var(--dk-card); color: var(--dk-text); border-color: var(--dk-line) var(--dk-line) var(--dk-card); }
+
+/* ---------------------------------------------------------------- jadval */
+
+[data-theme="dark"] .table { color: var(--dk-text); --bs-table-bg: transparent; --bs-table-color: var(--dk-text); }
+[data-theme="dark"] .table thead th { color: var(--dk-muted); border-color: var(--dk-line); }
+[data-theme="dark"] .table td, [data-theme="dark"] .table th { border-color: var(--dk-line); }
+[data-theme="dark"] .table-hover tbody tr:hover { background: var(--dk-card-2); --bs-table-hover-bg: var(--dk-card-2); color: var(--dk-text); }
+[data-theme="dark"] .bg-light, [data-theme="dark"] .bg-white { background: var(--dk-card-2) !important; }
+[data-theme="dark"] .table .btn-sm { box-shadow: none; }
+[data-theme="dark"] .pagination .page-link { background: var(--dk-card); border-color: var(--dk-line); color: var(--dk-text); }
+[data-theme="dark"] .pagination .page-item.active .page-link { background: var(--dk-primary); border-color: var(--dk-primary); }
+[data-theme="dark"] .code-chip { background: #262d3f; color: #c7cddc; }
+[data-theme="dark"] .empty-state i { color: #3a4358; }
+[data-theme="dark"] .empty-state h6 { color: #b8bfd1; }
+
+/* -------------------------------------------------------------- modal */
+
+[data-theme="dark"] .pos-modal { background: rgba(5, 8, 15, .7); }
+[data-theme="dark"] .pos-modal .modal-header,
+[data-theme="dark"] .pos-modal .modal-footer { border-color: var(--dk-line); background: var(--dk-card); }
+[data-theme="dark"] .pos-modal .modal-icon { background: var(--dk-primary-soft); color: var(--dk-primary); }
+[data-theme="dark"] .pos-modal .modal-close:hover { background: var(--dk-card-2); color: var(--dk-text); }
+[data-theme="dark"] .pos-modal .modal-subtitle { color: var(--dk-muted); }
+[data-theme="dark"] .code-box { background: var(--dk-card-2); border-color: var(--dk-line); color: var(--dk-text); }
+[data-theme="dark"] .margin-note.is-plus { background: rgba(77, 167, 97, .15); color: #7fd493; }
+[data-theme="dark"] .margin-note.is-minus { background: rgba(243, 121, 126, .15); color: #f7a1a5; }
+[data-theme="dark"] .stock-adjust { background: rgba(226, 158, 9, .12); border-color: rgba(226, 158, 9, .35); }
+[data-theme="dark"] .stock-adjust-head { color: #e6c06a; }
+[data-theme="dark"] .img-upload-box { background: var(--dk-card-2); border-color: var(--dk-line); }
+[data-theme="dark"] .img-upload-empty { color: #4a5470; }
+
+/* -------------------------------------------------------- chip, pill, tur */
+
+[data-theme="dark"] .chip { color: #c7cddc; }
+[data-theme="dark"] .chip:hover { border-color: var(--dk-primary); color: var(--dk-primary); }
+[data-theme="dark"] .chip.active { background: var(--dk-primary); border-color: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .chip.chip-add { background: var(--dk-primary-soft); color: var(--dk-primary); }
+
+[data-theme="dark"] .stat-mini small { color: var(--dk-muted); }
+[data-theme="dark"] .stat-mini strong { color: var(--dk-text); }
+[data-theme="dark"] .filter-toggle { color: #c7cddc; }
+[data-theme="dark"] .filter-toggle:hover, [data-theme="dark"] .filter-toggle.is-open { background: var(--dk-primary-soft); color: var(--dk-primary); border-color: var(--dk-primary); }
+[data-theme="dark"] .filter-count { background: var(--dk-primary); }
+
+[data-theme="dark"] .type-card:hover { border-color: var(--dk-primary); }
+[data-theme="dark"] .type-card.active { background: var(--dk-primary-soft); border-color: var(--dk-primary); }
+[data-theme="dark"] .type-card .type-icon { background: var(--dk-card-2); color: #b8bfd1; }
+[data-theme="dark"] .type-card.active .type-icon { background: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .type-card .type-text small { color: var(--dk-muted); }
+
+[data-theme="dark"] .pos-tab { color: #c7cddc; }
+[data-theme="dark"] .pos-tab.active { background: var(--dk-primary); border-color: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .pos-tab-count { background: var(--dk-primary-soft); color: var(--dk-primary); }
+[data-theme="dark"] .pos-tab.pos-tab-add { background: var(--dk-primary-soft); color: var(--dk-primary); }
+[data-theme="dark"] .pos-tab-close { border-left-color: rgba(255, 255, 255, .08); }
+
+[data-theme="dark"] .biz-card.active { background: var(--dk-primary-soft); border-color: var(--dk-primary); }
+[data-theme="dark"] .biz-card .type-icon { background: var(--dk-card-2); color: #b8bfd1; }
+[data-theme="dark"] .biz-card.active .type-icon { background: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .biz-card .type-text small { color: var(--dk-muted); }
+
+/* -------------------------------------------------------------- sotuv */
+
+[data-theme="dark"] .pos-chip { background: var(--dk-card); border-color: var(--dk-line); color: #c7cddc; }
+[data-theme="dark"] .pos-chip.active { background: var(--dk-primary); border-color: var(--dk-primary); color: #fff; }
+[data-theme="dark"] .pos-tile:hover { border-color: var(--dk-primary); box-shadow: 0 14px 26px -16px rgba(0, 0, 0, .8); }
+[data-theme="dark"] .pos-tile.in-cart { border-color: var(--dk-primary); box-shadow: 0 0 0 2px var(--dk-primary-soft); }
+[data-theme="dark"] .pos-tile .tile-thumb { background: var(--dk-card-2); }
+[data-theme="dark"] .pos-tile .tile-thumb i { color: #3f485f; }
+[data-theme="dark"] .pos-tile .tile-name { color: var(--dk-text); }
+[data-theme="dark"] .pos-tile .tile-price { color: var(--dk-primary); }
+[data-theme="dark"] .pos-tile .tile-count { background: var(--dk-primary); }
+[data-theme="dark"] .pos-cart .cart-head, [data-theme="dark"] .pos-cart .cart-line { border-color: var(--dk-line); }
+[data-theme="dark"] .pos-cart .cart-line-name { color: var(--dk-text); }
+[data-theme="dark"] .pos-cart .cart-foot { background: var(--dk-card-2); border-color: var(--dk-line); }
+[data-theme="dark"] .pos-cart .cart-total-row.grand { border-color: var(--dk-line); }
+[data-theme="dark"] .cart-customer { background: var(--dk-card-2); border-color: var(--dk-line); }
+[data-theme="dark"] .cust-name { color: var(--dk-text); }
+[data-theme="dark"] .cust-item:hover { background: var(--dk-card-2); }
+[data-theme="dark"] .cust-icon-btn:hover { background: var(--dk-card-2); color: var(--dk-text); }
+[data-theme="dark"] .cust-add { background: var(--dk-primary-soft); color: var(--dk-primary); }
+[data-theme="dark"] .cust-form-title { color: var(--dk-primary); }
+[data-theme="dark"] .cust-row { color: var(--dk-text); }
+[data-theme="dark"] .addr-list li { background: var(--dk-card-2); color: #c7cddc; }
+
+/* Joylar: tungi choyxona — yong'oq va sopol ohanglari */
+[data-theme="dark"] .place-card {
+    color: #f1e6d2;
+    border-color: #5a4630;
+    background:
+        radial-gradient(circle at 1px 1px, rgba(214, 178, 120, .12) 1px, transparent 1.5px) 0 0 / 12px 12px,
+        linear-gradient(165deg, #2d2318 0%, #241b12 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 10px 24px -18px rgba(0, 0, 0, .8);
+}
+[data-theme="dark"] .place-card::before { border-color: rgba(214, 178, 120, .3); }
+[data-theme="dark"] .place-card:hover { border-color: #8c6a4a; }
+[data-theme="dark"] .place-card.is-busy { border-color: #7a3f2c; background: radial-gradient(circle at 1px 1px, rgba(214, 120, 90, .14) 1px, transparent 1.5px) 0 0 / 12px 12px, linear-gradient(165deg, #33201a 0%, #281712 100%); }
+[data-theme="dark"] .place-emblem { box-shadow: 0 0 0 4px rgba(0, 0, 0, .25), 0 0 0 5px #5a4630; }
+[data-theme="dark"] .place-cap, [data-theme="dark"] .place-since { color: #c9ad86; }
+[data-theme="dark"] .place-status { background: rgba(63, 125, 78, .25); color: #8fd6a0; }
+[data-theme="dark"] .place-card.is-busy .place-status { background: rgba(0, 0, 0, .3); color: #f2a08a; }
+[data-theme="dark"] .place-action { background: #2d2318; border-color: #5a4630; color: #c9ad86; }
+[data-theme="dark"] .place-empty { background: #2d2318; border-color: #5a4630; color: #f1e6d2; }
+[data-theme="dark"] .place-empty i, [data-theme="dark"] .place-empty p { color: #c9ad86; }
+[data-theme="dark"] .place-legend { color: #b8bfd1; }
+
+/* ------------------------------------------------------------- statistika */
+
+[data-theme="dark"] .stat-card.stat-light { background: var(--dk-card); border-color: var(--dk-line); color: var(--dk-text); }
+[data-theme="dark"] .mini-chart .chart-tip { background: #000; }
+[data-theme="dark"] .rank-bar { background: var(--dk-card-2); }
+
+/* -------------------------------------------------- kirish va o'rnatish */
+
+[data-theme="dark"] .auth .auth-form-light,
+[data-theme="dark"] .auth .content-wrapper { background: var(--dk-card); color: var(--dk-text); }
+[data-theme="dark"] .auth .auth-form-light .form-control { background: var(--dk-card-2) !important; }
+[data-theme="dark"] .auth .input-group-text.bg-light { background: var(--dk-card-2) !important; color: var(--dk-text); }
+[data-theme="dark"] .setup-body { background: var(--dk-bg); }
+[data-theme="dark"] .setup-title, [data-theme="dark"] .setup-brand, [data-theme="dark"] .setup-card-title { color: var(--dk-text); }
+[data-theme="dark"] .setup-card-desc, [data-theme="dark"] .setup-sub { color: var(--dk-muted); }
+[data-theme="dark"] .setup-list li { color: #c7cddc; }
+
+/* ----------------------------------------------------------- SweetAlert */
+
+[data-theme="dark"] .swal2-popup { background: var(--dk-card); color: var(--dk-text); }
+[data-theme="dark"] .swal2-title, [data-theme="dark"] .swal2-html-container { color: var(--dk-text); }
+
+/* ----------------------------------------------------------- tugma */
+
+.theme-toggle {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--pos-line, #e8ebf2);
+    border-radius: 50%;
+    background: transparent;
+    color: #5c6478;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    transition: all .15s ease;
+}
+
+.theme-toggle:hover { color: var(--pos-primary); border-color: var(--pos-primary); }
+[data-theme="dark"] .theme-toggle { color: #e6c06a; border-color: var(--dk-line); }

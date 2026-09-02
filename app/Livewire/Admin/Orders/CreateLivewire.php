@@ -15,10 +15,25 @@ use Livewire\Component;
 /**
  * Yetkazib berish va olib ketish uchun tez sotuv ekrani.
  * Buyurtma bir urinishda ochiladi va yopiladi.
+ *
+ * Yorliqlar (tabs): bitta mijozning savati tugamasdan ikkinchisiga xizmat
+ * ko'rsatish kerak bo'lsa, kassir yangi yorliq ochadi. Har yorliq — alohida
+ * savat, mijoz, tur va chegirma. Holat sessiyada saqlanadi, sahifa
+ * yangilansa ham yo'qolmaydi.
  */
 class CreateLivewire extends Component
 {
     use WithCompany, WithCustomerPicker;
+
+    /** Faol bo'lmagan yorliqlarning holati: id => snapshot. */
+    public array $tabs = [];
+
+    public int $activeTab = 1;
+
+    private int $nextTabId = 2;
+
+    /** Bitta yorliqda saqlanadigan maydonlar. */
+    private const TAB_FIELDS = ['orderType', 'cart', 'orderDiscount', 'givenAmount', 'customerId', 'deliveryAddress'];
 
     public const TYPES = [
         'takeaway' => 'Olib ketish',
@@ -48,6 +63,155 @@ class CreateLivewire extends Component
     public string $search = '';
 
     public ?int $selectedCategory = null;
+
+    public function mount(): void
+    {
+        $saved = session()->get($this->tabsSessionKey());
+
+        if (is_array($saved) && ! empty($saved['tabs'])) {
+            $this->tabs = $saved['tabs'];
+            $this->activeTab = (int) ($saved['active'] ?? array_key_first($this->tabs));
+
+            if (! isset($this->tabs[$this->activeTab])) {
+                $this->activeTab = (int) array_key_first($this->tabs);
+            }
+
+            $this->restoreTab($this->tabs[$this->activeTab]);
+        } else {
+            $this->tabs = [1 => $this->snapshot()];
+            $this->activeTab = 1;
+        }
+
+        $this->nextTabId = max(array_keys($this->tabs)) + 1;
+    }
+
+    /** Har so'rovdan keyin: faol yorliq holati sessiyaga yoziladi. */
+    public function dehydrate(): void
+    {
+        $this->tabs[$this->activeTab] = $this->snapshot();
+
+        session()->put($this->tabsSessionKey(), [
+            'tabs' => $this->tabs,
+            'active' => $this->activeTab,
+        ]);
+    }
+
+    // ------------------------------------------------------------ yorliqlar
+
+    public function newTab(): void
+    {
+        $this->tabs[$this->activeTab] = $this->snapshot();
+
+        $id = $this->nextFreeTabId();
+        $this->resetTabState();
+        $this->tabs[$id] = $this->snapshot();
+        $this->activeTab = $id;
+    }
+
+    public function switchTab(int $id): void
+    {
+        if ($id === $this->activeTab || ! isset($this->tabs[$id])) {
+            return;
+        }
+
+        $this->tabs[$this->activeTab] = $this->snapshot();
+        $this->restoreTab($this->tabs[$id]);
+        $this->activeTab = $id;
+    }
+
+    public function closeTab(int $id): void
+    {
+        if (! isset($this->tabs[$id])) {
+            return;
+        }
+
+        unset($this->tabs[$id]);
+
+        if ($id !== $this->activeTab) {
+            return;
+        }
+
+        if ($this->tabs === []) {
+            $this->resetTabState();
+            $this->tabs[1] = $this->snapshot();
+            $this->activeTab = 1;
+
+            return;
+        }
+
+        $next = (int) array_key_first($this->tabs);
+        $this->restoreTab($this->tabs[$next]);
+        $this->activeTab = $next;
+    }
+
+    /** Yorliq nomi: mijoz tanlangan bo'lsa uning ismi, aks holda tartib raqami. */
+    public function tabLabel(int $id): string
+    {
+        $snap = $id === $this->activeTab ? $this->snapshot() : ($this->tabs[$id] ?? []);
+
+        if (! empty($snap['customerId'])) {
+            $name = \App\Models\Customer::query()
+                ->whereKey($snap['customerId'])
+                ->forCompany($this->companyId())
+                ->value('name');
+
+            if ($name) {
+                return $name;
+            }
+        }
+
+        $position = array_search($id, array_keys($this->tabs), true);
+
+        return 'Mijoz '.(($position === false ? count($this->tabs) : $position) + 1);
+    }
+
+    /** @return array<string, mixed> */
+    private function snapshot(): array
+    {
+        $snap = [];
+
+        foreach (self::TAB_FIELDS as $field) {
+            $snap[$field] = $this->{$field};
+        }
+
+        return $snap;
+    }
+
+    private function restoreTab(array $snap): void
+    {
+        $this->resetTabState();
+
+        foreach (self::TAB_FIELDS as $field) {
+            if (array_key_exists($field, $snap)) {
+                $this->{$field} = $snap[$field];
+            }
+        }
+
+        $this->cart = is_array($this->cart) ? $this->cart : [];
+        unset($this->selectedCustomer, $this->customerAddresses);
+    }
+
+    private function resetTabState(): void
+    {
+        $this->orderType = 'takeaway';
+        $this->cart = [];
+        $this->orderDiscount = 0;
+        $this->givenAmount = null;
+        $this->resetCustomerPicker();
+    }
+
+    private function nextFreeTabId(): int
+    {
+        $id = max($this->nextTabId, $this->tabs === [] ? 1 : max(array_keys($this->tabs)) + 1);
+        $this->nextTabId = $id + 1;
+
+        return $id;
+    }
+
+    private function tabsSessionKey(): string
+    {
+        return 'pos.quick.tabs.'.(int) auth()->id();
+    }
 
     #[Computed]
     public function categories(): Collection
@@ -207,8 +371,19 @@ class CreateLivewire extends Component
             trim($this->deliveryAddress) ?: null,
         );
 
-        $this->reset(['cart', 'orderDiscount', 'givenAmount', 'search', 'selectedCategory']);
-        $this->resetCustomerPicker();
+        // Yakunlangan yorliq yopiladi; boshqa mijozlar o'z yorliqlarida qoladi.
+        $this->reset(['search', 'selectedCategory']);
+        unset($this->tabs[$this->activeTab]);
+
+        if ($this->tabs === []) {
+            $this->resetTabState();
+            $this->tabs[1] = $this->snapshot();
+            $this->activeTab = 1;
+        } else {
+            $next = (int) array_key_first($this->tabs);
+            $this->restoreTab($this->tabs[$next]);
+            $this->activeTab = $next;
+        }
 
         return redirect()->route('admin.orders.print', $order->id);
     }

@@ -49,6 +49,40 @@
             @endif
         </div>
 
+        @if($mode === 'quick')
+            {{-- Parallel savatlar: har mijoz uchun alohida yorliq --}}
+            <div class="pos-tabs" x-data>
+                @foreach($tabs as $tabId => $tabSnap)
+                    @php
+                        $isActive = (int) $tabId === (int) $activeTab;
+                        $count = $isActive ? count($cart) : count($tabSnap['cart'] ?? []);
+                    @endphp
+                    <div class="pos-tab {{ $isActive ? 'active' : '' }}" wire:key="pos-tab-{{ $tabId }}">
+                        <button type="button" class="pos-tab-main" wire:click="switchTab({{ $tabId }})" title="Yorliqqa o'tish">
+                            <i class="mdi mdi-account-outline"></i>
+                            <span class="pos-tab-label">{{ $this->tabLabel((int) $tabId) }}</span>
+                            @if($count > 0)
+                                <span class="pos-tab-count">{{ $count }}</span>
+                            @endif
+                        </button>
+                        @if(count($tabs) > 1 || $count > 0)
+                            <button type="button" class="pos-tab-close" title="Yorliqni yopish"
+                                    x-on:click="
+                                        if ({{ $count }} > 0) {
+                                            Swal.fire({ title: 'Yorliq yopilsinmi?', text: 'Savatdagi {{ $count }} ta mahsulot o\'chib ketadi.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#F3797E', cancelButtonColor: '#8e94a9', confirmButtonText: 'Ha, yop', cancelButtonText: 'Bekor qilish', reverseButtons: true })
+                                                .then((r) => { if (r.isConfirmed) { $wire.closeTab({{ $tabId }}) } });
+                                        } else { $wire.closeTab({{ $tabId }}) }">
+                                <i class="mdi mdi-close"></i>
+                            </button>
+                        @endif
+                    </div>
+                @endforeach
+                <button type="button" class="pos-tab pos-tab-add" wire:click="newTab" title="Yangi mijoz uchun yorliq">
+                    <i class="mdi mdi-plus"></i> Yangi
+                </button>
+            </div>
+        @endif
+
         <div class="input-group mb-3">
             <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
             <input type="search" class="form-control border-start-0 ps-0"

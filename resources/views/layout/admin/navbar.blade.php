@@ -49,6 +49,10 @@
                 <i class="mdi {{ $biz->term('quick_sale_icon') }} me-1"></i> {{ $biz->term('quick_sale') }}
             </a>
 
+            <button type="button" class="theme-toggle" data-theme-toggle onclick="toggleTheme()" aria-label="Rejimni almashtirish">
+                <i class="mdi mdi-weather-night"></i>
+            </button>
+
             <div class="nav-item dropdown user-dropdown list-unstyled mb-0">
                 <a class="nav-link d-flex align-items-center gap-2 p-0" id="UserDropdown" href="#"
                    data-bs-toggle="dropdown" aria-expanded="false">

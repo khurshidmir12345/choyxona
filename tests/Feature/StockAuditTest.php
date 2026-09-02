@@ -132,6 +132,9 @@ class StockAuditTest extends TestCase
             ->assertSet('cart.'.$product->id.'.quantity', 1);
 
         // Prefikssiz raqam ham ishlaydi (skaner faqat raqam yuborsa).
+        // Yorliqlar sessiyada saqlanadi — yangi kassa holati uchun tozalaymiz.
+        session()->forget('pos.quick.tabs.'.$user->id);
+
         Livewire::test(QuickSale::class)
             ->set('search', (string) (10_000 + $product->id))
             ->assertSet('cart.'.$product->id.'.quantity', 1);

@@ -2410,3 +2410,99 @@ button.place-card .place-name { white-space: nowrap; overflow: hidden; text-over
 }
 
 .biz-card.active .type-check { opacity: 1; }
+
+
+/* ============================================================================
+   Tez sotuv: parallel savat yorliqlari
+   ========================================================================= */
+
+.pos-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.pos-tab {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    border: 1px solid #e3e6f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #5c6478;
+    overflow: hidden;
+    transition: all .15s ease;
+}
+
+.pos-tab:hover { border-color: var(--pos-tale); }
+
+.pos-tab.active {
+    border-color: var(--pos-primary);
+    background: var(--pos-primary);
+    color: #fff;
+    box-shadow: 0 6px 14px -8px rgba(31, 59, 179, .8);
+}
+
+.pos-tab-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 0 10px 0 9px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.pos-tab-main i { font-size: 1rem; }
+.pos-tab-label { overflow: hidden; text-overflow: ellipsis; }
+
+.pos-tab-count {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50px;
+    background: rgba(31, 59, 179, .1);
+    color: var(--pos-primary);
+    font-size: .68rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pos-tab.active .pos-tab-count { background: rgba(255, 255, 255, .22); color: #fff; }
+
+.pos-tab-close {
+    width: 26px;
+    height: 100%;
+    border: 0;
+    border-left: 1px solid rgba(0, 0, 0, .06);
+    background: transparent;
+    color: inherit;
+    opacity: .6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+}
+
+.pos-tab-close:hover { opacity: 1; background: rgba(0, 0, 0, .06); }
+.pos-tab.active .pos-tab-close { border-left-color: rgba(255, 255, 255, .25); }
+
+.pos-tab.pos-tab-add {
+    padding: 0 11px;
+    border-style: dashed;
+    color: var(--pos-primary);
+    background: rgba(31, 59, 179, .04);
+    font-size: .8rem;
+    font-weight: 700;
+    gap: 3px;
+}
+
+.pos-tab.pos-tab-add:hover { background: rgba(31, 59, 179, .1); }
