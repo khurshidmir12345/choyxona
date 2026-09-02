@@ -29,25 +29,25 @@
                 </div>
             </div>
 
-        </div>
 
-        @if($mode === 'quick')
-            {{-- Buyurtma turi: kichik kartalar, gorizontal aylanadi --}}
-            <div class="type-cards" role="radiogroup" aria-label="Buyurtma turi">
-                @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPE_META as $value => [$label, $hint, $icon])
-                    <button type="button" wire:key="type-{{ $value }}" wire:click="setOrderType('{{ $value }}')"
-                            role="radio" aria-checked="{{ $orderType === $value ? 'true' : 'false' }}"
-                            class="type-card {{ $orderType === $value ? 'active' : '' }}">
-                        <span class="type-icon"><i class="mdi {{ $icon }}"></i></span>
-                        <span class="type-text">
-                            <strong>{{ $label }}</strong>
-                            <small>{{ $hint }}</small>
-                        </span>
-                        <i class="mdi mdi-check-circle type-check"></i>
-                    </button>
-                @endforeach
-            </div>
-        @endif
+            @if($mode === 'quick')
+                {{-- Buyurtma turi: sarlavha bilan bir qatorda, o'ng tomonda --}}
+                <div class="pos-head-actions type-cards" role="radiogroup" aria-label="Buyurtma turi">
+                    @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPE_META as $value => [$label, $hint, $icon])
+                        <button type="button" wire:key="type-{{ $value }}" wire:click="setOrderType('{{ $value }}')"
+                                role="radio" aria-checked="{{ $orderType === $value ? 'true' : 'false' }}"
+                                class="type-card {{ $orderType === $value ? 'active' : '' }}">
+                            <span class="type-icon"><i class="mdi {{ $icon }}"></i></span>
+                            <span class="type-text">
+                                <strong>{{ $label }}</strong>
+                                <small>{{ $hint }}</small>
+                            </span>
+                            <i class="mdi mdi-check-circle type-check"></i>
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
         <div class="input-group mb-3">
             <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>

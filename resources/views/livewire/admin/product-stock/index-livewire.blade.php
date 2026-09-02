@@ -1,39 +1,25 @@
 <div>
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Kirim / chiqim</h3>
             <p>Zaxira harakatlari jurnali</p>
+        </div>
+        <div class="pos-head-tools">
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Mahsulot nomi yoki kodi...">
+            </div>
+            <select wire:model.live="typeFilter" class="form-select head-select">
+                <option value="">Barcha turlar</option>
+                @foreach($stockTypes as $case)
+                    <option value="{{ $case->value }}">{{ $case->label() }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="pos-head-actions">
             <button type="button" class="btn btn-primary btn-rounded" wire:click="createMovement">
                 <i class="mdi mdi-plus me-1"></i> Harakat qo'shish
             </button>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-8">
-                    <label class="form-label small fw-semibold text-muted">Qidirish</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="mdi mdi-magnify text-muted"></i>
-                        </span>
-                        <input type="search" wire:model.live.debounce.300ms="search"
-                               class="form-control border-start-0 ps-0" placeholder="Mahsulot nomi yoki kodi...">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted">Turi</label>
-                    <select wire:model.live="typeFilter" class="form-select">
-                        <option value="">Barchasi</option>
-                        @foreach($stockTypes as $case)
-                            <option value="{{ $case->value }}">{{ $case->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
         </div>
     </div>
 

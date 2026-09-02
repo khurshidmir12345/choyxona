@@ -23,10 +23,23 @@
 .pos-page-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 22px;
+    gap: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.pos-head-title { flex: 0 1 auto; min-width: 0; }
+
+/* Qidiruv, filtr, kichik statistika — sarlavha bilan bir qatorda */
+.pos-head-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .pos-page-head h3 {
@@ -955,7 +968,7 @@ select.form-select option { color: #1e283d; }
 /* ------------------------------------------------- sahifa sarlavhasi (yagona) */
 
 .pos-page-head {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .pos-page-head h3 {
@@ -1326,12 +1339,14 @@ select.form-select option { color: #1e283d; }
     margin-bottom: 16px;
 }
 
+.head-search,
 .place-search {
     position: relative;
     width: 100%;
-    max-width: 320px;
+    max-width: 240px;
 }
 
+.head-search i,
 .place-search i {
     position: absolute;
     left: 12px;
@@ -1341,9 +1356,10 @@ select.form-select option { color: #1e283d; }
     font-size: 1.1rem;
 }
 
+.head-search input,
 .place-search input {
     width: 100%;
-    height: 40px;
+    height: 38px;
     border: 1px solid #e3e6f0;
     border-radius: 12px;
     background: #fff;
@@ -1354,6 +1370,7 @@ select.form-select option { color: #1e283d; }
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 
+.head-search input:focus,
 .place-search input:focus {
     border-color: var(--pos-primary);
     box-shadow: 0 0 0 3px rgba(31, 59, 179, .12);
@@ -1731,11 +1748,10 @@ select.form-select option { color: #1e283d; }
 
 .type-cards {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding: 2px 2px 8px;
-    margin-bottom: 10px;
+    padding: 2px;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1749,10 +1765,10 @@ select.form-select option { color: #1e283d; }
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 200px;
-    padding: 9px 36px 9px 10px;
+    min-width: 172px;
+    padding: 6px 30px 6px 7px;
     border: 1.5px solid #e3e6f0;
-    border-radius: 14px;
+    border-radius: 12px;
     background: #fff;
     text-align: left;
     color: #1e283d;
@@ -1768,9 +1784,9 @@ select.form-select option { color: #1e283d; }
 }
 
 .type-card .type-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 11px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: #f1f3f9;
     color: #5c6478;
     display: inline-flex;
@@ -1784,15 +1800,15 @@ select.form-select option { color: #1e283d; }
 .type-card.active .type-icon { background: var(--pos-primary); color: #fff; }
 
 .type-card .type-text { display: flex; flex-direction: column; line-height: 1.2; }
-.type-card .type-text strong { font-size: .875rem; font-weight: 700; }
-.type-card .type-text small { font-size: .72rem; color: #8e94a9; margin-top: 2px; }
+.type-card .type-text strong { font-size: .82rem; font-weight: 700; }
+.type-card .type-text small { font-size: .68rem; color: #8e94a9; margin-top: 1px; }
 
 .type-card .type-check {
     position: absolute;
-    right: 10px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     color: var(--pos-primary);
     opacity: 0;
     transition: opacity .15s ease;
@@ -2005,3 +2021,218 @@ select.form-select option { color: #1e283d; }
 }
 
 .addr-list li i { color: var(--pos-primary); font-size: 1rem; flex-shrink: 0; }
+
+
+/* ============================================================================
+   Ixcham sarlavha qatori: select, filtr tugmasi, yig'iladigan filtr paneli,
+   kichik statistika pillari. Maqsad — ro'yxat ko'z to'g'risida tursin.
+   ========================================================================= */
+
+select.form-select.head-select {
+    height: 38px;
+    width: auto;
+    min-width: 150px;
+    max-width: 220px;
+    font-size: .85rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 1px solid #e3e6f0;
+    padding: 0 30px 0 12px;
+    background-position: right 10px center;
+    box-shadow: none;
+}
+
+select.form-select.head-select:focus {
+    border-color: var(--pos-primary);
+    box-shadow: 0 0 0 3px rgba(31, 59, 179, .12);
+}
+
+.filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #e3e6f0;
+    border-radius: 12px;
+    background: #fff;
+    color: #3f475a;
+    font-size: .85rem;
+    font-weight: 600;
+    transition: all .15s ease;
+}
+
+.filter-toggle i { font-size: 1.1rem; }
+
+.filter-toggle:hover,
+.filter-toggle.is-open {
+    border-color: var(--pos-primary);
+    color: var(--pos-primary);
+    background: rgba(31, 59, 179, .05);
+}
+
+.filter-count {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50px;
+    background: var(--pos-primary);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-panel {
+    background: #fff;
+    border: 1px solid var(--pos-border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px 10px;
+    align-items: end;
+}
+
+.filter-grid label {
+    display: block;
+    font-size: .7rem;
+    font-weight: 700;
+    color: #8e94a9;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.filter-grid .form-control,
+.filter-grid .form-select {
+    height: 36px;
+    font-size: .84rem;
+    border-radius: 10px;
+    border-color: #e3e6f0;
+    padding: 0 10px;
+    box-shadow: none;
+}
+
+.filter-grid .form-select { padding-right: 28px; }
+
+.filter-grid .filter-actions .btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: .8rem;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Kichik statistika: katta kartalar o'rniga bitta qatordagi pillar */
+.stat-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.stat-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 12px 0 6px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid var(--pos-border);
+    white-space: nowrap;
+}
+
+.stat-mini > i {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #fff;
+    background: var(--pos-tale);
+}
+
+.stat-mini > span { display: flex; flex-direction: column; line-height: 1.1; }
+.stat-mini small { font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #9aa1b5; }
+.stat-mini strong { font-size: .86rem; font-weight: 800; color: #1e283d; font-variant-numeric: tabular-nums; }
+
+.stat-mini.tone-blue   > i { background: var(--pos-tale); }
+.stat-mini.tone-indigo > i { background: var(--pos-dark-blue); }
+.stat-mini.tone-green  > i { background: var(--pos-success); }
+.stat-mini.tone-amber  > i { background: var(--pos-warning); }
+.stat-mini.tone-clay   > i { background: var(--tea-clay); }
+
+/* Zal: joy kartasi tugma sifatida — Joylar sahifasi bilan bir xil ko'rinish */
+button.place-card {
+    font: inherit;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+}
+
+button.place-card:focus-visible { outline: 2px solid var(--pos-primary); outline-offset: 2px; }
+
+button.place-card .place-name,
+button.place-card .place-cap,
+button.place-card .place-emblem { display: block; }
+
+button.place-card .place-emblem { display: flex; }
+
+button.place-card .place-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.place-amount {
+    display: block;
+    margin-top: 2px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--tea-clay);
+    font-variant-numeric: tabular-nums;
+}
+
+.place-amount small { font-size: .7rem; font-weight: 700; }
+
+.place-since {
+    display: block;
+    margin: 1px 0 6px;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--tea-bark);
+}
+
+@media (max-width: 767.98px) {
+    .pos-head-tools { justify-content: flex-start; }
+    .head-search, .place-search { max-width: 100%; }
+    .stat-strip { width: 100%; }
+}
+
+/* Sarlavha qatori bitta qatorga sig'sin: tor ekranda pill ikonkalari yashirinadi */
+@media (max-width: 1599.98px) {
+    .stat-mini > i { display: none; }
+    .stat-mini { padding-left: 11px; }
+}
+
+@media (max-width: 1399.98px) {
+    .head-search, .place-search { max-width: 200px; }
+    .stat-mini { padding-left: 9px; padding-right: 9px; }
+}
+
+.btn.btn-icon-only {
+    width: 42px;
+    padding-left: 0;
+    padding-right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.btn-icon-only i { font-size: 1.15rem; }

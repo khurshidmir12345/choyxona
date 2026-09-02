@@ -1,8 +1,23 @@
 <div>
+    @php $total = $places->total(); @endphp
+
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Joylar</h3>
             <p>Stol, so'ri va xonalar</p>
+        </div>
+        <div class="pos-head-tools">
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Joy nomi...">
+            </div>
+            @if($total > 0)
+                <div class="place-legend">
+                    <span><i class="dot dot-free"></i> Bo'sh</span>
+                    <span><i class="dot dot-busy"></i> Band</span>
+                    <span class="text-muted">{{ $total }} ta</span>
+                </div>
+            @endif
         </div>
         <div class="pos-head-actions">
             <a href="{{ route('cafe.create') }}" class="btn btn-inverse-primary btn-rounded">
@@ -12,25 +27,6 @@
                 <i class="mdi mdi-plus me-1"></i> Joy qo'shish
             </button>
         </div>
-    </div>
-
-    @php
-        $total = $places->total();
-        $busyCount = $places->getCollection()->filter->isBusy()->count();
-    @endphp
-
-    <div class="place-toolbar">
-        <div class="place-search">
-            <i class="mdi mdi-magnify"></i>
-            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Joy nomi...">
-        </div>
-        @if($total > 0)
-            <div class="place-legend">
-                <span><i class="dot dot-free"></i> Bo'sh</span>
-                <span><i class="dot dot-busy"></i> Band</span>
-                <span class="text-muted">Jami {{ $total }} ta</span>
-            </div>
-        @endif
     </div>
 
     @if($places->isEmpty())

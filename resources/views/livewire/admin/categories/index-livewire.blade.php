@@ -1,23 +1,19 @@
 <div>
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Kategoriyalar</h3>
             <p>Menyu bo'limlari</p>
+        </div>
+        <div class="pos-head-tools">
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Kategoriya nomi...">
+            </div>
         </div>
         <div class="pos-head-actions">
             <button type="button" class="btn btn-primary btn-rounded" wire:click="createCategory">
                 <i class="mdi mdi-plus me-1"></i> Kategoriya qo'shish
             </button>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="input-group" style="max-width: 420px;">
-                <span class="input-group-text bg-white border-end-0"><i class="mdi mdi-magnify text-muted"></i></span>
-                <input type="search" wire:model.live.debounce.300ms="search"
-                       class="form-control border-start-0 ps-0" placeholder="Kategoriya nomi bo'yicha qidirish...">
-            </div>
         </div>
     </div>
 

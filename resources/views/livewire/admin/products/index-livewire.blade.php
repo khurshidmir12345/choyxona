@@ -1,39 +1,25 @@
 <div>
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Mahsulotlar</h3>
             <p>Menyu va narxlar</p>
+        </div>
+        <div class="pos-head-tools">
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Nomi yoki kodi...">
+            </div>
+            <select wire:model.live="categoryFilter" class="form-select head-select">
+                <option value="">Barcha kategoriyalar</option>
+                @foreach($this->categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="pos-head-actions">
             <button type="button" class="btn btn-primary btn-rounded" wire:click="create">
                 <i class="mdi mdi-plus me-1"></i> Yangi mahsulot
             </button>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-8">
-                    <label class="form-label small fw-semibold text-muted">Qidirish</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="mdi mdi-magnify text-muted"></i>
-                        </span>
-                        <input type="search" wire:model.live.debounce.300ms="search"
-                               class="form-control border-start-0 ps-0" placeholder="Nomi yoki kodi...">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted">Kategoriya</label>
-                    <select wire:model.live="categoryFilter" class="form-select">
-                        <option value="">Barchasi</option>
-                        @foreach($this->categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
         </div>
     </div>
 

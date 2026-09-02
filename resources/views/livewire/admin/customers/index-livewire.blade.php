@@ -1,24 +1,23 @@
 <div>
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Mijozlar</h3>
             <p>Doimiy xaridorlar, manzillar va savdo tarixi</p>
+        </div>
+        <div class="pos-head-tools">
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Ism yoki telefon...">
+            </div>
+            @if($customers->total() > 0)
+                <div class="place-legend"><span class="text-muted">{{ $customers->total() }} ta</span></div>
+            @endif
         </div>
         <div class="pos-head-actions">
             <button type="button" class="btn btn-primary btn-rounded" wire:click="createCustomer">
                 <i class="mdi mdi-account-plus-outline me-1"></i> Mijoz qo'shish
             </button>
         </div>
-    </div>
-
-    <div class="place-toolbar">
-        <div class="place-search">
-            <i class="mdi mdi-magnify"></i>
-            <input type="search" wire:model.live.debounce.300ms="search" placeholder="Ism yoki telefon...">
-        </div>
-        @if($customers->total() > 0)
-            <div class="place-legend"><span class="text-muted">Jami {{ $customers->total() }} ta</span></div>
-        @endif
     </div>
 
     <div class="card">

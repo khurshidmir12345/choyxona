@@ -1,12 +1,39 @@
 <div>
+    @php $activeFilters = collect([$selectedCategory, $selectedStatus, $dateFrom, $dateTo])->filter(fn ($v) => $v !== '' && $v !== null)->count(); @endphp
+    <div x-data="{ filters: @js($activeFilters > 0) }">
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Xarajatlar</h3>
             <p>Kompaniya chiqimlari</p>
         </div>
+        <div class="pos-head-tools">
+            <div class="stat-strip">
+                <div class="stat-mini tone-indigo">
+                    <i class="mdi mdi-wallet-outline"></i>
+                    <span><small>Jami</small><strong>{{ number_format($totalAmount, 0, ',', ' ') }}</strong></span>
+                </div>
+                <div class="stat-mini tone-amber">
+                    <i class="mdi mdi-clock-outline"></i>
+                    <span><small>Kutilmoqda</small><strong>{{ number_format($pendingAmount, 0, ',', ' ') }}</strong></span>
+                </div>
+                <div class="stat-mini tone-green">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                    <span><small>Tasdiqlangan</small><strong>{{ number_format($approvedAmount, 0, ',', ' ') }}</strong></span>
+                </div>
+            </div>
+            <div class="head-search">
+                <i class="mdi mdi-magnify"></i>
+                <input type="search" wire:model.live.debounce.300ms="search" placeholder="Nomi...">
+            </div>
+            <button type="button" class="filter-toggle" :class="{ 'is-open': filters }" x-on:click="filters = !filters">
+                <i class="mdi mdi-filter-variant"></i> Filtr
+                @if($activeFilters) <span class="filter-count">{{ $activeFilters }}</span> @endif
+            </button>
+        </div>
         <div class="pos-head-actions">
-            <a href="{{ route('expense-categories.index') }}" class="btn btn-inverse-primary btn-rounded">
-                <i class="mdi mdi-folder-outline me-1"></i> Kategoriyalar
+            <a href="{{ route('expense-categories.index') }}" class="btn btn-inverse-primary btn-rounded btn-icon-only"
+               title="Xarajat kategoriyalari" aria-label="Xarajat kategoriyalari">
+                <i class="mdi mdi-folder-outline"></i>
             </a>
             <button type="button" class="btn btn-primary btn-rounded" wire:click="createExpense">
                 <i class="mdi mdi-plus me-1"></i> Xarajat qo'shish
@@ -14,83 +41,41 @@
         </div>
     </div>
 
-    <div class="row mb-2">
-        <div class="col-md-4 grid-margin">
-            <div class="card stat-card stat-indigo">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <p class="stat-label">Jami</p>
-                        <p class="stat-value">{{ number_format($totalAmount, 0, ',', ' ') }} <small>so'm</small></p>
-                    </div>
-                    <span class="stat-icon"><i class="mdi mdi-wallet-outline"></i></span>
-                </div>
+    <div class="filter-panel" x-show="filters" x-cloak x-transition.opacity.duration.150ms>
+        <div class="filter-grid">
+            <div>
+                <label>Kategoriya</label>
+                <select wire:model.live="selectedCategory" class="form-select">
+                    <option value="">Barchasi</option>
+                    @foreach($this->categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
             </div>
-        </div>
-        <div class="col-md-4 grid-margin">
-            <div class="card stat-card stat-amber">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <p class="stat-label">Kutilmoqda</p>
-                        <p class="stat-value">{{ number_format($pendingAmount, 0, ',', ' ') }} <small>so'm</small></p>
-                    </div>
-                    <span class="stat-icon"><i class="mdi mdi-clock-outline"></i></span>
-                </div>
+            <div>
+                <label>Holati</label>
+                <select wire:model.live="selectedStatus" class="form-select">
+                    <option value="">Barchasi</option>
+                    <option value="pending">Kutilmoqda</option>
+                    <option value="approved">Tasdiqlangan</option>
+                    <option value="rejected">Rad etilgan</option>
+                </select>
             </div>
-        </div>
-        <div class="col-md-4 grid-margin">
-            <div class="card stat-card stat-green">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <p class="stat-label">Tasdiqlangan</p>
-                        <p class="stat-value">{{ number_format($approvedAmount, 0, ',', ' ') }} <small>so'm</small></p>
-                    </div>
-                    <span class="stat-icon"><i class="mdi mdi-check-circle-outline"></i></span>
-                </div>
+            <div>
+                <label>Sanadan</label>
+                <input type="date" wire:model.live="dateFrom" value="{{ $dateFrom }}" class="form-control">
+            </div>
+            <div>
+                <label>Sanagacha</label>
+                <input type="date" wire:model.live="dateTo" value="{{ $dateTo }}" class="form-control">
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="btn btn-inverse-secondary" wire:click="clearFilters" title="Filtrni tozalash">
+                    <i class="mdi mdi-refresh me-1"></i> Tozalash
+                </button>
             </div>
         </div>
     </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Qidirish</label>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Nomi...">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Kategoriya</label>
-                    <select wire:model.live="selectedCategory" class="form-select">
-                        <option value="">Barchasi</option>
-                        @foreach($this->categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Holati</label>
-                    <select wire:model.live="selectedStatus" class="form-select">
-                        <option value="">Barchasi</option>
-                        <option value="pending">Kutilmoqda</option>
-                        <option value="approved">Tasdiqlangan</option>
-                        <option value="rejected">Rad etilgan</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Sanadan</label>
-                    <input type="date" wire:model.live="dateFrom" value="{{ $dateFrom }}" class="form-control">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted">Sanagacha</label>
-                    <input type="date" wire:model.live="dateTo" value="{{ $dateTo }}" class="form-control">
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-inverse-primary w-100" wire:click="clearFilters"
-                            title="Filtrni tozalash">
-                        <i class="mdi mdi-refresh"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="card">

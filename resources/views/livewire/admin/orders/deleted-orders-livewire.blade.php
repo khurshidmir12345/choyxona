@@ -1,8 +1,16 @@
 <div>
+    @php $activeFilters = collect([$fromDate, $toDate, $type])->filter()->count(); @endphp
+    <div x-data="{ filters: @js($activeFilters > 0) }">
     <div class="pos-page-head">
-        <div>
+        <div class="pos-head-title">
             <h3>Arxiv</h3>
             <p>O'chirilgan buyurtmalar — tiklash yoki butunlay o'chirish</p>
+        </div>
+        <div class="pos-head-tools">
+            <button type="button" class="filter-toggle" :class="{ 'is-open': filters }" x-on:click="filters = !filters">
+                <i class="mdi mdi-filter-variant"></i> Filtr
+                @if($activeFilters) <span class="filter-count">{{ $activeFilters }}</span> @endif
+            </button>
         </div>
         <div class="pos-head-actions">
             <a href="{{ route('orders.index') }}" class="btn btn-inverse-primary btn-rounded">
@@ -11,33 +19,32 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Sanadan</label>
-                    <input type="date" wire:model.live="fromDate" value="{{ $fromDate }}" class="form-control">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Sanagacha</label>
-                    <input type="date" wire:model.live="toDate" value="{{ $toDate }}" class="form-control">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Turi</label>
-                    <select wire:model.live="type" class="form-select">
-                        <option value="">Barchasi</option>
-                        <option value="delivery">Yetkazib berish</option>
-                        <option value="takeaway">Olib ketish</option>
-                        <option value="cafe">Zalda</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-inverse-primary w-100" wire:click="clearFilters">
-                        <i class="mdi mdi-refresh me-1"></i> Tozalash
-                    </button>
-                </div>
+    <div class="filter-panel" x-show="filters" x-cloak x-transition.opacity.duration.150ms>
+        <div class="filter-grid">
+            <div>
+                <label>Sanadan</label>
+                <input type="date" wire:model.live="fromDate" value="{{ $fromDate }}" class="form-control">
+            </div>
+            <div>
+                <label>Sanagacha</label>
+                <input type="date" wire:model.live="toDate" value="{{ $toDate }}" class="form-control">
+            </div>
+            <div>
+                <label>Turi</label>
+                <select wire:model.live="type" class="form-select">
+                    <option value="">Barchasi</option>
+                    <option value="delivery">Yetkazib berish</option>
+                    <option value="takeaway">Olib ketish</option>
+                    <option value="cafe">Zalda</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="btn btn-inverse-secondary" wire:click="clearFilters">
+                    <i class="mdi mdi-refresh me-1"></i> Tozalash
+                </button>
             </div>
         </div>
+    </div>
     </div>
 
     <div class="card">
