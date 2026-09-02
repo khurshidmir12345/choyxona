@@ -20,7 +20,7 @@
             <span>
                 @switch($order->type?->value)
                     @case('delivery') Yetkazib berish @break
-                    @case('takeaway') Olib ketish @break
+                    @case('takeaway') {{ $biz->term('takeaway') }} @break
                     @default Zalda
                 @endswitch
                 @if($order->place) — {{ $order->place->name }} @endif

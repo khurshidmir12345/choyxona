@@ -14,6 +14,7 @@ use MoonShine\UI\Fields\ID;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\UI\Fields\Image;
+use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Text;
 
 /**
@@ -48,6 +49,12 @@ class CompanyResource extends ModelResource
         return [
             ID::make()->sortable(),
             Text::make('name')->sortable(),
+            Select::make('Biznes turi', 'business_type')
+                ->options(array_combine(
+                    \App\Casts\BusinessType::values(),
+                    array_map(fn ($c) => $c->label(), \App\Casts\BusinessType::cases()),
+                ))
+                ->nullable(),
             BelongsTo::make('User', 'user', 'name')->searchable(),
             Text::make('Phone', 'phone_number')->sortable(),
             Text::make('Balance', 'balance')->sortable(),
@@ -71,6 +78,12 @@ class CompanyResource extends ModelResource
         return [
             ID::make()->sortable(),
             Text::make('name')->sortable(),
+            Select::make('Biznes turi', 'business_type')
+                ->options(array_combine(
+                    \App\Casts\BusinessType::values(),
+                    array_map(fn ($c) => $c->label(), \App\Casts\BusinessType::cases()),
+                ))
+                ->nullable(),
             BelongsTo::make('User', 'user', 'name')->searchable(),
             Text::make('Phone', 'phone_number')->sortable(),
             Text::make('Balance', 'balance')->sortable(),

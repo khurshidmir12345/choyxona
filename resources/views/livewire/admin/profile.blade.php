@@ -90,6 +90,24 @@
 
                             <div class="row g-3" style="max-width: 780px">
                                 <div class="col-12">
+                                    <label class="form-label fw-semibold">Biznes turi</label>
+                                    <div class="biz-cards">
+                                        @foreach(\App\Casts\BusinessType::cases() as $type)
+                                            <button type="button" wire:click="setBusinessType('{{ $type->value }}')"
+                                                    class="biz-card {{ $business_type === $type->value ? 'active' : '' }}">
+                                                <span class="type-icon"><i class="mdi {{ $type->icon() }}"></i></span>
+                                                <span class="type-text">
+                                                    <strong>{{ $type->label() }}</strong>
+                                                    <small>{{ $type->description() }}</small>
+                                                </span>
+                                                <i class="mdi mdi-check-circle type-check"></i>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                    <div class="form-text">Do'kon rejimida zal va joylar ko'rinmaydi, so'zlar universal bo'ladi.</div>
+                                </div>
+
+                                <div class="col-12">
                                     <label class="form-label fw-semibold">Nomi</label>
                                     <input type="text" wire:model="company_name"
                                            class="form-control @error('company_name') is-invalid @enderror">

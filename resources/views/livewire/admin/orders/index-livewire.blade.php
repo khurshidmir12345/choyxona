@@ -3,7 +3,7 @@
     <div x-data="{ filters: @js($activeFilters > 0) }">
     <div class="pos-page-head">
         <div class="pos-head-title">
-            <h3>Buyurtmalar</h3>
+            <h3>{{ $biz->term('orders') }}</h3>
             <p>Barcha savdo tarixi</p>
         </div>
         <div class="pos-head-tools">
@@ -47,8 +47,8 @@
                 <select wire:model.live="type" class="form-select">
                     <option value="">Barchasi</option>
                     <option value="delivery">Yetkazib berish</option>
-                    <option value="takeaway">Olib ketish</option>
-                    <option value="cafe">Zalda</option>
+                    <option value="takeaway">{{ $biz->term('takeaway') }}</option>
+                    @if($biz->hasHall()) <option value="cafe">Zalda</option> @endif
                 </select>
             </div>
             <div>
@@ -74,7 +74,7 @@
             @if($orders->isEmpty())
                 <div class="empty-state">
                     <i class="mdi mdi-clipboard-text-outline"></i>
-                    <h6>Buyurtma topilmadi</h6>
+                    <h6>{{ $biz->term('orders_empty') }}</h6>
                     <p>Tanlangan filtr bo'yicha hech narsa yo'q.</p>
                 </div>
             @else

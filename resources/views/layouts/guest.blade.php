@@ -26,14 +26,14 @@
                         </div>
 
                         <div>
-                            <h1>Zal, yetkazib berish va olib ketish — bitta tizimda.</h1>
+                            <h1>Savdo, zaxira va mijozlar — bitta tizimda.</h1>
                             <p class="mt-3">
-                                Stollarni boshqaring, chek chiqaring, zaxira va foydani real vaqtda kuzating.
+                                Choyxona, kafe yoki oddiy do'kon: chek chiqaring, zaxira va foydani real vaqtda kuzating.
                             </p>
                             <ul>
-                                <li><i class="mdi mdi-check"></i> Stollar bo'yicha ochiq hisoblar</li>
-                                <li><i class="mdi mdi-check"></i> Tez sotuv va chek chiqarish</li>
-                                <li><i class="mdi mdi-check"></i> Zaxira va xarajat nazorati</li>
+                                <li><i class="mdi mdi-check"></i> Kafe uchun zal va ochiq hisoblar</li>
+                                <li><i class="mdi mdi-check"></i> Do'kon uchun tez kassa va skaner</li>
+                                <li><i class="mdi mdi-check"></i> Zaxira, xarajat va mijozlar nazorati</li>
                             </ul>
                         </div>
 

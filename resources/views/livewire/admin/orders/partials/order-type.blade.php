@@ -1,7 +1,7 @@
 @php
     $map = [
         'delivery' => ['Yetkazib berish', 'mdi-truck-delivery-outline', 'badge-outline-info'],
-        'takeaway' => ['Olib ketish', 'mdi-shopping-outline', 'badge-outline-warning'],
+        'takeaway' => [$biz->term('takeaway'), $biz->term('takeaway_icon'), 'badge-outline-warning'],
         'cafe' => ['Zalda', 'mdi-sofa-outline', 'badge-outline-primary'],
     ];
     [$label, $icon, $tone] = $map[$type?->value] ?? ['—', 'mdi-help-circle-outline', 'badge-outline-secondary'];

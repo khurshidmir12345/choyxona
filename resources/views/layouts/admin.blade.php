@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Choyxona' }}</title>
+    <title>{{ $title ?? $biz->term('brand') }}</title>
 
     {{-- Shablon uslublari (BootstrapDash Corona) --}}
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
@@ -34,7 +34,7 @@
             <footer class="footer">
                 <div class="d-sm-flex justify-content-center justify-content-sm-between">
                     <span class="text-muted d-block text-center text-sm-start">
-                        Choyxona POS — savdo va boshqaruv tizimi
+                        {{ $biz->term('brand') }} — savdo va boshqaruv tizimi
                     </span>
                     <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center text-muted">
                         © {{ date('Y') }}

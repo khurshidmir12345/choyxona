@@ -13,6 +13,7 @@ class CompanyFactory extends Factory
     {
         return [
             'name' => fake()->company(),
+            'business_type' => 'cafe',
             'address' => fake()->address(),
             'phone_number' => fake()->unique()->numerify('+9989########'),
             'user_id' => UserFactory::new(),

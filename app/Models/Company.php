@@ -16,6 +16,7 @@ class Company extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'business_type',
         'phone_number',
         'email',
         'description',
@@ -33,6 +34,18 @@ class Company extends Model
      * ("09:00"). Ilgari ular 'timestamp' ga cast qilinardi, natijada
      * Carbon parse qilishga urinib xato berardi.
      */
+    protected function casts(): array
+    {
+        return [
+            'business_type' => \App\Casts\BusinessType::class,
+        ];
+    }
+
+    public function businessType(): \App\Casts\BusinessType
+    {
+        return $this->business_type ?? \App\Casts\BusinessType::Cafe;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -32,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
+            'business.chosen' => \App\Http\Middleware\EnsureBusinessTypeChosen::class,
+            'cafe.only' => \App\Http\Middleware\CafeOnly::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -13,11 +13,11 @@
 <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-stretch flex-row">
     <div class="navbar-brand-wrapper d-flex align-items-center">
         <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
-            <span class="brand-mark"><i class="mdi mdi-storefront-outline"></i></span>
-            <span class="brand-text">Choyxona</span>
+            <span class="brand-mark"><i class="mdi {{ $biz->term('brand_icon') }}"></i></span>
+            <span class="brand-text">{{ $biz->term('brand') }}</span>
         </a>
         <a class="navbar-brand brand-logo-mini" href="{{ route('dashboard') }}">
-            <span class="brand-mark"><i class="mdi mdi-storefront-outline"></i></span>
+            <span class="brand-mark"><i class="mdi {{ $biz->term('brand_icon') }}"></i></span>
         </a>
     </div>
 
@@ -39,12 +39,14 @@
         </div>
 
         <div class="ms-auto d-flex align-items-center gap-2">
-            <a href="{{ route('cafe.create') }}" class="btn btn-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
-                <i class="mdi mdi-sofa-outline me-1"></i> Zal
-            </a>
+            @if($biz->hasHall())
+                <a href="{{ route('cafe.create') }}" class="btn btn-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
+                    <i class="mdi mdi-sofa-outline me-1"></i> Zal
+                </a>
+            @endif
             <a href="{{ route('orders.create') }}"
-               class="btn btn-inverse-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
-                <i class="mdi mdi-cart-outline me-1"></i> Tez sotuv
+               class="btn {{ $biz->hasHall() ? 'btn-inverse-primary' : 'btn-primary' }} btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
+                <i class="mdi {{ $biz->term('quick_sale_icon') }} me-1"></i> {{ $biz->term('quick_sale') }}
             </a>
 
             <div class="nav-item dropdown user-dropdown list-unstyled mb-0">

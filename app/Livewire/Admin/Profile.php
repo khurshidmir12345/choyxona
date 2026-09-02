@@ -48,6 +48,8 @@ class Profile extends Component
 
     public $logo = null;
 
+    public string $business_type = 'cafe';
+
     public string $tab = 'profile';
 
     public function mount(): void
@@ -67,13 +69,21 @@ class Profile extends Component
             $this->company_description = (string) $company->description;
             $this->open_time = (string) $company->open_time;
             $this->close_time = (string) $company->close_time;
+            $this->business_type = $company->businessType()->value;
+        }
+    }
+
+    public function setBusinessType(string $type): void
+    {
+        if (\App\Casts\BusinessType::tryFrom($type)) {
+            $this->business_type = $type;
         }
     }
 
     private function company(): ?Company
     {
         return Company::query()
-            ->select(['id', 'name', 'address', 'phone_number', 'email', 'description', 'logo', 'open_time', 'close_time'])
+            ->select(['id', 'name', 'business_type', 'address', 'phone_number', 'email', 'description', 'logo', 'open_time', 'close_time'])
             ->find($this->companyId());
     }
 
@@ -143,6 +153,7 @@ class Profile extends Component
             'open_time' => ['nullable', 'string', 'max:10'],
             'close_time' => ['nullable', 'string', 'max:10'],
             'logo' => ['nullable', 'image', 'max:2048'],
+            'business_type' => ['required', Rule::in(\App\Casts\BusinessType::values())],
         ], [
             'company_name.required' => 'Kompaniya nomini kiriting.',
             'company_email.email' => 'Email to\'g\'ri emas.',
@@ -159,6 +170,7 @@ class Profile extends Component
             'description' => $data['company_description'] ?? null,
             'open_time' => $data['open_time'] ?: null,
             'close_time' => $data['close_time'] ?: null,
+            'business_type' => $data['business_type'],
         ];
 
         if ($this->logo) {
@@ -172,8 +184,12 @@ class Profile extends Component
 
         $company->update($attributes);
         $this->logo = null;
+        \App\Support\Business::forget();
 
         $this->dispatch('toast', type: 'success', message: 'Kompaniya ma\'lumotlari yangilandi.');
+
+        // Biznes turi o'zgargan bo'lsa, menyu va so'zlar yangilanishi uchun sahifa qayta yuklanadi.
+        $this->redirect(route('admin.profile'));
     }
 
     public function render()

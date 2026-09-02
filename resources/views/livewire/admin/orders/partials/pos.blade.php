@@ -33,7 +33,7 @@
             @if($mode === 'quick')
                 {{-- Buyurtma turi: sarlavha bilan bir qatorda, o'ng tomonda --}}
                 <div class="pos-head-actions type-cards" role="radiogroup" aria-label="Buyurtma turi">
-                    @foreach(\App\Livewire\Admin\Orders\CreateLivewire::TYPE_META as $value => [$label, $hint, $icon])
+                    @foreach(\App\Livewire\Admin\Orders\CreateLivewire::typeMeta() as $value => [$label, $hint, $icon])
                         <button type="button" wire:key="type-{{ $value }}" wire:click="setOrderType('{{ $value }}')"
                                 role="radio" aria-checked="{{ $orderType === $value ? 'true' : 'false' }}"
                                 class="type-card {{ $orderType === $value ? 'active' : '' }}">
@@ -73,7 +73,7 @@
         @if($products->isEmpty())
             <div class="card">
                 <div class="card-body empty-state">
-                    <i class="mdi mdi-food-off"></i>
+                    <i class="mdi {{ $biz->term('pos_empty_icon') }}"></i>
                     <h6>Mahsulot topilmadi</h6>
                     <p>Qidiruv so'zini yoki kategoriyani o'zgartirib ko'ring.</p>
                 </div>

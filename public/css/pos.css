@@ -2236,3 +2236,177 @@ button.place-card .place-name { white-space: nowrap; overflow: hidden; text-over
 }
 
 .btn.btn-icon-only i { font-size: 1.15rem; }
+
+
+/* ============================================================================
+   Biznes turini tanlash ekrani va profil kartalari
+   ========================================================================= */
+
+.setup-body {
+    background: #f6f7fb;
+    min-height: 100vh;
+}
+
+.setup-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 20px 40px;
+    text-align: center;
+}
+
+.setup-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: #1e283d;
+    margin-bottom: 28px;
+}
+
+.setup-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1e283d;
+    margin: 0 0 6px;
+}
+
+.setup-sub {
+    color: #8e94a9;
+    font-size: .9rem;
+    margin: 0 0 26px;
+}
+
+.setup-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.setup-card {
+    position: relative;
+    text-align: left;
+    background: #fff;
+    border: 1.5px solid #e3e6f0;
+    border-radius: 18px;
+    padding: 22px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.setup-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--pos-primary);
+    box-shadow: 0 22px 40px -24px rgba(31, 59, 179, .5);
+}
+
+.setup-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.setup-card.is-cafe .setup-icon { background: linear-gradient(150deg, #a06b3f, #6e4526); }
+.setup-card.is-retail .setup-icon { background: linear-gradient(150deg, #7DA0FA, #1F3BB3); }
+
+.setup-card-title { font-size: 1.05rem; font-weight: 800; color: #1e283d; }
+.setup-card-desc { font-size: .85rem; color: #6f7789; line-height: 1.45; }
+
+.setup-list {
+    list-style: none;
+    margin: 6px 0 4px;
+    padding: 0;
+}
+
+.setup-list li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .82rem;
+    color: #3f475a;
+    padding: 3px 0;
+}
+
+.setup-list li i { color: var(--pos-success); font-size: 1rem; }
+
+.setup-cta {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    background: var(--pos-primary);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+.setup-card:disabled { opacity: .6; }
+
+/* Profil: biznes turi kartalari (tur kartalari uslubida, kengroq) */
+.biz-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.biz-card {
+    position: relative;
+    flex: 1 1 260px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 36px 10px 10px;
+    border: 1.5px solid #e3e6f0;
+    border-radius: 14px;
+    background: #fff;
+    text-align: left;
+    color: #1e283d;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.biz-card:hover { border-color: var(--pos-tale); }
+
+.biz-card.active {
+    border-color: var(--pos-primary);
+    background: linear-gradient(135deg, #f4f6ff 0%, #eaefff 100%);
+}
+
+.biz-card .type-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #f1f3f9;
+    color: #5c6478;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.biz-card.active .type-icon { background: var(--pos-primary); color: #fff; }
+.biz-card .type-text { display: flex; flex-direction: column; line-height: 1.25; }
+.biz-card .type-text strong { font-size: .875rem; font-weight: 700; }
+.biz-card .type-text small { font-size: .74rem; color: #8e94a9; }
+
+.biz-card .type-check {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.15rem;
+    color: var(--pos-primary);
+    opacity: 0;
+}
+
+.biz-card.active .type-check { opacity: 1; }

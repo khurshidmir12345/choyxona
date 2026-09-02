@@ -2,7 +2,7 @@
     <div class="pos-page-head">
         <div class="pos-head-title">
             <h3>Kategoriyalar</h3>
-            <p>Menyu bo'limlari</p>
+            <p>{{ $biz->term('categories_subtitle') }}</p>
         </div>
         <div class="pos-head-tools">
             <div class="head-search">
@@ -67,13 +67,13 @@
 
     @if($showForm)
         <x-modal :title="$categoryId ? 'Kategoriyani tahrirlash' : 'Yangi kategoriya'" icon="mdi-tag-outline"
-                 subtitle="Menyu bo'limi" size="modal-sm" close="closeForm">
+                 :subtitle="$biz->term('category_subtitle')" size="modal-sm" close="closeForm">
             <form wire:submit="save">
                 <div class="modal-body">
                     <label class="form-label">Nomi</label>
                     <input type="text" wire:model="name" autofocus
                            class="form-control @error('name') is-invalid @enderror"
-                           placeholder="Masalan: Issiq ichimliklar">
+                           placeholder="{{ $biz->term('category_placeholder') }}">
                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="modal-footer">

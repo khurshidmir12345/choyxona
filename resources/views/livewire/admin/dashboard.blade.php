@@ -77,7 +77,7 @@
         <div class="col-6 col-md-4 col-xl-2 grid-margin">
             <div class="card stat-card stat-light">
                 <div class="card-body">
-                    <p class="stat-label">Buyurtmalar</p>
+                    <p class="stat-label">{{ $biz->term('orders') }}</p>
                     <p class="stat-value">{{ number_format($ordersCount, 0, ',', ' ') }}</p>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                 $typeValue = $row->type?->value ?? $row->type;
                 [$typeLabel, $typeIcon] = match($typeValue) {
                     'delivery' => ['Yetkazish', 'mdi-truck-delivery-outline'],
-                    'takeaway' => ['Olib ketish', 'mdi-shopping-outline'],
+                    'takeaway' => [$biz->term('takeaway'), $biz->term('takeaway_icon')],
                     'cafe' => ['Zalda', 'mdi-sofa-outline'],
                     default => ['Boshqa', 'mdi-help-circle-outline'],
                 };
@@ -167,7 +167,7 @@
     {{-- ---------------------------------------------------------------- top --}}
     <div class="row">
         @foreach([
-            ['Eng ko\'p sotilgan mahsulotlar', $topProducts, 'mdi-food-variant'],
+            ['Eng ko\'p sotilgan mahsulotlar', $topProducts, $biz->term('product_icon')],
             ['Eng daromadli kategoriyalar', $topCategories, 'mdi-tag-multiple-outline'],
         ] as [$cardTitle, $rows, $cardIcon])
             <div class="col-lg-6 grid-margin">

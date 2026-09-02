@@ -15,6 +15,7 @@ use App\Livewire\Admin\Places\IndexLivewire as PlaceIndex;
 use App\Livewire\Admin\ProductStock\IndexLivewire as StockIndex;
 use App\Livewire\Admin\Products\IndexLivewire as ProductIndex;
 use App\Livewire\Admin\Profile;
+use App\Livewire\Admin\Setup\BusinessTypeLivewire as BusinessSetup;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,14 +29,20 @@ Route::get('/', function () {
  * Ilgari oradagi bo'sh blade fayllar bor edi va marshrut nomlari
  * sahifa mazmuniga mos kelmasdi ("/product/rooms" — joylar ro'yxati).
  */
-Route::middleware('auth')->group(function () {
+// Birinchi kirishda biznes turi tanlanadi; shu sahifa tekshiruvdan tashqarida.
+Route::middleware('auth')->get('/sozlash/biznes-turi', BusinessSetup::class)->name('setup.business');
+
+Route::middleware(['auth', 'business.chosen'])->group(function () {
     Route::redirect('/home', '/dashboard')->name('home');
 
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
-    // Sotuv
-    Route::get('/pos/zal', HallPos::class)->name('cafe.create');
-    Route::get('/pos/zal/{place_id}', HallPos::class)->name('admin.orders.place');
+    // Sotuv (zal faqat kafe rejimida)
+    Route::middleware('cafe.only')->group(function () {
+        Route::get('/pos/zal', HallPos::class)->name('cafe.create');
+        Route::get('/pos/zal/{place_id}', HallPos::class)->name('admin.orders.place');
+        Route::get('/joylar', PlaceIndex::class)->name('places.index');
+    });
     Route::get('/pos/tez-sotuv', QuickSale::class)->name('orders.create');
     Route::get('/buyurtmalar', OrderIndex::class)->name('orders.index');
     Route::get('/buyurtmalar/arxiv', DeletedOrders::class)->name('orders.deleted');
@@ -47,7 +54,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/mahsulotlar', ProductIndex::class)->name('products.index');
     Route::get('/kategoriyalar', CategoryIndex::class)->name('categories.index');
     Route::get('/zaxira', StockIndex::class)->name('product-stock.index');
-    Route::get('/joylar', PlaceIndex::class)->name('places.index');
 
     // Moliya
     Route::get('/xarajatlar', ExpenseIndex::class)->name('expenses.index');

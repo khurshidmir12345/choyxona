@@ -2,7 +2,7 @@
     <div class="pos-page-head">
         <div class="pos-head-title">
             <h3>Mahsulotlar</h3>
-            <p>Menyu va narxlar</p>
+            <p>{{ $biz->term('products_subtitle') }}</p>
         </div>
         <div class="pos-head-tools">
             <div class="head-search">
@@ -27,9 +27,9 @@
         <div class="card-body">
             @if($products->isEmpty())
                 <div class="empty-state">
-                    <i class="mdi mdi-food-variant"></i>
+                    <i class="mdi {{ $biz->term('product_icon') }}"></i>
                     <h6>Mahsulot yo'q</h6>
-                    <p>Menyuga birinchi mahsulotni qo'shing.</p>
+                    <p>{{ $biz->term('products_empty') }}</p>
                 </div>
             @else
                 <div class="table-responsive">

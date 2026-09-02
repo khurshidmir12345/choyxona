@@ -25,11 +25,16 @@ class CreateLivewire extends Component
         'delivery' => 'Yetkazib berish',
     ];
 
-    /** Buyurtma turi kartalari: nom, izoh, ikonka. */
-    public const TYPE_META = [
-        'takeaway' => ['Olib ketish', 'Mijoz o\'zi keladi', 'mdi-shopping-outline'],
-        'delivery' => ['Yetkazib berish', 'Manzilga yetkaziladi', 'mdi-moped-outline'],
-    ];
+    /** Buyurtma turi kartalari: nom, izoh, ikonka — biznes turiga qarab. */
+    public static function typeMeta(): array
+    {
+        $biz = \App\Support\Business::current();
+
+        return [
+            'takeaway' => [$biz->term('takeaway'), $biz->term('takeaway_hint'), $biz->term('takeaway_icon')],
+            'delivery' => ['Yetkazib berish', 'Manzilga yetkaziladi', 'mdi-moped-outline'],
+        ];
+    }
 
     public string $orderType = 'takeaway';
 

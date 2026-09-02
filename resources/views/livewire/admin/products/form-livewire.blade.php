@@ -1,6 +1,6 @@
 <div>
     <x-modal :title="$productId ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot'"
-             :icon="$productId ? 'mdi-pencil-outline' : 'mdi-food-variant'"
+             :icon="$productId ? 'mdi-pencil-outline' : $biz->term('product_icon')"
              subtitle="Narxlar so'mda" size="modal-lg" close="close">
 
         <form wire:submit="save">
@@ -11,7 +11,7 @@
                     <label class="form-label">Nomi</label>
                     <input type="text" wire:model="name" autofocus
                            class="form-control @error('name') is-invalid @enderror"
-                           placeholder="Masalan: Ko'k choy">
+                           placeholder="{{ $biz->term('product_placeholder') }}">
                     @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 

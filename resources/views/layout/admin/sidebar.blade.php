@@ -1,30 +1,33 @@
 @php
     $current = request()->route()?->getName();
     $is = fn (string ...$names) => in_array($current, $names, true);
+    $t = fn (string $key) => $biz->term($key);
+    $hall = $biz->hasHall();
 
     /*
      * Menyu tuzilishi bitta joyda. "section" — ajratuvchi sarlavha,
-     * "children" bo'lsa yig'iladigan bo'lim.
+     * "children" bo'lsa yig'iladigan bo'lim. Kafe rejimida zal va joylar
+     * qo'shiladi, do'kon rejimida so'zlar va ikonkalar universal.
      */
-    $menu = [
+    $menu = array_values(array_filter([
         ['type' => 'link', 'label' => 'Bosh sahifa', 'icon' => 'mdi-view-dashboard-outline', 'route' => 'dashboard'],
 
         ['type' => 'section', 'label' => 'Savdo'],
-        ['type' => 'link', 'label' => 'Zal (stollar)', 'icon' => 'mdi-sofa-outline', 'route' => 'cafe.create'],
-        ['type' => 'link', 'label' => 'Tez sotuv', 'icon' => 'mdi-cart-outline', 'route' => 'orders.create'],
-        ['type' => 'group', 'label' => 'Buyurtmalar', 'icon' => 'mdi-clipboard-text-outline', 'id' => 'menu-orders', 'children' => [
-            ['label' => 'Buyurtmalar tarixi', 'icon' => 'mdi-history', 'route' => 'orders.index'],
+        $hall ? ['type' => 'link', 'label' => 'Zal (stollar)', 'icon' => 'mdi-sofa-outline', 'route' => 'cafe.create'] : null,
+        ['type' => 'link', 'label' => $t('quick_sale'), 'icon' => $t('quick_sale_icon'), 'route' => 'orders.create'],
+        ['type' => 'group', 'label' => $t('orders'), 'icon' => 'mdi-clipboard-text-outline', 'id' => 'menu-orders', 'children' => [
+            ['label' => $t('orders_history'), 'icon' => 'mdi-history', 'route' => 'orders.index'],
             ['label' => 'Arxiv', 'icon' => 'mdi-archive-outline', 'route' => 'orders.deleted'],
         ]],
         ['type' => 'link', 'label' => 'Mijozlar', 'icon' => 'mdi-account-group-outline', 'route' => 'customers.index', 'routes' => ['customers.index', 'customers.show']],
 
         ['type' => 'section', 'label' => 'Katalog'],
-        ['type' => 'group', 'label' => 'Mahsulotlar', 'icon' => 'mdi-food-outline', 'id' => 'menu-catalog', 'children' => [
-            ['label' => 'Barcha mahsulotlar', 'icon' => 'mdi-food-fork-drink', 'route' => 'products.index'],
+        ['type' => 'group', 'label' => 'Mahsulotlar', 'icon' => $t('products_icon'), 'id' => 'menu-catalog', 'children' => [
+            ['label' => 'Barcha mahsulotlar', 'icon' => $t('products_all_icon'), 'route' => 'products.index'],
             ['label' => 'Kategoriyalar', 'icon' => 'mdi-tag-outline', 'route' => 'categories.index'],
             ['label' => 'Kirim / chiqim', 'icon' => 'mdi-swap-vertical', 'route' => 'product-stock.index'],
         ]],
-        ['type' => 'link', 'label' => 'Joylar', 'icon' => 'mdi-table-furniture', 'route' => 'places.index'],
+        $hall ? ['type' => 'link', 'label' => 'Joylar', 'icon' => 'mdi-table-furniture', 'route' => 'places.index'] : null,
 
         ['type' => 'section', 'label' => 'Moliya'],
         ['type' => 'group', 'label' => 'Xarajatlar', 'icon' => 'mdi-wallet-outline', 'id' => 'menu-finance', 'children' => [
@@ -34,7 +37,7 @@
 
         ['type' => 'section', 'label' => 'Sozlamalar'],
         ['type' => 'link', 'label' => 'Profil va kompaniya', 'icon' => 'mdi-account-cog-outline', 'route' => 'admin.profile'],
-    ];
+    ]));
 @endphp
 
 <nav class="sidebar sidebar-offcanvas" id="sidebar">

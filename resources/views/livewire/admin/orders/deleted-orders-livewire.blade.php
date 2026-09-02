@@ -34,8 +34,8 @@
                 <select wire:model.live="type" class="form-select">
                     <option value="">Barchasi</option>
                     <option value="delivery">Yetkazib berish</option>
-                    <option value="takeaway">Olib ketish</option>
-                    <option value="cafe">Zalda</option>
+                    <option value="takeaway">{{ $biz->term('takeaway') }}</option>
+                    @if($biz->hasHall()) <option value="cafe">Zalda</option> @endif
                 </select>
             </div>
             <div class="filter-actions">
