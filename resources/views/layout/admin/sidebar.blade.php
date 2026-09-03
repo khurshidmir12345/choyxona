@@ -15,7 +15,6 @@
         ['type' => 'section', 'label' => 'Savdo'],
         $hall ? ['type' => 'link', 'label' => 'Zal (stollar)', 'icon' => 'mdi-sofa-outline', 'route' => 'cafe.create'] : null,
         ['type' => 'link', 'label' => $t('quick_sale'), 'icon' => $t('quick_sale_icon'), 'route' => 'orders.create'],
-        ['type' => 'link', 'label' => 'Oflayn kassa', 'icon' => 'mdi-wifi-off', 'route' => 'pos.offline'],
         ['type' => 'group', 'label' => $t('orders'), 'icon' => 'mdi-clipboard-text-outline', 'id' => 'menu-orders', 'children' => [
             ['label' => $t('orders_history'), 'icon' => 'mdi-history', 'route' => 'orders.index'],
             ['label' => 'Arxiv', 'icon' => 'mdi-archive-outline', 'route' => 'orders.deleted'],

@@ -49,7 +49,7 @@
                 <i class="mdi {{ $biz->term('quick_sale_icon') }} me-1"></i> {{ $biz->term('quick_sale') }}
             </a>
 
-            <a href="{{ route('pos.offline') }}" class="net-status" data-net-status>
+            <a href="{{ route('orders.create') }}" class="net-status" data-net-status>
                 <i class="mdi mdi-wifi"></i>
                 <span class="net-label d-none d-md-inline" data-net-label>Onlayn</span>
                 <span class="net-pending" data-net-pending hidden>0</span>

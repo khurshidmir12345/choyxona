@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Casts\ProductStockType;
-use App\Livewire\Admin\Orders\CreateLivewire as QuickSale;
 use App\Livewire\Admin\ProductStock\IndexLivewire as StockIndex;
 use App\Livewire\Admin\Products\FormLivewire as ProductForm;
 use App\Models\Company;
@@ -101,42 +100,5 @@ class StockAuditTest extends TestCase
 
         $this->assertSame($user->id, $movement->user_id);
         $this->assertSame('bozordan keldi', $movement->note);
-    }
-
-    public function test_sotuv_harakati_buyurtma_raqami_bilan_yoziladi(): void
-    {
-        $user = $this->actingAsOwner();
-        $company = Company::where('user_id', $user->id)->first();
-        $product = Product::factory()->forCompany($company)->create(['current_stock' => 10]);
-
-        Livewire::test(QuickSale::class)
-            ->call('addProduct', $product->id)
-            ->call('saveOrder');
-
-        $movement = ProductStock::sole();
-
-        $this->assertSame(ProductStockType::Sell, $movement->type);
-        $this->assertSame($user->id, $movement->user_id);
-        $this->assertStringContainsString('buyurtma #', $movement->note);
-    }
-
-    public function test_skaner_kodi_mahsulotni_savatga_qushadi(): void
-    {
-        $user = $this->actingAsOwner();
-        $company = Company::where('user_id', $user->id)->first();
-        $product = Product::factory()->forCompany($company)->create();
-
-        Livewire::test(QuickSale::class)
-            ->set('search', $product->code)
-            ->assertSet('search', '')
-            ->assertSet('cart.'.$product->id.'.quantity', 1);
-
-        // Prefikssiz raqam ham ishlaydi (skaner faqat raqam yuborsa).
-        // Yorliqlar sessiyada saqlanadi — yangi kassa holati uchun tozalaymiz.
-        session()->forget('pos.quick.tabs.'.$user->id);
-
-        Livewire::test(QuickSale::class)
-            ->set('search', (string) (10_000 + $product->id))
-            ->assertSet('cart.'.$product->id.'.quantity', 1);
     }
 }

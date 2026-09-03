@@ -1,16 +1,49 @@
 /*
- * Service worker: oflayn kassa (/pos/oflayn) va statik fayllar keshlanadi.
- * Internet yo'q paytda istalgan sahifaga kirilsa — oflayn kassa ochiladi.
- * API va boshqa sahifalar keshlanmaydi.
+ * Service worker: sotuv ekrani (/pos/tez-sotuv) va unga kerak barcha fayllar
+ * (CSS, JS, shriftlar, rasmlar) o'rnatilganda keshlanadi. Internet yo'q
+ * paytda istalgan manzil sotuv ekranini ochadi. API keshlanmaydi.
  */
-const VERSION = 'pos-v1';
-const OFFLINE_PAGE = '/pos/oflayn';
+const VERSION = 'pos-v3';
+const POS_PAGE = '/pos/tez-sotuv';
+const ASSET_RE = /\.(css|js|png|jpe?g|svg|webp|gif|ico|woff2?|ttf|eot)(\?|$)/i;
+
+function sameOrigin(url) { return url.origin === self.location.origin; }
+
+async function precache() {
+    const cache = await caches.open(VERSION);
+    const page = await fetch(POS_PAGE, { credentials: 'same-origin' });
+    if (!page.ok || page.redirected) return;
+    await cache.put(POS_PAGE, page.clone());
+
+    const html = await page.text();
+    const urls = new Set();
+    for (const m of html.matchAll(/(?:href|src)=["']([^"']+)["']/g)) {
+        try {
+            const u = new URL(m[1], self.location.origin);
+            if (sameOrigin(u) && (ASSET_RE.test(u.pathname + u.search) || u.pathname.startsWith('/livewire/livewire'))) urls.add(u.href);
+        } catch (e) {}
+    }
+
+    // CSS ichidagi shrift va rasmlar (url(...)) ham keshlanadi
+    const cssUrls = [...urls].filter(u => /\.css(\?|$)/i.test(new URL(u).pathname + new URL(u).search));
+    for (const href of cssUrls) {
+        try {
+            const res = await fetch(href, { credentials: 'same-origin' });
+            if (!res.ok) continue;
+            const text = await res.clone().text();
+            await cache.put(href, res);
+            for (const m of text.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)) {
+                if (m[1].startsWith('data:')) continue;
+                try { const u = new URL(m[1], href); if (sameOrigin(u)) urls.add(u.href); } catch (e) {}
+            }
+        } catch (e) {}
+    }
+
+    await Promise.all([...urls].map(u => cache.match(u).then(hit => hit ? null : cache.add(new Request(u, { credentials: 'same-origin' })).catch(() => null))));
+}
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(VERSION).then((cache) => cache.add(new Request(OFFLINE_PAGE, { credentials: 'same-origin' })).catch(() => null))
-            .then(() => self.skipWaiting())
-    );
+    event.waitUntil(precache().catch(() => null).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
@@ -20,11 +53,16 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// Sahifa "yangila" desa (masalan, sotuv ekrani ochilganda) kesh yangilanadi
+self.addEventListener('message', (event) => {
+    if (event.data === 'precache') event.waitUntil(precache().catch(() => null));
+});
+
 function isStatic(request) {
     const url = new URL(request.url);
-    if (url.origin !== self.location.origin) return false;
+    if (!sameOrigin(url)) return false;
     if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/livewire/update') || url.pathname.startsWith('/_debugbar')) return false;
-    return ['style', 'script', 'font', 'image'].includes(request.destination) || url.pathname.startsWith('/livewire/livewire');
+    return ['style', 'script', 'font', 'image'].includes(request.destination) || ASSET_RE.test(url.pathname) || url.pathname.startsWith('/livewire/livewire');
 }
 
 self.addEventListener('fetch', (event) => {
@@ -33,17 +71,12 @@ self.addEventListener('fetch', (event) => {
 
     if (request.mode === 'navigate') {
         const url = new URL(request.url);
-        if (url.pathname === OFFLINE_PAGE) {
-            // Oflayn kassa: avval tarmoq, bo'lmasa kesh.
-            event.respondWith(
-                fetch(request).then((res) => {
-                    if (res.ok) caches.open(VERSION).then((c) => c.put(OFFLINE_PAGE, res.clone()));
-                    return res;
-                }).catch(() => caches.match(OFFLINE_PAGE))
-            );
-        } else {
-            event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_PAGE)));
-        }
+        event.respondWith(
+            fetch(request).then((res) => {
+                if (url.pathname === POS_PAGE && res.ok && !res.redirected) caches.open(VERSION).then((c) => c.put(POS_PAGE, res.clone()));
+                return res;
+            }).catch(() => caches.match(POS_PAGE))
+        );
         return;
     }
 

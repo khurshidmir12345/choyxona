@@ -5,33 +5,38 @@ namespace Tests\Feature;
 use App\Casts\OrderStatusEnum;
 use App\Casts\OrderTypeEnum;
 use App\Casts\ProductStockType;
-use App\Livewire\Admin\Orders\CreateLivewire;
 use App\Models\Company;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductStock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
+/**
+ * Sotuv ekrani brauzerda ishlaydi; server tomoni — /api/pos/sync.
+ */
 class QuickSaleTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function sale(array $items, array $extra = []): array
+    {
+        return array_merge([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'type' => 'takeaway',
+            'items' => $items,
+        ], $extra);
+    }
 
     public function test_olib_ketish_buyurtmasi_yakunlanadi(): void
     {
         $user = $this->actingAsOwner();
         $company = Company::where('user_id', $user->id)->first();
-        $product = Product::factory()->forCompany($company)->create([
-            'sell_price' => 12_000, 'discount' => 0, 'current_stock' => 5,
-        ]);
+        $product = Product::factory()->forCompany($company)->create(['sell_price' => 12_000, 'discount' => 0, 'current_stock' => 5]);
 
-        Livewire::test(CreateLivewire::class)
-            ->set('orderType', 'takeaway')
-            ->call('addProduct', $product->id)
-            ->call('updateQuantity', $product->id, 3)
-            ->call('saveOrder')
-            ->assertRedirect();
+        $this->postJson(route('pos.sync'), ['sales' => [$this->sale([
+            ['product_id' => $product->id, 'quantity' => 3, 'price' => 12_000, 'discount' => 0],
+        ])]])->assertOk()->assertJsonPath('results.0.status', 'created');
 
         $order = Order::sole();
         $this->assertSame(OrderTypeEnum::Takeaway, $order->type);
@@ -44,32 +49,29 @@ class QuickSaleTest extends TestCase
     {
         $user = $this->actingAsOwner();
         $company = Company::where('user_id', $user->id)->first();
-        $product = Product::factory()->forCompany($company)->create([
-            'sell_price' => 5_000, 'discount' => 0, 'current_stock' => 9,
-        ]);
+        $product = Product::factory()->forCompany($company)->create(['sell_price' => 5_000, 'current_stock' => 9]);
 
-        Livewire::test(CreateLivewire::class)
-            ->call('addProduct', $product->id)
-            ->call('saveOrder');
+        $this->postJson(route('pos.sync'), ['sales' => [$this->sale([
+            ['product_id' => $product->id, 'quantity' => 1, 'price' => 5_000],
+        ])]])->assertOk();
 
         $movement = ProductStock::sole();
         $this->assertSame(ProductStockType::Sell, $movement->type);
         $this->assertSame(1, $movement->quantity);
         $this->assertSame($product->id, $movement->product_id);
+        $this->assertSame($user->id, $movement->user_id);
+        $this->assertStringContainsString('buyurtma #', $movement->note);
     }
 
     public function test_mahsulot_chegirmasi_qator_summasiga_tasir_qiladi(): void
     {
         $user = $this->actingAsOwner();
         $company = Company::where('user_id', $user->id)->first();
-        $product = Product::factory()->forCompany($company)->create([
-            'sell_price' => 10_000, 'discount' => 20, 'current_stock' => 10,
-        ]);
+        $product = Product::factory()->forCompany($company)->create(['sell_price' => 10_000, 'discount' => 20, 'current_stock' => 10]);
 
-        Livewire::test(CreateLivewire::class)
-            ->call('addProduct', $product->id)
-            ->call('updateQuantity', $product->id, 2)
-            ->call('saveOrder');
+        $this->postJson(route('pos.sync'), ['sales' => [$this->sale([
+            ['product_id' => $product->id, 'quantity' => 2, 'price' => 10_000, 'discount' => 20],
+        ])]])->assertOk();
 
         // 2 x 10 000 = 20 000, undan 20% chegirma = 16 000.
         $this->assertSame(16_000, Order::sole()->total_amount);
@@ -79,18 +81,27 @@ class QuickSaleTest extends TestCase
     {
         $this->actingAsOwner();
 
-        Livewire::test(CreateLivewire::class)->call('saveOrder');
+        $this->postJson(route('pos.sync'), ['sales' => [$this->sale([])]])->assertStatus(422);
 
         $this->assertSame(0, Order::count());
     }
 
-    public function test_boshqa_kompaniyaning_mahsuloti_savatga_tushmaydi(): void
+    public function test_boshqa_kompaniyaning_mahsuloti_sotilmaydi(): void
     {
         $this->actingAsOwner();
         $foreign = Product::factory()->create();
 
-        Livewire::test(CreateLivewire::class)
-            ->call('addProduct', $foreign->id)
-            ->assertSet('cart', []);
+        $this->postJson(route('pos.sync'), ['sales' => [$this->sale([
+            ['product_id' => $foreign->id, 'quantity' => 1, 'price' => 1_000],
+        ])]])->assertOk()->assertJsonPath('results.0.status', 'error');
+
+        $this->assertSame(0, Order::count());
+    }
+
+    public function test_sotuv_ekrani_ochiladi(): void
+    {
+        $this->actingAsOwner();
+
+        $this->get(route('orders.create'))->assertOk()->assertSee('Tez sotuv')->assertSee('quick-sale.js');
     }
 }

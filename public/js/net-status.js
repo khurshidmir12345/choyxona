@@ -4,7 +4,7 @@
  */
 (function () {
     function pending() {
-        try { return (JSON.parse(localStorage.getItem('pos.offline.queue')) || []).length; } catch (e) { return 0; }
+        try { return (JSON.parse(localStorage.getItem('pos.quick.queue')) || []).length; } catch (e) { return 0; }
     }
 
     function render() {
@@ -20,8 +20,8 @@
             var badge = el.querySelector('[data-net-pending]');
             if (badge) { badge.textContent = n; badge.hidden = n === 0; }
             el.title = online
-                ? (n ? n + ' ta sotuv sinxronlanmagan — oflayn kassada "Sinxronlash"ni bosing' : 'Internet bor')
-                : 'Internet yo\'q — oflayn kassada davom eting';
+                ? (n ? n + ' ta sotuv sinxronlanmagan — sotuv ekranida "Sinxronlash"ni bosing' : 'Internet bor')
+                : 'Internet yo\'q — sotuv ekrani oflayn ishlaydi';
         });
     }
 
@@ -34,7 +34,10 @@
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/sw.js').catch(function () {});
+            navigator.serviceWorker.register('/sw.js').then(function (reg) {
+                // Har kirishda sotuv ekrani va fayllari keshi yangilanadi
+                if (reg.active) reg.active.postMessage('precache');
+            }).catch(function () {});
         });
     }
 })();

@@ -6,7 +6,6 @@ use App\Livewire\Admin\Customers\ShowLivewire as CustomerShow;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
 use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
-use App\Livewire\Admin\Orders\CreateLivewire as QuickSale;
 use App\Livewire\Admin\Orders\DeletedOrdersLivewire as DeletedOrders;
 use App\Livewire\Admin\Orders\IndexLivewire as OrderIndex;
 use App\Livewire\Admin\Orders\OrderCompleted;
@@ -43,10 +42,9 @@ Route::middleware(['auth', 'business.chosen'])->group(function () {
         Route::get('/pos/zal/{place_id}', HallPos::class)->name('admin.orders.place');
         Route::get('/joylar', PlaceIndex::class)->name('places.index');
     });
-    Route::get('/pos/tez-sotuv', QuickSale::class)->name('orders.create');
-
-    // Oflayn kassa: sahifa brauzerda keshlanadi, sotuvlar keyin sinxronlanadi
-    Route::view('/pos/oflayn', 'pos.offline')->name('pos.offline');
+    // Sotuv ekrani: brauzerda ishlaydi, internetsiz ham; sotuvlar API orqali yoziladi
+    Route::view('/pos/tez-sotuv', 'pos.quick-sale')->name('orders.create');
+    Route::redirect('/pos/oflayn', '/pos/tez-sotuv');
     Route::get('/api/pos/snapshot', [\App\Http\Controllers\Pos\OfflineSyncController::class, 'snapshot'])->name('pos.snapshot');
     Route::post('/api/pos/sync', [\App\Http\Controllers\Pos\OfflineSyncController::class, 'sync'])->name('pos.sync');
     Route::get('/buyurtmalar', OrderIndex::class)->name('orders.index');

@@ -26,7 +26,7 @@ class OfflinePosTest extends TestCase
         Product::factory()->create(); // begona kompaniya
         Customer::factory()->create(['company_id' => $company->id, 'name' => 'Dilnoza']);
 
-        $this->get(route('pos.offline'))->assertOk()->assertSee('Oflayn kassa');
+        $this->get(route('orders.create'))->assertOk()->assertSee('Sinxronlash');
 
         $this->getJson(route('pos.snapshot'))
             ->assertOk()

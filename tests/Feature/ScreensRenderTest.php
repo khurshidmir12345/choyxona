@@ -8,7 +8,6 @@ use App\Livewire\Admin\Customers\ShowLivewire as CustomerShow;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ExpenseCategories\IndexLivewire as ExpenseCategoryIndex;
 use App\Livewire\Admin\Expenses\IndexLivewire as ExpenseIndex;
-use App\Livewire\Admin\Orders\CreateLivewire as QuickSale;
 use App\Livewire\Admin\Orders\DeletedOrdersLivewire as Archive;
 use App\Livewire\Admin\Orders\IndexLivewire as OrderIndex;
 use App\Livewire\Admin\Orders\OrderInCafeLivewire as HallPos;
@@ -49,13 +48,16 @@ class ScreensRenderTest extends TestCase
         $this->seedCompany();
 
         foreach ([
-            Dashboard::class, HallPos::class, QuickSale::class, OrderIndex::class,
+            Dashboard::class, HallPos::class, OrderIndex::class,
             Archive::class, ProductIndex::class, CategoryIndex::class, StockIndex::class,
             PlaceIndex::class, ExpenseIndex::class, ExpenseCategoryIndex::class, Profile::class,
             CustomerIndex::class,
         ] as $component) {
             Livewire::test($component)->assertOk();
         }
+
+        // Sotuv ekrani oddiy sahifa (brauzerda ishlaydi)
+        $this->get(route('orders.create'))->assertOk();
 
         $customer = Customer::factory()->create(['company_id' => Company::first()->id]);
         Livewire::test(CustomerShow::class, ['id' => $customer->id])->assertSee($customer->name)->assertOk();
