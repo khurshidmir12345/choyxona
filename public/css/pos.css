@@ -2506,3 +2506,92 @@ button.place-card .place-name { white-space: nowrap; overflow: hidden; text-over
 }
 
 .pos-tab.pos-tab-add:hover { background: rgba(31, 59, 179, .1); }
+
+
+/* ============================================================================
+   Onlayn/oflayn ko'rsatkich va oflayn kassa
+   ========================================================================= */
+
+.net-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 11px;
+    border-radius: 50px;
+    border: 1px solid var(--pos-line);
+    background: #fafbff;
+    color: #4a5265;
+    font-size: .78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.net-status i { font-size: 1.05rem; }
+.net-status.is-online i { color: var(--pos-success); }
+.net-status.is-offline { background: rgba(243, 121, 126, .12); border-color: #f3a3a6; color: #b23a3a; }
+.net-status.is-offline i { color: #d9534f; }
+.net-status:hover { color: var(--pos-primary); border-color: var(--pos-primary); }
+
+.net-pending {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50px;
+    background: var(--pos-warning);
+    color: #fff;
+    font-size: .68rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.net-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.net-pill.is-online { background: #e3f2e5; color: #2f6f3f; }
+.net-pill.is-offline { background: #fdeeee; color: #b23a3a; }
+
+.offline-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.offline-notice i { font-size: 1.15rem; }
+.offline-notice.is-success { background: #e3f2e5; color: #2f6f3f; }
+.offline-notice.is-error { background: #fdeeee; color: #b23a3a; }
+
+.queue-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 0;
+    border-top: 1px solid var(--pos-border);
+}
+
+.queue-row:first-of-type { border-top: 0; }
+
+.mdi-spin { animation: mdi-spin 1s linear infinite; }
+@keyframes mdi-spin { to { transform: rotate(360deg); } }
+
+@media print {
+    body * { visibility: hidden; }
+    .receipt-print, .receipt-print * { visibility: visible; }
+    .receipt-print { position: fixed; left: 0; top: 0; width: 72mm; padding: 8px; background: #fff; color: #000; font-family: 'Courier New', monospace; font-size: 12px; }
+}

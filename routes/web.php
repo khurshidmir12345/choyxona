@@ -44,6 +44,11 @@ Route::middleware(['auth', 'business.chosen'])->group(function () {
         Route::get('/joylar', PlaceIndex::class)->name('places.index');
     });
     Route::get('/pos/tez-sotuv', QuickSale::class)->name('orders.create');
+
+    // Oflayn kassa: sahifa brauzerda keshlanadi, sotuvlar keyin sinxronlanadi
+    Route::view('/pos/oflayn', 'pos.offline')->name('pos.offline');
+    Route::get('/api/pos/snapshot', [\App\Http\Controllers\Pos\OfflineSyncController::class, 'snapshot'])->name('pos.snapshot');
+    Route::post('/api/pos/sync', [\App\Http\Controllers\Pos\OfflineSyncController::class, 'sync'])->name('pos.sync');
     Route::get('/buyurtmalar', OrderIndex::class)->name('orders.index');
     Route::get('/buyurtmalar/arxiv', DeletedOrders::class)->name('orders.deleted');
     Route::get('/buyurtmalar/{id}/chek', OrderCompleted::class)->name('admin.orders.print');

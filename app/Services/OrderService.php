@@ -102,9 +102,11 @@ class OrderService
         array $items,
         int $orderDiscount,
         ?int $customerId = null,
-        ?string $deliveryAddress = null
+        ?string $deliveryAddress = null,
+        ?string $offlineUuid = null,
+        ?\DateTimeInterface $createdAt = null
     ): Order {
-        return DB::transaction(function () use ($companyId, $userId, $type, $items, $orderDiscount, $customerId, $deliveryAddress) {
+        return DB::transaction(function () use ($companyId, $userId, $type, $items, $orderDiscount, $customerId, $deliveryAddress, $offlineUuid, $createdAt) {
             $amount = 0;
             foreach ($items as $item) {
                 $amount += $this->lineTotal($item);
@@ -118,12 +120,18 @@ class OrderService
                 'user_id' => $userId,
                 'customer_id' => $customerId,
                 'delivery_address' => $type === OrderTypeEnum::Delivery ? ($deliveryAddress ?: null) : null,
+                'offline_uuid' => $offlineUuid,
                 'amount' => $amount,
                 'total_amount' => $this->applyDiscount($amount, $orderDiscount),
                 'discount' => $orderDiscount,
                 'type' => $type,
                 'status' => OrderStatusEnum::Done,
             ]);
+
+            // Oflayn sotuv: haqiqiy sotilgan vaqt saqlanadi, sinxronlash vaqti emas.
+            if ($createdAt) {
+                $order->forceFill(['created_at' => $createdAt])->saveQuietly();
+            }
 
             $this->syncItems($order, $items, $orderDiscount, $userId);
             $this->writeOffStock($order, $companyId);

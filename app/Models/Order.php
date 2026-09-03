@@ -24,6 +24,7 @@ class Order extends Model
         'user_id',
         'customer_id',
         'delivery_address',
+        'offline_uuid',
         'amount',
         'total_amount',
         'discount',

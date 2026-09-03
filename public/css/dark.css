@@ -320,3 +320,11 @@
 [data-theme="dark"] .badge-outline-info { color: #4ed3dd; border-color: #4ed3dd; }
 [data-theme="dark"] .badge-outline-success { color: #7fd493; border-color: #7fd493; }
 [data-theme="dark"] .badge-outline-warning { color: #f0b84a; border-color: #f0b84a; }
+
+/* Oflayn ko'rsatkich */
+[data-theme="dark"] .net-status { background: var(--dk-card-2); border-color: var(--dk-line); color: #c7cddc; }
+[data-theme="dark"] .net-status.is-offline { background: rgba(243, 121, 126, .15); border-color: #7a3f42; color: #f7a1a5; }
+[data-theme="dark"] .net-pill.is-online { background: rgba(77, 167, 97, .18); color: #7fd493; }
+[data-theme="dark"] .net-pill.is-offline { background: rgba(243, 121, 126, .15); color: #f7a1a5; }
+[data-theme="dark"] .offline-notice.is-success { background: rgba(77, 167, 97, .15); color: #7fd493; }
+[data-theme="dark"] .offline-notice.is-error { background: rgba(243, 121, 126, .15); color: #f7a1a5; }

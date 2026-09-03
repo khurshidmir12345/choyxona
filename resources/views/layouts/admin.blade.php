@@ -57,6 +57,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {{-- Rasm yuklash: brauzerda kichraytirish + Livewire upload (Alpine ishga tushishidan oldin yuklanadi) --}}
 <script src="{{ asset('js/image-upload.js') }}?v={{ filemtime(public_path('js/image-upload.js')) }}"></script>
+{{-- Onlayn/oflayn ko'rsatkich va service worker (oflayn kassa) --}}
+<script src="{{ asset('js/net-status.js') }}?v={{ filemtime(public_path('js/net-status.js')) }}"></script>
 
 @livewireScripts
 
