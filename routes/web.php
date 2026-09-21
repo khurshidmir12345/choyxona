@@ -20,6 +20,7 @@ use App\Livewire\Admin\Products\IndexLivewire as ProductIndex;
 use App\Livewire\Admin\Profile;
 use App\Livewire\Admin\Roles\IndexLivewire as RoleIndex;
 use App\Livewire\Admin\Setup\BusinessTypeLivewire as BusinessSetup;
+use App\Livewire\Mobile\HallLivewire as MobileHall;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'business.chosen'])->group(function () {
     Route::middleware(['cafe.only', 'perm:hall'])->group(function () {
         Route::get('/pos/zal', HallPos::class)->name('cafe.create');
         Route::get('/pos/zal/{place_id}', HallPos::class)->name('admin.orders.place');
+        // Telefon uchun ko'rinish (Telegram mini ilova); kompyuter versiyasi o'zi shu yerga yo'naltiradi
+        Route::get('/m/zal', MobileHall::class)->name('mobile.hall');
+        Route::get('/m/zal/{place_id}', MobileHall::class)->name('mobile.hall.place');
     });
     Route::middleware(['cafe.only', 'perm:places'])->get('/joylar', PlaceIndex::class)->name('places.index');
 

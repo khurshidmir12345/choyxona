@@ -97,8 +97,9 @@ class TelegramTest extends TestCase
         $this->assertSame('aziz_uz', $waiter->fresh()->telegram_username);
         $this->assertTrue(session('telegram_app'));
 
-        // Endi sayt Telegram rejimida chiziladi (to'liq ekran skripti ulanadi).
-        $this->get(route('cafe.create'))->assertOk()->assertSee('js/telegram.js');
+        // Telegram ichida zal mobil ko'rinishda, to'liq ekran skripti bilan.
+        $this->get(route('cafe.create'))->assertRedirect(route('mobile.hall'));
+        $this->get(route('mobile.hall'))->assertOk()->assertSee('js/telegram.js')->assertSee('css/mobile.css');
     }
 
     public function test_boglangan_telegram_parolsiz_kiradi(): void

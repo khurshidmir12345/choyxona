@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Admin\Orders;
 
-use App\Casts\OrderStatusEnum;
 use App\Casts\PlaceStatusEnum;
 use App\Livewire\Concerns\WithCompany;
 use App\Livewire\Concerns\WithCustomerPicker;
@@ -11,6 +10,7 @@ use App\Models\Place;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Services\OrderService;
+use App\Support\Device;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -44,6 +44,16 @@ class OrderInCafeLivewire extends Component
 
     public function mount(?int $place_id = null): void
     {
+        // Telefonda (Telegram mini ilova yoki mobil brauzer) alohida mobil ko'rinish.
+        if (Device::isMobile()) {
+            $this->redirectRoute(
+                $place_id ? 'mobile.hall.place' : 'mobile.hall',
+                $place_id ? ['place_id' => $place_id] : [],
+            );
+
+            return;
+        }
+
         if ($place_id) {
             $this->openTable($place_id);
         }
@@ -315,7 +325,7 @@ class OrderInCafeLivewire extends Component
     // ---------------------------------------------------------------- ichki
 
     /** Ochiq buyurtmani topadi, bo'lmasa shu payt yaratadi. */
-    private function ensureOrder(OrderService $orders): ?Order
+    protected function ensureOrder(OrderService $orders): ?Order
     {
         if ($this->cart === [] || ! $this->placeId) {
             $this->dispatch('toast', type: 'error', message: 'Avval mahsulot tanlang.');
@@ -345,7 +355,7 @@ class OrderInCafeLivewire extends Component
     }
 
     /** @return array<int, array<string, mixed>> */
-    private function loadCart(int $orderId): array
+    protected function loadCart(int $orderId): array
     {
         return Order::query()
             ->findOrFail($orderId)
@@ -365,7 +375,7 @@ class OrderInCafeLivewire extends Component
             ->all();
     }
 
-    private function resetOrderState(): void
+    protected function resetOrderState(): void
     {
         $this->activeOrderId = null;
         $this->cart = [];
