@@ -2,11 +2,15 @@
 <html lang="uz">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Tungi/kunduzgi rejim: CSS'dan oldin, yaltirashsiz --}}
     <script src="{{ asset('js/theme.js') }}?v={{ filemtime(public_path('js/theme.js')) }}"></script>
-
+    @if(session('telegram_app'))
+        {{-- Telegram mini ilova: to'liq ekran va xavfsiz maydonlar (public/js/telegram.js) --}}
+        <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+        <script src="{{ asset('js/telegram.js') }}?v={{ filemtime(public_path('js/telegram.js')) }}"></script>
+    @endif
 
     <title>{{ $title ?? $biz->term('brand') }}</title>
 
@@ -75,9 +79,13 @@
 
         Livewire.on('toast', (event) => {
             const data = Array.isArray(event) ? event[0] : event;
-            toast.fire({ icon: data.type === 'error' ? 'error' : 'success', title: data.message });
+            toast.fire({ icon: data.type === 'error' ? 'error' : (data.type === 'warning' ? 'warning' : 'success'), title: data.message });
         });
 
+        // Yo'naltirishdan keyin kelgan xabar (masalan, ruxsat yo'q)
+        @if(session('toast'))
+            toast.fire({ icon: @js(session('toast.type') === 'error' ? 'error' : 'success'), title: @js(session('toast.message')) });
+        @endif
     });
 </script>
 

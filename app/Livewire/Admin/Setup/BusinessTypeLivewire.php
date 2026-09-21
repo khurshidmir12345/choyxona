@@ -31,7 +31,7 @@ class BusinessTypeLivewire extends Component
         Company::query()->whereKey($companyId)->update(['business_type' => $businessType->value]);
         Business::forget();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('home');
     }
 
     public function render()

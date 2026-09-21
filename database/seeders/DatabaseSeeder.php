@@ -21,17 +21,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (['director', 'kassir', 'ofitsiant'] as $role) {
-            Role::firstOrCreate(['name' => $role]);
-        }
-
         $owner = User::firstOrCreate(
             ['phone_number' => '+998901234567'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
                 'phone_verified_at' => now(),
-                'role_id' => Role::where('name', 'director')->value('id'),
+                'type' => 'owner',
             ],
         );
 
@@ -45,6 +41,26 @@ class DatabaseSeeder extends Seeder
                 'close_time' => '23:00',
             ],
         );
+
+        // Standart lavozimlar (ofitsant, kassir, menejer) va namunaviy xodimlar.
+        Role::ensureDefaults($company->id);
+
+        foreach ([
+            ['Ofitsant Aziz', '+998901234568', 'waiter'],
+            ['Kassir Dilnoza', '+998901234569', 'cashier'],
+        ] as [$name, $phone, $slug]) {
+            User::firstOrCreate(
+                ['phone_number' => $phone],
+                [
+                    'name' => $name,
+                    'password' => Hash::make('12345678'),
+                    'phone_verified_at' => now(),
+                    'type' => 'staff',
+                    'company_id' => $company->id,
+                    'role_id' => Role::query()->forCompany($company->id)->where('slug', $slug)->value('id'),
+                ],
+            );
+        }
 
         $menu = [
             'Choy va ichimliklar' => [

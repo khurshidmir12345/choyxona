@@ -34,7 +34,7 @@ class BusinessTypeTest extends TestCase
 
         Livewire::test(BusinessTypeLivewire::class)
             ->call('choose', 'retail')
-            ->assertRedirect(route('dashboard'));
+            ->assertRedirect(route('home'));
 
         $this->assertSame(BusinessType::Retail, $company->refresh()->business_type);
         $this->get(route('dashboard'))->assertOk();
@@ -46,8 +46,8 @@ class BusinessTypeTest extends TestCase
         Company::where('user_id', $user->id)->update(['business_type' => 'retail']);
         Business::forget();
 
-        $this->get(route('cafe.create'))->assertRedirect(route('dashboard'));
-        $this->get(route('places.index'))->assertRedirect(route('dashboard'));
+        $this->get(route('cafe.create'))->assertRedirect(route('home'));
+        $this->get(route('places.index'))->assertRedirect(route('home'));
 
         $this->get(route('dashboard'))
             ->assertOk()

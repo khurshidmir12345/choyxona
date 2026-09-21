@@ -17,7 +17,11 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'company_id' => CompanyFactory::new(),
+            'name' => fake()->unique()->jobTitle(),
+            'slug' => null,
+            'permissions' => [],
+            'is_default' => false,
         ];
     }
 }

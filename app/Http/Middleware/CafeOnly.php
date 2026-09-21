@@ -13,7 +13,7 @@ class CafeOnly
     public function handle(Request $request, Closure $next): Response
     {
         if (! Business::current()->hasHall()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('home');
         }
 
         return $next($request);

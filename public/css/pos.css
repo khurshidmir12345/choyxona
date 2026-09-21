@@ -2595,3 +2595,56 @@ button.place-card .place-name { white-space: nowrap; overflow: hidden; text-over
     .receipt-print, .receipt-print * { visibility: visible; }
     .receipt-print { position: fixed; left: 0; top: 0; width: 72mm; padding: 8px; background: #fff; color: #000; font-family: 'Courier New', monospace; font-size: 12px; }
 }
+
+/* ---------------------------------------------------------- lavozim ruxsatlari */
+
+.perm-list { display: grid; gap: 8px; }
+.perm-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border: 1px solid var(--pos-line); border-radius: 12px;
+    cursor: pointer; margin: 0; transition: border-color .15s, background .15s;
+}
+.perm-item:hover { border-color: var(--pos-primary); }
+.perm-item.is-on { border-color: var(--pos-primary); background: rgba(31, 59, 179, .05); }
+.perm-item .form-check-input { margin: 0; flex: 0 0 auto; }
+.perm-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(31, 59, 179, .08); color: var(--pos-primary); font-size: 1.15rem;
+}
+.perm-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.perm-text strong { font-size: .92rem; }
+.perm-text small { color: #8e94a9; font-size: .78rem; }
+
+/* ------------------------------------------------------ telegram mini ilova */
+/*
+ * Telegram to'liq ekranda soat/kamera (safe area) va Telegram'ning yopish/menyu
+ * tugmalari (content safe area) sahifa ustiga tushadi. public/js/telegram.js
+ * ularni --tg-safe-* o'zgaruvchilariga yozadi, yuqori panel shunga suriladi.
+ */
+html.is-telegram {
+    --tg-safe-top: 0px; --tg-safe-bottom: 0px; --tg-safe-left: 0px; --tg-safe-right: 0px;
+}
+html.is-telegram .navbar.default-layout {
+    height: calc(var(--pos-topbar-h) + var(--tg-safe-top));
+    padding-top: var(--tg-safe-top);
+    padding-left: var(--tg-safe-left);
+    padding-right: var(--tg-safe-right);
+}
+html.is-telegram .page-body-wrapper { padding-top: calc(var(--pos-topbar-h) + var(--tg-safe-top)); }
+html.is-telegram .content-wrapper {
+    padding-bottom: calc(2rem + var(--tg-safe-bottom));
+    padding-left: calc(1rem + var(--tg-safe-left));
+    padding-right: calc(1rem + var(--tg-safe-right));
+}
+html.is-telegram .footer { display: none; }
+html.is-telegram body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+html.is-telegram .navbar .navbar-toggler.d-lg-none { display: inline-flex !important; }
+@media (max-width: 991.98px) {
+    html.is-telegram .sidebar-offcanvas {
+        top: calc(var(--pos-topbar-h) + var(--tg-safe-top));
+        max-height: calc(100vh - var(--pos-topbar-h) - var(--tg-safe-top));
+        padding-bottom: var(--tg-safe-bottom);
+    }
+    html.is-telegram .pos-modal .modal-dialog { margin-top: calc(var(--tg-safe-top) + .5rem); }
+}

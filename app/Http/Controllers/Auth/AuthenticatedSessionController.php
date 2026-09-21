@@ -44,9 +44,20 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        // Ega xodimni vaqtincha o'chirib qo'ygan bo'lishi mumkin.
+        if (! $user->is_active) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+
+            throw ValidationException::withMessages([
+                'phone_number' => 'Hisobingiz o\'chirilgan. Rahbaringizga murojaat qiling.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Xodim o'ziga ochiq birinchi bo'limga tushadi (ofitsant — zalga).
+        return redirect()->intended(route($user->homeRoute(), absolute: false));
     }
 
     /**
@@ -54,12 +65,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Telegram ichida chiqilsa, yana mini ilova kirish sahifasiga qaytadi.
+        $fromTelegram = (bool) $request->session()->get('telegram_app');
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route($fromTelegram ? 'telegram.entry' : 'login');
     }
 }

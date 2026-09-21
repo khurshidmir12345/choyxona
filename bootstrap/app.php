@@ -38,7 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'business.chosen' => \App\Http\Middleware\EnsureBusinessTypeChosen::class,
             'cafe.only' => \App\Http\Middleware\CafeOnly::class,
+            'perm' => \App\Http\Middleware\EnsurePermission::class,
         ]);
+
+        // Telegram webhook tashqaridan keladi — CSRF tekshiruvi unga tegishli emas.
+        $middleware->validateCsrfTokens(except: ['api/telegram/webhook']);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

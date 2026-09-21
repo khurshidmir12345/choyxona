@@ -41,6 +41,19 @@ class Company extends Model
         ];
     }
 
+    /** Yangi kompaniya bilan birga standart lavozimlar ham yaratiladi. */
+    protected static function booted(): void
+    {
+        static::created(function (Company $company) {
+            Role::ensureDefaults($company->id);
+        });
+    }
+
+    public function roles(): HasMany
+    {
+        return $this->hasMany(Role::class);
+    }
+
     public function businessType(): \App\Casts\BusinessType
     {
         return $this->business_type ?? \App\Casts\BusinessType::Cafe;

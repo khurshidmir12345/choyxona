@@ -12,11 +12,11 @@
 --}}
 <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-stretch flex-row">
     <div class="navbar-brand-wrapper d-flex align-items-center">
-        <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
+        <a class="navbar-brand brand-logo" href="{{ route('home') }}">
             <span class="brand-mark"><i class="mdi {{ $biz->term('brand_icon') }}"></i></span>
             <span class="brand-text">{{ $biz->term('brand') }}</span>
         </a>
-        <a class="navbar-brand brand-logo-mini" href="{{ route('dashboard') }}">
+        <a class="navbar-brand brand-logo-mini" href="{{ route('home') }}">
             <span class="brand-mark"><i class="mdi {{ $biz->term('brand_icon') }}"></i></span>
         </a>
     </div>
@@ -38,18 +38,25 @@
             <span class="company-chip-name">{{ $company?->name ?? 'Choyxona' }}</span>
         </div>
 
+        @php
+            $me = auth()->user();
+            $canHall = $biz->hasHall() && $me->allows(\App\Support\Permission::HALL);
+            $canQuick = $me->allows(\App\Support\Permission::QUICK_SALE);
+        @endphp
         <div class="ms-auto d-flex align-items-center gap-2">
-            @if($biz->hasHall())
+            @if($canHall)
                 <a href="{{ route('cafe.create') }}" class="btn btn-primary btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
                     <i class="mdi mdi-sofa-outline me-1"></i> Zal
                 </a>
             @endif
-            <a href="{{ route('orders.create') }}"
-               class="btn {{ $biz->hasHall() ? 'btn-inverse-primary' : 'btn-primary' }} btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
-                <i class="mdi {{ $biz->term('quick_sale_icon') }} me-1"></i> {{ $biz->term('quick_sale') }}
-            </a>
+            @if($canQuick)
+                <a href="{{ route('orders.create') }}"
+                   class="btn {{ $canHall ? 'btn-inverse-primary' : 'btn-primary' }} btn-rounded btn-sm px-3 d-none d-sm-inline-flex">
+                    <i class="mdi {{ $biz->term('quick_sale_icon') }} me-1"></i> {{ $biz->term('quick_sale') }}
+                </a>
+            @endif
 
-            <a href="{{ route('orders.create') }}" class="net-status" data-net-status>
+            <a href="{{ $canQuick ? route('orders.create') : '#' }}" class="net-status" data-net-status>
                 <i class="mdi mdi-wifi"></i>
                 <span class="net-label d-none d-md-inline" data-net-label>Onlayn</span>
                 <span class="net-pending" data-net-pending hidden>0</span>
@@ -70,12 +77,17 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="UserDropdown">
                     <div class="dropdown-header text-center">
-                        <p class="mb-1 mt-2 fw-semibold">{{ auth()->user()->name }}</p>
-                        <p class="fw-light text-muted mb-0">{{ auth()->user()->phone_number }}</p>
+                        <p class="mb-1 mt-2 fw-semibold">{{ $me->name }}</p>
+                        <p class="fw-light text-muted mb-0">{{ $me->phone_number }}</p>
+                        @if($me->isStaff())
+                            <span class="badge badge-outline-primary mt-1">{{ $me->role?->name ?? 'Xodim' }}</span>
+                        @endif
                     </div>
-                    <a class="dropdown-item" href="{{ route('admin.profile') }}">
-                        <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> Profil
-                    </a>
+                    @if($me->allows(\App\Support\Permission::SETTINGS))
+                        <a class="dropdown-item" href="{{ route('admin.profile') }}">
+                            <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> Profil
+                        </a>
+                    @endif
                     <form id="logout-form" method="POST" action="{{ route('logout') }}" class="d-none">
                         @csrf
                     </form>
