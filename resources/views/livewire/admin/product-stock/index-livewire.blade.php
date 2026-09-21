@@ -117,8 +117,8 @@
                     <div class="mb-3">
                         <label class="form-label">Turi</label>
                         <div class="row g-2">
-                            @foreach($stockTypes as $case)
-                                <div class="col-4">
+                            @foreach($manualTypes as $case)
+                                <div class="col-6">
                                     <button type="button" wire:click="$set('type', '{{ $case->value }}')"
                                             class="btn w-100 {{ $type === $case->value ? 'btn-primary' : 'btn-inverse-primary' }}"
                                             style="font-size:.8rem">

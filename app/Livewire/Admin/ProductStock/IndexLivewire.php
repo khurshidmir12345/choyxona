@@ -82,6 +82,12 @@ class IndexLivewire extends Component
             return;
         }
 
+        if ($stock->type === ProductStockType::Sell) {
+            $this->dispatch('toast', type: 'warning', message: 'Sotuv yozuvi buyurtma orqali boshqariladi, bu yerda tahrirlanmaydi.');
+
+            return;
+        }
+
         $this->stockId = $stock->id;
         $this->product_id = $stock->product_id;
         $this->quantity = $stock->quantity;
@@ -99,7 +105,7 @@ class IndexLivewire extends Component
                 Rule::exists('products', 'id')->where('company_id', $this->companyId()),
             ],
             'quantity' => ['required', 'integer', 'min:1'],
-            'type' => ['required', Rule::in(ProductStockType::values())],
+            'type' => ['required', Rule::in(ProductStockType::manualValues())],
             'note' => ['nullable', 'string', 'max:255'],
         ], [
             'product_id.required' => 'Mahsulotni tanlang.',
@@ -107,6 +113,7 @@ class IndexLivewire extends Component
             'quantity.required' => 'Miqdorni kiriting.',
             'quantity.min' => 'Miqdor kamida 1 bo\'lishi kerak.',
             'type.required' => 'Turini tanlang.',
+            'type.in' => 'Bu turni qo\'lda kiritib bo\'lmaydi.',
             'note.max' => 'Izoh 255 belgidan oshmasin.',
         ]);
 
@@ -232,6 +239,7 @@ class IndexLivewire extends Component
         return view('livewire.admin.product-stock.index-livewire', [
             'movements' => $movements,
             'stockTypes' => ProductStockType::cases(),
+            'manualTypes' => ProductStockType::manualCases(),
         ]);
     }
 }
