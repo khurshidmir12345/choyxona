@@ -25,6 +25,8 @@
 {{ $slot }}
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{{-- Savat va filtrlar brauzerda: Alpine ishga tushishidan oldin yuklanadi --}}
+<script src="{{ asset('js/mobile-hall.js') }}?v={{ filemtime(public_path('js/mobile-hall.js')) }}"></script>
 @livewireScripts
 <script>
     document.addEventListener('livewire:init', () => {

@@ -324,9 +324,55 @@ class OrderInCafeLivewire extends Component
 
     // ---------------------------------------------------------------- ichki
 
+    /**
+     * Savatni bazadagi narxlar bilan qayta tuzadi: brauzerdan faqat
+     * mahsulot va miqdor ishonchli, narx/chegirma serverdan olinadi.
+     * Bitta so'rov — faqat savatdagi mahsulotlar, faqat shu kompaniya.
+     */
+    protected function repriceCart(): void
+    {
+        $quantities = [];
+
+        foreach ($this->cart as $id => $line) {
+            $quantity = (int) ($line['quantity'] ?? 0);
+            $productId = (int) ($line['product_id'] ?? $id);
+
+            if ($quantity > 0 && $productId > 0) {
+                $quantities[$productId] = $quantity;
+            }
+        }
+
+        if ($quantities === []) {
+            $this->cart = [];
+
+            return;
+        }
+
+        $cart = [];
+
+        Product::query()
+            ->select(['id', 'name', 'sell_price', 'discount'])
+            ->forCompany($this->companyId())
+            ->whereIn('id', array_keys($quantities))
+            ->get()
+            ->each(function (Product $product) use (&$cart, $quantities) {
+                $cart[$product->id] = [
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'price' => (int) $product->sell_price,
+                    'discount' => (int) $product->discount,
+                    'quantity' => $quantities[$product->id],
+                ];
+            });
+
+        $this->cart = $cart;
+    }
+
     /** Ochiq buyurtmani topadi, bo'lmasa shu payt yaratadi. */
     protected function ensureOrder(OrderService $orders): ?Order
     {
+        $this->repriceCart();
+
         if ($this->cart === [] || ! $this->placeId) {
             $this->dispatch('toast', type: 'error', message: 'Avval mahsulot tanlang.');
 

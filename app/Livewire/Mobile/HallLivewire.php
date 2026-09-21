@@ -4,6 +4,7 @@ namespace App\Livewire\Mobile;
 
 use App\Livewire\Admin\Orders\OrderInCafeLivewire;
 use App\Models\Order;
+use App\Models\Product;
 use App\Services\OrderService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -12,24 +13,17 @@ use Livewire\Attributes\Layout;
 /**
  * Zal POS — telefon uchun ko'rinish (Telegram mini ilova va mobil brauzer).
  *
- * Mantiq kompyuter versiyasi bilan bir xil (OrderInCafeLivewire), faqat
- * ekran boshqacha: pastki yorliqlar (stollar / buyurtmalar / profil),
- * stol filtrlari, mahsulot ro'yxati va pastdan chiqadigan savat.
+ * Tezlik uchun savat, filtrlar va qidiruv brauzerda ishlaydi
+ * (public/js/mobile-hall.js): stol ochilganda menyu bir marta JSON bo'lib
+ * keladi, "+"/"−" serverga bormaydi. Server faqat saqlash, hisobni yopish,
+ * stolni bo'shatish va mijoz qidiruvida ishlaydi; narxlar saqlashda
+ * bazadan qayta olinadi (repriceCart).
  */
 #[Layout('layouts.mobile')]
 class HallLivewire extends OrderInCafeLivewire
 {
     /** places | orders | profile */
     public string $tab = 'places';
-
-    /** all | free | busy */
-    public string $placeFilter = 'all';
-
-    public string $placeSearch = '';
-
-    public bool $onlyCart = false;
-
-    public bool $showCart = false;
 
     public bool $showCustomer = false;
 
@@ -50,26 +44,32 @@ class HallLivewire extends OrderInCafeLivewire
         }
     }
 
-    public function setPlaceFilter(string $filter): void
-    {
-        if (in_array($filter, ['all', 'free', 'busy'], true)) {
-            $this->placeFilter = $filter;
-        }
-    }
-
+    /**
+     * Stol ochilganda brauzerga beriladigan menyu: faqat kerakli ustunlar,
+     * bitta so'rov. Filtr va qidiruv brauzerda.
+     *
+     * @return list<array{id:int,name:string,price:int,discount:int,stock:int,image:?string,code:string,category_id:?int}>
+     */
     #[Computed]
-    public function filteredPlaces(): Collection
+    public function catalog(): array
     {
-        $term = mb_strtolower(trim($this->placeSearch));
-
-        return $this->places
-            ->filter(fn ($place) => match ($this->placeFilter) {
-                'free' => ! $place->isBusy(),
-                'busy' => $place->isBusy(),
-                default => true,
-            })
-            ->filter(fn ($place) => $term === '' || str_contains(mb_strtolower($place->name), $term))
-            ->values();
+        return Product::query()
+            ->select(Product::CARD_COLUMNS)
+            ->forCompany($this->companyId())
+            ->orderBy('name')
+            ->limit(500)
+            ->get()
+            ->map(fn (Product $p) => [
+                'id' => (int) $p->id,
+                'name' => $p->name,
+                'price' => (int) $p->sell_price,
+                'discount' => (int) $p->discount,
+                'stock' => (int) ($p->current_stock ?? 0),
+                'image' => $p->imageUrl(),
+                'code' => $p->formattedCode(),
+                'category_id' => $p->category_id ? (int) $p->category_id : null,
+            ])
+            ->all();
     }
 
     /** Ochiq hisoblar: qaysi stolda, necha xil mahsulot, qancha, kim ochgan. */
@@ -77,7 +77,7 @@ class HallLivewire extends OrderInCafeLivewire
     public function openOrders(): Collection
     {
         return Order::query()
-            ->select(['id', 'place_id', 'user_id', 'customer_id', 'amount', 'total_amount', 'discount', 'created_at'])
+            ->select(['id', 'place_id', 'user_id', 'customer_id', 'amount', 'created_at'])
             ->forCompany($this->companyId())
             ->opened()
             ->whereNotNull('place_id')
@@ -87,7 +87,7 @@ class HallLivewire extends OrderInCafeLivewire
             ->get();
     }
 
-    /** Bugun yopilgan hisoblar (oxirgi 30 tasi). */
+    /** Bugun yopilgan hisoblar (oxirgi 30 tasi). Indeks: company, status, updated_at. */
     #[Computed]
     public function todayClosed(): Collection
     {
@@ -96,62 +96,36 @@ class HallLivewire extends OrderInCafeLivewire
             ->forCompany($this->companyId())
             ->done()
             ->whereNotNull('place_id')
-            ->whereDate('updated_at', today())
+            ->whereBetween('updated_at', [today(), today()->endOfDay()])
             ->with(['place:id,name', 'user:id,name'])
             ->latest('updated_at')
             ->limit(30)
             ->get();
     }
 
-    /** Mahsulotlar: kategoriya + qidiruv (ota klass) + "faqat savatdagilar". */
-    #[Computed]
-    public function mobileProducts(): Collection
-    {
-        $products = $this->products;
-
-        if (! $this->onlyCart) {
-            return $products;
-        }
-
-        return $products->filter(fn ($product) => isset($this->cart[$product->id]))->values();
-    }
-
     public function openTable(int $placeId): void
     {
         parent::openTable($placeId);
-        $this->showCart = false;
         $this->showCustomer = false;
-        $this->onlyCart = false;
         $this->forgetComputed();
     }
 
     public function closePanel(): void
     {
         parent::closePanel();
-        $this->showCart = false;
         $this->showCustomer = false;
-        $this->onlyCart = false;
         $this->forgetComputed();
-    }
-
-    /**
-     * Hisoblangan xususiyatlar so'rov ichida keshlanadi. Stol ochilgan/yopilgan
-     * bo'lsa, o'sha so'rovda chizilayotgan ekran eski qiymatni ko'rmasin.
-     */
-    private function forgetComputed(): void
-    {
-        unset($this->activePlace, $this->places, $this->filteredPlaces, $this->openOrders, $this->todayClosed, $this->mobileProducts, $this->products);
-    }
-
-    public function toggleCart(): void
-    {
-        $this->showCart = ! $this->showCart;
-        $this->showCustomer = false;
     }
 
     public function toggleCustomer(): void
     {
         $this->showCustomer = ! $this->showCustomer;
+    }
+
+    public function selectCustomer(int $id): void
+    {
+        parent::selectCustomer($id);
+        $this->showCustomer = false;
     }
 
     /** Saqlab, stollar taxtasiga qaytadi — ofitsant keyingi stolga o'tadi. */
@@ -190,8 +164,17 @@ class HallLivewire extends OrderInCafeLivewire
     public function clearTable(OrderService $orders): void
     {
         parent::clearTable($orders);
-        $this->showCart = false;
         $this->showCustomer = false;
+        $this->forgetComputed();
+    }
+
+    /**
+     * Hisoblangan xususiyatlar so'rov ichida keshlanadi. Stol ochilgan/yopilgan
+     * bo'lsa, o'sha so'rovda chizilayotgan ekran eski qiymatni ko'rmasin.
+     */
+    private function forgetComputed(): void
+    {
+        unset($this->activePlace, $this->places, $this->openOrders, $this->todayClosed, $this->catalog, $this->subtotal, $this->total, $this->change);
     }
 
     public function render()

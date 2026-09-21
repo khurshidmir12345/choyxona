@@ -54,11 +54,11 @@ class MobileHallTest extends TestCase
             ->assertRedirect(route('mobile.hall'));
     }
 
-    public function test_mobil_zal_chiziladi_va_filtrlar_ishlaydi(): void
+    public function test_mobil_zal_chiziladi_va_buyurtmalar_yorligi_ishlaydi(): void
     {
         $waiter = $this->waiter();
         $company = Company::find($waiter->company_id);
-        $free = Place::factory()->for($company)->create(['name' => '1-stol', 'status' => PlaceStatusEnum::Empty]);
+        Place::factory()->for($company)->create(['name' => '1-stol', 'status' => PlaceStatusEnum::Empty]);
         $busy = Place::factory()->for($company)->create(['name' => 'VIP xona', 'status' => PlaceStatusEnum::Busy]);
         Order::factory()->for($company)->create(['place_id' => $busy->id, 'user_id' => $waiter->id, 'status' => OrderStatusEnum::Opened, 'amount' => 50000]);
 
@@ -66,24 +66,14 @@ class MobileHallTest extends TestCase
             ->get(route('mobile.hall'))
             ->assertOk()
             ->assertSee('css/mobile.css')
+            ->assertSee('js/mobile-hall.js')
             ->assertSee('js/telegram.js')
             ->assertSee('1-stol')
             ->assertSee('VIP xona')
+            // Filtr brauzerda: stol ro'yxati JSON bo'lib beriladi
+            ->assertSee('mBoard(', false)
             ->assertDontSee('sidebar-offcanvas');
 
-        Livewire::test(HallLivewire::class)
-            ->call('setPlaceFilter', 'free')
-            ->assertSee('1-stol')
-            ->assertDontSee('VIP xona')
-            ->call('setPlaceFilter', 'busy')
-            ->assertSee('VIP xona')
-            ->assertDontSee('1-stol')
-            ->call('setPlaceFilter', 'all')
-            ->set('placeSearch', 'vip')
-            ->assertSee('VIP xona')
-            ->assertDontSee('1-stol');
-
-        // Buyurtmalar yorlig'i: ochiq hisob ko'rinadi
         Livewire::test(HallLivewire::class)
             ->call('setTab', 'orders')
             ->assertSee('Ochiq hisoblar')
@@ -91,42 +81,63 @@ class MobileHallTest extends TestCase
             ->assertSee('50 000');
     }
 
-    public function test_mobil_buyurtma_savat_va_hisob_yopish(): void
+    public function test_stol_ochilganda_menyu_json_beriladi_va_savat_brauzerda(): void
+    {
+        $waiter = $this->waiter();
+        $company = Company::find($waiter->company_id);
+        $place = Place::factory()->for($company)->create(['name' => '2-stol']);
+        Product::factory()->for($company)->create(['name' => 'Kok choy', 'sell_price' => 8000, 'discount' => 0, 'current_stock' => 10]);
+        Company::factory()->create()->products()->save(Product::factory()->make(['name' => 'Begona mahsulot']));
+
+        Livewire::test(HallLivewire::class)
+            ->call('openTable', $place->id)
+            ->assertSee('2-stol')
+            ->assertSee('Yangi buyurtma')
+            // Menyu JSON: faqat shu kompaniya, savat mantiqi brauzerda (entangle)
+            ->assertSee('Kok choy')
+            ->assertDontSee('Begona mahsulot')
+            ->assertSee('$wire.entangle(\'cart\')', false)
+            ->assertSee('mHall(', false);
+
+        // Ro'yxat server tomonida chizilmaydi — har bir bosishda 200 ta mahsulot qayta kelmaydi
+        $html = Livewire::test(HallLivewire::class)->call('openTable', $place->id)->html();
+        $this->assertStringNotContainsString('wire:click="addProduct', $html);
+        $this->assertSame(1, substr_count($html, 'Kok choy'), 'Mahsulot faqat JSON ichida bir marta');
+        // @js qo'shtirnoqni \u0022 qilib yozadi
+        $this->assertStringContainsString('price\u0022:8000', $html);
+    }
+
+    public function test_brauzerdan_kelgan_savat_saqlanadi_narx_bazadan_olinadi(): void
     {
         $waiter = $this->waiter();
         $company = Company::find($waiter->company_id);
         $place = Place::factory()->for($company)->create(['name' => '2-stol']);
         $tea = Product::factory()->for($company)->create(['name' => 'Ko\'k choy', 'sell_price' => 8000, 'discount' => 0, 'current_stock' => 10]);
         $osh = Product::factory()->for($company)->create(['name' => 'Osh', 'sell_price' => 38000, 'discount' => 0, 'current_stock' => 10]);
+        $foreign = Product::factory()->for(Company::factory()->create())->create(['sell_price' => 1000]);
 
+        // Brauzer narxni 1 so'm deb yuborsa ham, server bazadagi narxni oladi; begona mahsulot tashlab yuboriladi
         $component = Livewire::test(HallLivewire::class)
             ->call('openTable', $place->id)
-            ->assertSee('2-stol')
-            ->assertSee('Yangi buyurtma')
-            ->call('addProduct', $tea->id)
-            ->call('addProduct', $tea->id)
-            ->call('addProduct', $osh->id)
-            ->assertSet('cart.'.$tea->id.'.quantity', 2)
-            ->set('onlyCart', true)
-            ->assertSee('Osh')
-            ->call('toggleCart')
-            ->assertSet('showCart', true)
-            ->assertSee('54 000');
-
-        // Saqlash — taxtaga qaytadi, stol band bo'ladi
-        $component->call('saveOrder')
-            ->assertSet('placeId', null)
-            ->assertSet('showCart', false);
+            ->set('cart', [
+                $tea->id => ['product_id' => $tea->id, 'name' => 'x', 'price' => 1, 'discount' => 90, 'quantity' => 2],
+                $osh->id => ['product_id' => $osh->id, 'name' => 'x', 'price' => 1, 'discount' => 0, 'quantity' => 1],
+                $foreign->id => ['product_id' => $foreign->id, 'name' => 'x', 'price' => 1, 'discount' => 0, 'quantity' => 5],
+            ])
+            ->call('saveOrder')
+            ->assertSet('placeId', null);
 
         $this->assertSame(PlaceStatusEnum::Busy, $place->refresh()->status);
         $order = Order::where('place_id', $place->id)->opened()->first();
         $this->assertNotNull($order);
         $this->assertSame(54000, (int) $order->amount);
+        $this->assertSame(2, $order->orderDetails()->count());
 
-        // Qayta ochib, hisobni yopish — chek havolasi qoladi, mahsulot zaxirasi kamayadi
+        // Qayta ochib, hisobni yopish — chek havolasi qoladi, zaxira kamayadi
         Livewire::test(HallLivewire::class)
             ->call('openTable', $place->id)
             ->assertSet('activeOrderId', $order->id)
+            ->assertSet('cart.'.$tea->id.'.quantity', 2)
             ->call('closeOrder')
             ->assertSet('placeId', null)
             ->assertSet('lastReceiptId', $order->id)
@@ -135,6 +146,21 @@ class MobileHallTest extends TestCase
         $this->assertSame(OrderStatusEnum::Done, $order->refresh()->status);
         $this->assertSame(PlaceStatusEnum::Empty, $place->refresh()->status);
         $this->assertSame(8, (int) $tea->refresh()->current_stock);
+    }
+
+    public function test_bosh_savat_bilan_saqlab_bolmaydi(): void
+    {
+        $waiter = $this->waiter();
+        $company = Company::find($waiter->company_id);
+        $place = Place::factory()->for($company)->create();
+
+        Livewire::test(HallLivewire::class)
+            ->call('openTable', $place->id)
+            ->set('cart', [])
+            ->call('saveOrder')
+            ->assertSet('placeId', $place->id);
+
+        $this->assertSame(0, Order::count());
     }
 
     public function test_ofitsant_kirganda_telegramdan_mobil_zalga_tushadi(): void

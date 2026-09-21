@@ -338,3 +338,6 @@ a { color: inherit; text-decoration: none; }
 .m-toast { border-radius: 12px !important; font-size: .9rem !important; margin-top: calc(var(--m-safe-top) + 6px) !important; }
 .m-swal { border-radius: 18px !important; }
 [data-theme="dark"] .swal2-popup { background: var(--m-card) !important; color: var(--m-text) !important; }
+
+/* Alpine: sahifa yuklanguncha yashirin elementlar */
+[x-cloak] { display: none !important; }
